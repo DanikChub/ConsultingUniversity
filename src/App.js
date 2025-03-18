@@ -19,7 +19,7 @@ const App = observer(() => {
   useEffect(() => {
     
     check().then(data => {
-      console.log(data.id);
+   
       getUserById(data.id)
       .then(data => {
         user.setUser(data)

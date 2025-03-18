@@ -1,14 +1,22 @@
 import React, { useContext, useEffect } from 'react';
 
 import logo from "../../assets/imgs/logo/logo.png"
-import { Link } from 'react-router-dom';
-import { AUTH_ROUTE, USER_ROUTE, ADMIN_ROUTE } from '../../utils/consts';
+import { Link, useNavigate } from 'react-router-dom';
+import { AUTH_ROUTE, USER_ROUTE, ADMIN_ROUTE, MAIN_ROUTE, ADMIN_CHANGE_USER } from '../../utils/consts';
 import { Context } from '../../index';
 import { observer } from 'mobx-react-lite';
 
 const NavBar = observer(() => {
     const {user} = useContext(Context)
+ 
 
+    const handlerClick = () => {
+        localStorage.setItem('token', '')
+        user.setUser({});
+        user.setIsAuth(false);
+    }
+
+    
 
     return (
         <div className="header">
@@ -23,9 +31,13 @@ const NavBar = observer(() => {
                         
                         {user.isAuth ? 
                             user.user.role == "ADMIN" ? 
-                            <Link to={ADMIN_ROUTE} className="top_nav_sign_in">
-                            <span>Личный кабинет</span>  
-                            </Link> :
+                            <div style={{display: "flex"}}>
+                                <Link to={ADMIN_ROUTE} className="top_nav_sign_in">
+                                    <span>Личный кабинет</span>  
+                                </Link>
+                                <Link to={MAIN_ROUTE} style={{marginLeft: "10px"}} onClick={handlerClick} className="top_nav_sign_in">Выйти</Link>
+                            </div>
+                             :
                                 <Link to={USER_ROUTE} className="top_nav_sign_in">
                                 <span>Личный кабинет</span>  
                                 </Link> 
