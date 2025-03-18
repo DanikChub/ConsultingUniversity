@@ -1,0 +1,18 @@
+.Spinner {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 201;
+    height: 5px;
+    background-color: rgb(56, 158, 247);
+    animation: loading .5s ease-in-out forwards;
+}
+
+@keyframes loading {
+    0% {
+        width: 0;
+    }
+    100% {
+        width: 100%;
+    }
+}
