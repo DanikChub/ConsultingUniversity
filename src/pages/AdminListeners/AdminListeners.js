@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAllUsers } from '../../http/userAPI';
+import { deleteUser, getAllUsers } from '../../http/userAPI';
 import { ADMIN_REGISTRATE_USER } from '../../utils/consts';
 
 import { Link } from 'react-router-dom';
@@ -25,6 +25,15 @@ const AdminListeners = () => {
         
     }, [])
 
+    const destroyUser = (id) => {
+        deleteUser(id).then(d => 
+            getAllUsers().then(data => {
+                setUsers(data.filter(item => item.role == "USER"));
+               
+            })
+        );
+    }
+
     return (
         <div className="content">
         <div className="container">
@@ -43,6 +52,7 @@ const AdminListeners = () => {
                                 <th>Организация</th>
                                 <th>Дата начала обучения</th>
                                 <th>Дата окончания обучения</th>
+                                <th>Удалить</th>
                             </tr>
                         </thead>
                         
@@ -61,6 +71,7 @@ const AdminListeners = () => {
                                         <td>Администрация Ивановского ...</td>
                                         <td>{dateToString(user.createdAt)}</td>
                                         <td>-</td>
+                                        <td className='deleteButton' onClick={() => destroyUser(user.id)}>x</td>
                                         
                                     </tr>
                                     )

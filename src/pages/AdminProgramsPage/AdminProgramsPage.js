@@ -8,14 +8,15 @@ import LeftMenu from '../../components/LeftMenu/LeftMenu';
 
 const AdminProgramsPage = () => {
     const [programs, setPrograms] = useState([]);
-
+    const [numberOfPrograms, setNumberOfPrograms] = useState(0);
     const [itemClassDelete, setItemClassDelete] = useState('');
 
     useEffect(() => {
        
-        getAllPrograms().then(data =>
+        getAllPrograms().then(data => {
             setPrograms(data)
-        )
+            setNumberOfPrograms(data.length);
+        })
     }, [])
 
     const deleteProgramClick = (program_id) => {
@@ -39,7 +40,7 @@ const AdminProgramsPage = () => {
                     <div className="tabs">
                         
                         <div className="tabs_nav_links">
-                            <div className="tabs_nav_link active">Опубликовано (2)</div>
+                            <div className="tabs_nav_link active">Опубликовано ({numberOfPrograms})</div>
                             <Link to={MAKE_PROGRAM_ROUTE} className='tabs_nav_link'>Создать программу</Link>
                         </div>
                         

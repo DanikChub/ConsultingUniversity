@@ -9,6 +9,7 @@ import "./LoginPage.css"
 const LoginPage = () => {
     const {user} = useContext(Context)
     const [inputLogin, setInputLogin] = useState('');
+    const [message, setMessage] = useState('');
     const [inputPass, setInputPass] = useState('');
 
     const navigate = useNavigate();
@@ -16,7 +17,8 @@ const LoginPage = () => {
     const signIn = async () => {
         try {
 
-            login(inputLogin, inputPass).then(data => {
+            login(inputLogin, inputPass)
+            .then(data => {
                 getUserById(data.id).then(data => {
                     user.setUser(data)
                     user.setIsAuth(true)
@@ -31,8 +33,11 @@ const LoginPage = () => {
                     
                 })
             })
+            .catch(e => {
+                setMessage(e.response.data.message);
+            })
         } catch(e) {
-            alert("ошибка")
+          
         }
         
     }
@@ -41,6 +46,7 @@ const LoginPage = () => {
             <h3>Войти в личный кабинет</h3>
             <input className='login_form_input' value={inputLogin} onChange={(e) => setInputLogin(e.target.value)} placeholder='Логин'/>
             <input className='login_form_input' value={inputPass}  onChange={(e) => setInputPass(e.target.value)} placeholder='Пароль' type="password"/>
+            <div className='login_form_message'>{message}</div>
             <div className='login_form_button' onClick={signIn}>Войти</div>
             <Link onClick={() => forgotPassword(inputLogin)} to={FORGOT_PASSWORD_ROUTE + '?email=' + 'inputLogin'} className='login_form_forgot_pass'>Забыл пароль</Link>
         </div>

@@ -50,6 +50,12 @@ export const remakeUser = async (id, email, password, role, name, number, organi
     return data
 }
 
+
+export const deleteUser = async (id) => {
+    const {data} = await $authHost.post('api/user/delete', {id})
+
+    return data
+}
 export const setWellTest = async(id) => {
     const {data} = await $authHost.post('api/user/set_well_tests', {id});
 

@@ -46,3 +46,9 @@
 .login_form_forgot_pass {
     margin-top: 20px;
 }
+
+
+.login_form_message {
+    margin-top: 20px;
+    color: rgb(251, 68, 68);
+}

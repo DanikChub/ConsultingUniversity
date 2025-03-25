@@ -89,6 +89,19 @@
     color: #fff;
 }
 
+.deleteButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    font-size: 20px;
+    cursor: pointer;
+
+}
+.deleteButton:hover {
+    background-color: rgb(241, 77, 77);
+    color: #fff;
+}
 
 /*ADD_INPUTS*/
 
