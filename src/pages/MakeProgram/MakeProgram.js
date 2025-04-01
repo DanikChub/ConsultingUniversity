@@ -310,7 +310,7 @@ const MakeProgram = () => {
                                                 </div>
                                                 <div className='MakeProgram_Punct_Material'>
                                                     <button onClick={() => showTestClasses(true, i, j, punct.test_id)} className='MakeProgram_Punct_Material_Plus' id={"button_test_" + i + "_" + j} >+</button>
-                                                    <div className='MakeProgram_Punct_Material_Text'>{punct.test_title? punct.test_title : "Добавить тест"}</div>
+                                                    <div className='MakeProgram_Punct_Material_Text'>{punct.test_title? punct.test_title : "Создать тест"}</div>
                                                 </div>
                                             </div>
                                         </div>    
