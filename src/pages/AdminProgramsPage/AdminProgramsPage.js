@@ -35,7 +35,7 @@ const AdminProgramsPage = () => {
             <div className="admin_inner">
                 <LeftMenu/>
                 <div className="admin_container">
-                    <div className="admin_path">Главная / <b>Программы</b></div>
+                    <div className="admin_path">Главная/<b>Программы</b></div>
                     
 
                     <div className="tabs">
