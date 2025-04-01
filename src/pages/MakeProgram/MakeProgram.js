@@ -8,6 +8,7 @@ import {Buffer} from "buffer";
 import LeftMenu from '../../components/LeftMenu/LeftMenu';
 import CreateVideo from '../../components/CreateVideo/CreateVideo';
 import CreateTest from '../../components/CreateTest/CreateTest';
+import { getOneTest } from '../../http/testAPI';
 
 
 const MakeProgram = () => {
@@ -24,6 +25,8 @@ const MakeProgram = () => {
 
     const [themesArray, setThemesArray] = useState([]);
 
+    const [presentationSrc, setPresentationSrc] = useState(null);
+
     const [showVideo, setShowVideo] = useState(false);
     const [showTest, setShowTest] = useState(false);
 
@@ -39,14 +42,16 @@ const MakeProgram = () => {
                 {
                     theme_id: 0,
                     title: "",
+                   
                     puncts: [
                         {
                             punct_id: 0,
                             title: "",
                             video_src: null,
                             lection_src: null,
-                            lection_id: 0,
-                            test_id: null
+                            lection_id: null,
+                            test_id: null,
+                            test_title: null,
                         }
                     ]
                     
@@ -58,6 +63,7 @@ const MakeProgram = () => {
 
     useEffect(() => {
         console.log(themesArray);
+
     }, [themesArray])
 
     const [themeId, setThemeId] = useState(0);
@@ -71,6 +77,7 @@ const MakeProgram = () => {
         setThemesArray(valueNew);
     }
 
+    
 
     const inputPunctsHandler = (i_1, i_2, type, value) => {
         const valueNew = [...themesArray]; 
@@ -94,6 +101,7 @@ const MakeProgram = () => {
 
                 if (!valueNew[i_1].puncts[i_2].lection_src) {
                     setLectionCounter(prev => prev+1)
+                    valueNew[i_1].puncts[i_2].lection_id = 0;
                     valueNew[i_1].puncts[i_2].lection_id += lectionCounter;
                 }
                 
@@ -115,13 +123,14 @@ const MakeProgram = () => {
         
         const data = {
             theme_id: themeId+1,
+            
             title: "",
             puncts: [
                 {
                     punct_id: 0,
                     title: "",
                     video_src: null,
-                    lection_id: 0,
+                    lection_id: null,
                     lection_src: null,
                 }
             ]
@@ -181,8 +190,25 @@ const MakeProgram = () => {
     const [notActive, setNotActive] = useState(false);
 
     const handleClickSave = () => {
+        let formData = new FormData();
+        formData.append("title", programTitleInput)
+        formData.append("admin_id", user.user.id)
+        formData.append("presentation_src", presentationSrc)
+        formData.append("number_of_practical_work", lectionCounter)
+        formData.append("number_of_test", testCounter)
+        formData.append("number_of_videos", videoCounter)
+
+        
+        themesArray.forEach(theme => {
+            theme.puncts.forEach(punct => {
+                formData.append("docs", punct.lection_src)
+                
+            })
+        })
+        formData.append("themes", JSON.stringify(themesArray))
         if (params.id) {
-            remakeProgram(params.id, programTitleInput, user.user.id, 0, 0, videoCounter, themesArray).then(data => {
+            formData.append("id", params.id)
+            remakeProgram(formData).then(data => {
              
                 setNotActive(true);
                 setTimeout(() => {
@@ -193,23 +219,7 @@ const MakeProgram = () => {
                 }, 2400)
             })
         } else {
-            let formData = new FormData();
-            formData.append("title", programTitleInput)
-            formData.append("admin_id", user.user.id)
-            formData.append("number_of_practical_work", lectionCounter)
-            formData.append("number_of_test", testCounter)
-            formData.append("number_of_videos", videoCounter)
-
-            themesArray.forEach(theme => {
-                theme.puncts.forEach(punct => {
-                    formData.append("docs", punct.lection_src)
-                   
-                })
-            })
             
-            console.log(themesArray)
-            formData.append("themes", JSON.stringify(themesArray))
-            console.log(formData);
             createProgram(formData).then(data => {
           
                 setNotActive(true);
@@ -223,6 +233,15 @@ const MakeProgram = () => {
         }
         
 
+    }
+
+    const showTestClasses = (show, i, j, remake) => {
+        setShowTest({show:show, i: i, j: j, remake: remake})
+        if (show) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
     }
 
     return (
@@ -262,9 +281,14 @@ const MakeProgram = () => {
                                     <span className='MakeProgram_Theme_Marker'>{i+1}. </span>
 
                                     <input  onChange={(e) => inputTitleHandler(i, e.target.value)} value={theme.title} className='MakeProgramInput' placeholder='Название темы'/>
-                                    <button  onClick={() => newPunct(i)} className='MakeProgram_Theme_Button'>+</button>
                                     
-
+                                    
+                                    <button  onClick={() => newPunct(i)} className='MakeProgram_Theme_Button'>+</button>
+                                    <div className='MakeProgram_Punct_Material'>
+                                        <input id={i} onChange={(e ) => setPresentationSrc(e.target.files[0])} accept='.pptx' className='MakeProgram_Punct_Material_input'  type="file"/>
+                                        <label htmlFor={i} className='MakeProgram_Punct_Material_Plus'>+</label>
+                                        <div className='MakeProgram_Punct_Material_Text'>{presentationSrc?presentationSrc.name:'Добавить презентацию'}</div>
+                                    </div>
                                     <div className='MakeProgram_Theme_Puncts'>
                                     {theme.puncts.map((punct, j) => 
                                         <div  className='MakeProgram_Theme_Punct'>
@@ -275,7 +299,7 @@ const MakeProgram = () => {
 
                                             <div className='MakeProgram_Punct_Materials'>
                                                 <div className='MakeProgram_Punct_Material'>
-                                                    <button onClick={() => setShowVideo({show:true, i: i, j : j})} className='MakeProgram_Punct_Material_input' id={"button" + i + "_" + j} ></button>
+                                                    <button onClick={() => setShowVideo({show:true, i: i, j: j})} className='MakeProgram_Punct_Material_input' id={"button" + i + "_" + j} ></button>
                                                     <label htmlFor={"button" + i + "_" + j} className='MakeProgram_Punct_Material_Plus'>+</label>
                                                     <div className='MakeProgram_Punct_Material_Text'>{punct.video_src?punct.video_src:'Добавить видео'}</div>
                                                 </div>
@@ -285,8 +309,8 @@ const MakeProgram = () => {
                                                     <div className='MakeProgram_Punct_Material_Text'>{punct.lection_src?punct.lection_src.name:'Добавить лекцию'}</div>
                                                 </div>
                                                 <div className='MakeProgram_Punct_Material'>
-                                                    <button onClick={() => setShowTest({show:true, i: i, j : j})} className='MakeProgram_Punct_Material_Plus' id={"button_test_" + i + "_" + j} >+</button>
-                                                    <div className='MakeProgram_Punct_Material_Text'>Добавить тест</div>
+                                                    <button onClick={() => showTestClasses(true, i, j, punct.test_id)} className='MakeProgram_Punct_Material_Plus' id={"button_test_" + i + "_" + j} >+</button>
+                                                    <div className='MakeProgram_Punct_Material_Text'>{punct.test_title? punct.test_title : "Добавить тест"}</div>
                                                 </div>
                                             </div>
                                         </div>    

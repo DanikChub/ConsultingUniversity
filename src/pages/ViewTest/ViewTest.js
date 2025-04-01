@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import CountDown from '../../components/CountDown/CountDown';
 import { getOneTest } from '../../http/testAPI';
 import { FINISH_TEST_ROUTE } from '../../utils/consts';
-
-import "./TestPage.css"
 
 function compareArray(arr_1, j) {
     arr_1.forEach(el => {
@@ -12,16 +11,36 @@ function compareArray(arr_1, j) {
     return false;
 }
 
-const TestPage = () => {
+function shuffle(array) {
+    const new_arr = array;
+    new_arr.sort(() => Math.random() - 0.5);
+    return new_arr
+}
+
+const ViewTest = () => {
     const [test, setTest] = useState({title: null, puncts: []});
     const params = useParams();
     const [numberQuestion, setNumberQuestion] = useState(0);
     const [userAnswers, setUserAnswers] = useState([[]]);
     const [checkAnswers, setCheckAnswers] = useState();
+
+    const [secForEnd, setSecForEnd] = useState(null);
+
+    
     const navigate = useNavigate();
 
     useEffect(() => {
-        getOneTest(params.id).then(data => setTest(data));
+
+        getOneTest(params.id).then(data => {
+            
+            data.puncts = shuffle(data.puncts);
+            setTest(data);
+            
+            setSecForEnd(data.time_limit)
+            
+
+        });
+        
     }, [])
 
     const testHadlerClick = (i) => {
@@ -64,23 +83,26 @@ const TestPage = () => {
 
         test.puncts.forEach(el => new_arr.push(el.correct_answer));
 
-        let s = true;
+        
         console.log(new_arr, userAnswers);
         userAnswers.forEach((userAnswer, i) => {
+            let s = true;
             userAnswer.forEach((el, j) => {
                 if (el != new_arr[i][j]) {
                     s *= false
+                    
                 } 
             })
             if (s) {
                 correct_answers+=1;
             }
-           
+            
             
         })
-    
         
-        navigate(FINISH_TEST_ROUTE + '?title=' + test.title + '&questions=' + test.puncts.length + '&correct_answers=' + correct_answers);
+        console.log(correct_answers);
+  
+        
         
     }
 
@@ -101,6 +123,9 @@ const TestPage = () => {
             <div className="title">
                 <b>Тест.</b><span> {test.title}</span>
             </div>
+            {secForEnd && <CountDown seconds={secForEnd}/>}
+         
+
             <div className="test_puncts">
           
                 {
@@ -158,4 +183,4 @@ const TestPage = () => {
     );
 };
 
-export default TestPage;
+export default ViewTest;

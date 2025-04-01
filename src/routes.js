@@ -2,7 +2,7 @@ import MainPage from './pages/MainPage/MainPage'
 import CoursePage from './pages/CoursePage/CoursePage'
 import TestPage from './pages/TestPage/TestPage'
 import UserPage from './pages/UserPage/UserPage'
-import { ADMIN_APPLICATIONS_ROUTE, ADMIN_CHANGE_USER, ADMIN_LISTENERS_ROUTE, ADMIN_PROGRAMS_ROUTE, ADMIN_REGISTRATE_USER, ADMIN_ROUTE, AUTH_ROUTE, CHANGE_PROGRAM_ROUTE, COURSE_ROUTE, FINISH_TEST_ROUTE, FORGOT_PASSWORD_ROUTE, MAIN_ROUTE, MAKE_PROGRAM_ROUTE, TEST_ROUTE, USER_ROUTE, VIDEO_ROUTE } from './utils/consts'
+import { ADMIN_APPLICATIONS_ROUTE, ADMIN_CHANGE_USER, ADMIN_LISTENERS_ROUTE, ADMIN_PROGRAMS_ROUTE, ADMIN_REGISTRATE_USER, ADMIN_ROUTE, ADMIN_VIEW_PROGRAM, ADMIN_VIEW_TEST, ADMIN_VIEW_VIDEO, ADMIN_VIEW_ЕУЫЕ, AUTH_ROUTE, CHANGE_PROGRAM_ROUTE, COURSE_ROUTE, FINISH_TEST_ROUTE, FORGOT_PASSWORD_ROUTE, MAIN_ROUTE, MAKE_PROGRAM_ROUTE, TEST_ROUTE, USER_ROUTE, VIDEO_ROUTE } from './utils/consts'
 import LoginPage from './pages/LoginPage/LoginPage'
 import AdminPage from './pages/AdminPage/AdminPage'
 import AdminProgramsPage from './pages/AdminProgramsPage/AdminProgramsPage'
@@ -13,6 +13,9 @@ import ApplicationPage from './pages/ApplicationPage/ApplicationPage'
 import FinishTestPage from './pages/FinishTestPage/FinishTestPage'
 import VideoPage from './pages/VideoPage/VideoPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage/ForgotPasswordPage'
+import ViewProgram from './pages/ViewProgram/ViewProgram'
+import ViewTest from './pages/ViewTest/ViewTest'
+import ViewVideo from './pages/ViewVideo/ViewVideo'
 
 
 export const authRoutes = [
@@ -71,6 +74,18 @@ export const adminRoutes = [
     {
         path: ADMIN_APPLICATIONS_ROUTE,
         Component: <ApplicationPage/>
+    },
+    {
+        path: ADMIN_VIEW_PROGRAM,
+        Component: <ViewProgram/>
+    },
+    {
+        path: ADMIN_VIEW_TEST,
+        Component: <ViewTest/>
+    },
+    {
+        path: ADMIN_VIEW_VIDEO,
+        Component: <ViewVideo/>
     },
 ]
 

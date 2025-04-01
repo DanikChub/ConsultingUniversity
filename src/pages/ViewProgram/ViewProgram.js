@@ -1,7 +1,6 @@
 import React, {useState, useEffect, useContext} from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import "./CoursePage.css";
 
 import learn from "../../assets/imgs/learn.png"
 import word from "../../assets/imgs/word.png"
@@ -11,44 +10,29 @@ import check from "../../assets/imgs/check.png"
 import test_src from "../../assets/imgs/test.png"
 import { Context } from '../../index';
 import { getOneProgram } from '../../http/programAPI';
-import { TEST_ROUTE, VIDEO_ROUTE } from '../../utils/consts';
+import { ADMIN_VIEW_VIDEO, TEST_ROUTE, VIDEO_ROUTE } from '../../utils/consts';
 import { setWellPracticalWorks, setWellTest, setWellVideos } from '../../http/userAPI';
 import { observer } from 'mobx-react-lite';
 import { getStatistic, updatePracticalWorks, updateVideos } from '../../http/statisticAPI';
 
-const CoursePage = observer(() => {
+const ViewProgram = observer(() => {
     const userContext = useContext(Context);
     const [courseItems, setCourseItems] = useState([]);
     const [program, setProgram] = useState([]);
     const [user, setUser] = useState({});
     const [courseActives, setCourseActives] = useState([]);
-    const [statistic, setStatistic] = useState({
-        id: 2,
-        users_id: 7,
-        programs_id: 7,
-        well_videos: 1,
-        well_tests: 0,
-        well_practical_works: 0,
-        max_videos: 1,
-        max_tests: 0,
-        max_practical_works: 0,
-        userId: null,
-        programId: null
-    });
+    
+    const params = useParams();
 
     useEffect(() => {
-        let program_id = userContext.user.user.programs_id[0]
+        let program_id = params.id;
 
       
         getOneProgram(program_id).then(program => {
             setCourseItems(program.themes);
             setProgram(program)
-            setUser(userContext.user.user)
         })
         
-        getStatistic(userContext.user.user.id, userContext.user.user.programs_id[0]).then(data => {
-            setStatistic(data);
-        })
 
        
     }, [])
@@ -103,23 +87,23 @@ const CoursePage = observer(() => {
                         <div className="block_title">{program.title}</div>
                         <div className="block_statistic">
                             <div className="block_statistic_item">
-                                <span className="block_statistic_item_value">{statistic.well_videos + '/' + statistic.max_videos}</span>
+                                <span className="block_statistic_item_value">{0+ '/' + 0}</span>
                                 <span> видео</span>
                             </div>
                             <div className="block_statistic_item">
-                                <span className="block_statistic_item_value">{statistic.well_tests + '/' + statistic.max_tests}</span>
+                                <span className="block_statistic_item_value">{0 + '/' + 0}</span>
                                 <span> тестов</span>
                             </div>
                             <div className="block_statistic_item">
-                                <span className="block_statistic_item_value">{statistic.well_practical_works + '/' + statistic.max_practical_works}</span>
+                                <span className="block_statistic_item_value">{0 + '/' + 0}</span>
                                 <span> практических работ</span>
                             </div>
                         </div>
                         <div className="content_program_well_progressbar_container">
                             <div className="content_program_well_progressbar">
-                                <div className='content_program_well_progressbar_inner' style={{width: `${(statistic.well_videos+statistic.well_tests+statistic.well_practical_works)/(statistic.max_videos+statistic.max_tests+statistic.max_practical_works)*100}%`}}></div>
+                                <div className='content_program_well_progressbar_inner' style={{width: `0px`}}></div>
                             </div>
-                            <div className="content_program_well_procent">{Math.round((statistic.well_videos+statistic.well_tests+statistic.well_practical_works)/(statistic.max_videos+statistic.max_tests+statistic.max_practical_works)*100)}%</div>
+                            <div className="content_program_well_procent">0%</div>
                         </div>
                     </div>
                     <div className="content_program_well_img">
@@ -136,10 +120,12 @@ const CoursePage = observer(() => {
                             <div className="course_item_title">{title}</div>
                         </div>
                         <div className="course_item_panel">
-                            <a href="#" className="course_item_download">
+                            {program.presentation_src &&
+                                <a href={process.env.REACT_APP_API_URL + program.presentation_src} className="course_item_download">
                                 <img src={presentation} alt=""/>
                                 <div>Презентация</div>
                             </a>
+                            }
                             <div className="course_item_completed">
                                 <img src={check} alt=""/>
                             </div>
@@ -156,19 +142,19 @@ const CoursePage = observer(() => {
                                 <div className="course_item_hide_title">{i+1}.{j+1} {title}</div>
                                 <div className="course_item_hide_materials">
                                     {lection_src && 
-                                    <a onClick={() => updatePracticalWorks(user.id, user.programs_id[0])} href={process.env.REACT_APP_API_URL + lection_src} className="course_item_download">
+                                    <a href={process.env.REACT_APP_API_URL + lection_src} className="course_item_download">
                                         <img src={word} alt=""/>
                                         <div>Лекция</div>
                                     </a>
                                     }
                                     {video_src && 
-                                    <Link onClick={() => updateVideos(user.id, user.programs_id[0])} to={VIDEO_ROUTE + '?link=' + video_src} className="course_item_download">
+                                    <Link to={ADMIN_VIEW_VIDEO + '?link=' + video_src} className="course_item_download">
                                         <img src={video_play} alt=""/>
                                         <div>Видео</div>
                                     </Link>
                                     }
                                     {test_id && 
-                                    <Link to={'/user/course/test/' + test_id} className="course_item_download">
+                                    <Link to={'/admin/programs/test/' + test_id} className="course_item_download">
                                         <img src={test_src} alt=""/>
                                         <div>Тест</div>
                                     </Link>
@@ -188,4 +174,4 @@ const CoursePage = observer(() => {
     );
 });
 
-export default CoursePage;
+export default ViewProgram;

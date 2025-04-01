@@ -24,7 +24,7 @@ const ApplicationPage = () => {
             <div className="admin_inner">
                 <LeftMenu/>
                 <div className="admin_container">
-                    <div className="admin_path">Главная / <b>Слушатели</b></div>
+                    <div className="admin_path">Главная / <b>Заявки</b></div>
               
 
                     <table className="admin_table">

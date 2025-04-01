@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+
 import "./MainPage.css";
 
 import video from "../../assets/videos/bg/bg.mp4";
@@ -8,7 +9,7 @@ import training_program_1 from "../../assets/imgs/training_programs/1.png";
 import training_program_2 from "../../assets/imgs/training_programs/2.png";
 import training_program_3 from "../../assets/imgs/training_programs/3.png";
 import { Link } from 'react-router-dom';
-import { AUTH_ROUTE } from '../../utils/consts';
+import { AUTH_ROUTE, ADMIN_ROUTE } from '../../utils/consts';
 import { createApplication } from '../../http/applicationAPI';
 
 const MainPage = () => {
@@ -78,7 +79,7 @@ const MainPage = () => {
         <div className="container">
             <div className="training_buttons">
                 <a href="#" className="training_button black">Выбрать программу</a>
-                <a href="#" className="training_button blue">Войти в ЛК</a>
+                <Link to={AUTH_ROUTE} className="training_button blue">Войти в ЛК</Link>
                 <a href="#" className="training_button lightblue">Спросить</a>
             </div>
 

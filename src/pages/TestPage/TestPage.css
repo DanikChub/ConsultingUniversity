@@ -22,8 +22,12 @@
     color: #fff;
 }
 
+
 .test_question {
+    width: 90%;
     margin-top: 76px;
+    display: flex;
+    align-items: center;
     font-size: 16px;
     color: #2C3E50;
     font-weight: 500;

@@ -15,8 +15,8 @@ export const createProgram = async (formData) => {
     return data;
 }
 
-export const remakeProgram = async (id, title, admin_id, number_of_practical_work, number_of_test, number_of_videos, themes) => {
-    const {data} = await $authHost.post(`api/program/remake`, {id, title, admin_id, number_of_practical_work, number_of_test, number_of_videos, themes})
+export const remakeProgram = async (formData) => {
+    const {data} = await $authHost.post(`api/program/remake`, formData)
     
     return data;
 }

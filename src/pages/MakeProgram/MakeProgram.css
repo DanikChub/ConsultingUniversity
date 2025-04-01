@@ -48,13 +48,12 @@
  
     border-radius: 7px;
 
-    cursor: pointer;
     transition: .2s linear;
 }
 
-.admin_program_item:hover {
+/* .admin_program_item:hover {
     box-shadow: 2px 2px 15px 4px rgba(139, 139, 139, 0.266);
-}
+} */
 
 .admin_program_item_img {
     height: 131px;
@@ -116,7 +115,7 @@
     align-items: center;
     font-size: 25px;
     background-color: transparent;
-    border: 1px solid rgb(142, 142, 142);
+    border: 1px solid #000;
     border-radius: 2px;
     margin-right: 10px;
     margin-left: 10px;
@@ -124,6 +123,9 @@
     transition: .2s linear;
 }
 
+.admin_program_item_button_group {
+    display: flex;
+}
 .MakeProgram_Theme_Button:hover {
     background-color: rgb(55, 139, 241);
     color: #fff;
@@ -132,6 +134,20 @@
 .MakeProgram_Theme_Button.red:hover {
     background-color: rgb(241, 55, 55);
     color: #fff;
+}
+
+.MakeProgram_Theme_Button.red:hover {
+    background-color: rgb(241, 55, 55);
+    color: #fff;
+}
+
+.MakeProgram_Theme_Button svg {
+    transition: .2s linear;
+    width: 20px;
+}
+
+.MakeProgram_Theme_Button:hover svg {
+    fill: #fff;
 }
 
 .MakeProgramInput::placeholder {

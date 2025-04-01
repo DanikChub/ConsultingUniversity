@@ -48,7 +48,7 @@ const LoginPage = () => {
             <input className='login_form_input' value={inputPass}  onChange={(e) => setInputPass(e.target.value)} placeholder='Пароль' type="password"/>
             <div className='login_form_message'>{message}</div>
             <div className='login_form_button' onClick={signIn}>Войти</div>
-            <Link onClick={() => forgotPassword(inputLogin)} to={FORGOT_PASSWORD_ROUTE + '?email=' + 'inputLogin'} className='login_form_forgot_pass'>Забыл пароль</Link>
+            <Link onClick={() => forgotPassword(inputLogin)} to={FORGOT_PASSWORD_ROUTE + '?email=' + inputLogin} className='login_form_forgot_pass'>Забыл пароль</Link>
         </div>
     );
 };

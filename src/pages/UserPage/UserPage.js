@@ -15,10 +15,25 @@ import { Context } from '../../index';
 import { getOneProgram } from '../../http/programAPI';
 import Spinner from '../../components/Spinner/Spinner';
 
+import { getStatistic } from '../../http/statisticAPI';
+
 const UserPage = () => {
     const userContext = useContext(Context);
     const [program, setProgram] = useState({});
     const [loading, setLoading] = useState(true);
+    const [statistic, setStatistic] = useState({
+        id: 2,
+        users_id: 7,
+        programs_id: 7,
+        well_videos: 1,
+        well_tests: 0,
+        well_practical_works: 0,
+        max_videos: 1,
+        max_tests: 0,
+        max_practical_works: 0,
+        userId: null,
+        programId: null
+    });
 
     useEffect(() => {
        if (userContext.user.user.programs_id) {
@@ -29,6 +44,9 @@ const UserPage = () => {
             setLoading(false);
         }
         getProgram(program_id)
+        getStatistic(userContext.user.user.id, userContext.user.user.programs_id[0]).then(data => {
+            setStatistic(data);
+        })
        }
         
     }, [])
@@ -64,8 +82,10 @@ const UserPage = () => {
                                         </div>
                                     </div>
                                     <div className="content_program_well_progressbar_container">
-                                        <div className="content_program_well_progressbar"></div>
-                                        <div className="content_program_well_procent">48%</div>
+                                        <div className="content_program_well_progressbar">
+                                            <div className='content_program_well_progressbar_inner' style={{width: `${(statistic.well_videos+statistic.well_tests+statistic.well_practical_works)/(statistic.max_videos+statistic.max_tests+statistic.max_practical_works)*100}%`}}></div>
+                                        </div>
+                                        <div className="content_program_well_procent">{Math.round((statistic.well_videos+statistic.well_tests+statistic.well_practical_works)/(statistic.max_videos+statistic.max_tests+statistic.max_practical_works)*100)}%</div>
                                     </div>
                                 </Link>
                                 <div className="content_program_well how">

@@ -20,6 +20,8 @@
     display: block;
 }
 
+
+
 .modal_container {
     position: absolute;
     top: 50%;
@@ -28,6 +30,8 @@
     padding: 50px;
     background-color: #fff;
     width: 500px;
+    overflow-y: scroll;
+    height: 90%;
 
     border-radius: 5px;
 
@@ -76,4 +80,22 @@
 .modal_button:hover {
     background-color: rgb(243, 69, 69);
     color: #fff;
+}
+
+.test_times {
+    display: flex;
+    width: 20%;
+    margin-top: 20px;
+    font-size: 26px;
+}
+
+.modal_input.test_time {
+    font-size: 20px;
+}
+
+.modal_input.test_time::-webkit-outer-spin-button,
+.modal_input.test_time::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
 }
