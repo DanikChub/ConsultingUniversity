@@ -1,39 +1,39 @@
 import React, { useEffect, useState } from 'react';
 
-import "./CreateVideo.css"
+import "./CreatePracticalWork.css"
 
-const CreateVideo = ({show, setShow, themesArray, setThemesArray, setCounter}) => {
-    const [videoInput, setVideoInput] = useState('');
+const CreatePracticalWork = ({show, setShow, themesArray, setThemesArray, setCounter}) => {
+    const [practicalInput, setPracticalInput] = useState('');
 
     useEffect(() => {
         if (show.remake) {
             
-            setVideoInput(show.remake);
+            setPracticalInput(show.remake);
         }
     }, [show.remake])
 
     const handleVideoInput = (value) => {
-        setVideoInput(value)
+        setPracticalInput(value)
     }
 
     const handleClick = () => {
         const prevValueArray = [...themesArray];
 
-        prevValueArray[show.i].puncts[show.j].video_src = videoInput;
+        prevValueArray[show.i].puncts[show.j].practical_work = practicalInput;
 
         setThemesArray(prevValueArray)
         setShow(false);
-        setVideoInput('');
+        setPracticalInput('');
         setCounter(value => value+1);
     }
     const handleClickDelete = () => {
         const prevValueArray = [...themesArray];
 
-        prevValueArray[show.i].puncts[show.j].video_src = null;
+        prevValueArray[show.i].puncts[show.j].practical_work = null;
 
         setThemesArray(prevValueArray)
         setShow(false);
-        setVideoInput('');
+        setPracticalInput('');
         setCounter(value => value+1);
     }
 
@@ -41,7 +41,7 @@ const CreateVideo = ({show, setShow, themesArray, setThemesArray, setCounter}) =
         <div className={show.show?"modal show": "modal"}>
             <div className='modal_container video'>
                 <button onClick={() => setShow(false)} className='modal_button'>x</button>
-                <input onChange={(e) => handleVideoInput(e.target.value)} value={videoInput} type="text" placeholder='Ссылка на видео' className='modal_input'/>
+                <input onChange={(e) => handleVideoInput(e.target.value)} value={practicalInput} type="text" placeholder='Тема практической работы' className='modal_input'/>
                 <div style={{display: 'flex'}}>
                     <div onClick={handleClickDelete} className='admin_button red'>Удалить</div>
                     <div onClick={handleClick} className='admin_button'>Сохранить</div>
@@ -52,4 +52,4 @@ const CreateVideo = ({show, setShow, themesArray, setThemesArray, setCounter}) =
     );
 };
 
-export default CreateVideo;
+export default CreatePracticalWork;

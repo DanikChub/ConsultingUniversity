@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { updateTests } from '../../http/statisticAPI';
 import { getOneTest } from '../../http/testAPI';
 import { FINISH_TEST_ROUTE } from '../../utils/consts';
 
@@ -15,12 +16,14 @@ function compareArray(arr_1, j) {
 const TestPage = () => {
     const [test, setTest] = useState({title: null, puncts: []});
     const params = useParams();
+    const [queryParams] = useSearchParams();
     const [numberQuestion, setNumberQuestion] = useState(0);
     const [userAnswers, setUserAnswers] = useState([[]]);
     const [checkAnswers, setCheckAnswers] = useState();
     const navigate = useNavigate();
 
     useEffect(() => {
+        console.log(queryParams.get("user_id"), queryParams.get("program_id"), queryParams.get("punct_id"))
         getOneTest(params.id).then(data => setTest(data));
     }, [])
 
@@ -78,8 +81,11 @@ const TestPage = () => {
            
             
         })
-    
         
+        if (test.puncts.length/correct_answers > 0.75) {
+            console.log('asd');
+            updateTests(queryParams.get("user_id"), queryParams.get("program_id"), queryParams.get("punct_id"))
+        }
         navigate(FINISH_TEST_ROUTE + '?title=' + test.title + '&questions=' + test.puncts.length + '&correct_answers=' + correct_answers);
         
     }

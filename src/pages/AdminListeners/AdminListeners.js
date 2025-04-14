@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 
 import "./AdminListeners.css"
 import LeftMenu from '../../components/LeftMenu/LeftMenu';
+import { getStatistic } from '../../http/statisticAPI';
 
 function dateToString(date) {
     const newDate = new Date(date);
@@ -15,10 +16,23 @@ function dateToString(date) {
 
 const AdminListeners = () => {
     const [users, setUsers] = useState([]);
+    
 
     useEffect(() => {
         getAllUsers().then(data => {
-                setUsers(data.filter(item => item.role == "USER"));
+                let users = data.filter(item => item.role == "USER");
+                users.forEach(user => {
+                  
+                    getStatistic(user.id, user.programs_id[0]).then(statistic => {
+                        user["statistic"] = statistic
+                    })
+                    
+                })
+                setTimeout(() => {
+                    console.log(users);
+                    setUsers(users);
+                }, 1000)
+                
                 
                 console.log(data);
             });
@@ -64,9 +78,9 @@ const AdminListeners = () => {
                                         <td><a href={"/admin/listeners/new_listener/" + user.id}>{user.name}</a></td>
                                         <td>
                                             <div className="progress-bar_container">
-                                                <div className="prorgress-bar" style={{width: "48%"}}></div>
+                                                <div className="prorgress-bar" style={{width: `${user.statistic?(user.statistic.well_videos+user.statistic.well_tests+user.statistic.well_practical_works)/(user.statistic.max_videos+user.statistic.max_tests+user.statistic.max_practical_works)*100:''}%`}}></div>
                                             </div>
-                                            <span>48%</span>
+                                            <span>{user.statistic?Math.round((user.statistic.well_videos+user.statistic.well_tests+user.statistic.well_practical_works)/(user.statistic.max_videos+user.statistic.max_tests+user.statistic.max_practical_works)*100): ''}%</span>
                                         </td>
                                         <td>Администрация Ивановского ...</td>
                                         <td>{dateToString(user.createdAt)}</td>

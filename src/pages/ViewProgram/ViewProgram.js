@@ -112,7 +112,7 @@ const ViewProgram = observer(() => {
                 </div>
             </div>
             <div className="course">
-                {courseItems.map(({title, puncts}, i) => 
+                {courseItems.map(({title, puncts, presentation_src}, i) => 
                     <div className={"course_item " + courseActives[i]}>
                     <div onClick={() => accordeon_item_click(i)} className="course_item_main">
                         <div className="course_item_description">
@@ -120,8 +120,8 @@ const ViewProgram = observer(() => {
                             <div className="course_item_title">{title}</div>
                         </div>
                         <div className="course_item_panel">
-                            {program.presentation_src &&
-                                <a href={process.env.REACT_APP_API_URL + program.presentation_src} className="course_item_download">
+                            {presentation_src &&
+                                <a target="_blank" href={process.env.REACT_APP_API_URL + presentation_src} className="course_item_download">
                                 <img src={presentation} alt=""/>
                                 <div>Презентация</div>
                             </a>
@@ -137,7 +137,7 @@ const ViewProgram = observer(() => {
                         </div>
                     </div>
                     <div className="course_item_hide">
-                        {puncts.map(({title, video_src, lection_src, test_id}, j) => 
+                        {puncts.map(({title, video_src, lection_src, test_id, practical_work}, j) => 
                             <div className="course_item_hide_punct">
                                 <div className="course_item_hide_title">{i+1}.{j+1} {title}</div>
                                 <div className="course_item_hide_materials">
@@ -157,6 +157,12 @@ const ViewProgram = observer(() => {
                                     <Link to={'/admin/programs/test/' + test_id} className="course_item_download">
                                         <img src={test_src} alt=""/>
                                         <div>Тест</div>
+                                    </Link>
+                                    }
+                                    {practical_work && 
+                                    <Link to={'/admin/programs/test/' + test_id} className="course_item_download">
+                                        <img src={test_src} alt=""/>
+                                        <div>Практическая работа</div>
                                     </Link>
                                     }
                                 </div>

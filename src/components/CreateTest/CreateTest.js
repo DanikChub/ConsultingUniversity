@@ -134,6 +134,30 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
         setTestPuncts(prevValue);
     }
 
+    const removeButtonClick = () => {
+        const prevValue = [...themesArray];
+        prevValue[show.i].puncts[show.j].test_title = null;
+        prevValue[show.i].puncts[show.j].test_id = null;
+
+        setThemesArray(prevValue);
+        setUserAnswers([]);
+        setShow({show: false, i: 0, j: 0})
+        document.body.style.overflowY = "auto";
+    
+        setTestTitle('');
+                setTestPuncts([{
+                        question: "",
+                        answers: [
+                            "",
+                            "",
+                            "",
+                        ],
+                        correct_answer: [],
+                        several_answers: false
+                    },
+                ])
+    }
+
     const saveButtonClick = (bool) => {
         let timeLimit = Number(hourInput)*60*60+Number(minInput)*60+Number(secInput) || null;
         if (show.remake) {
@@ -155,7 +179,7 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
                 setUserAnswers([]);
                 setShow({show: false, i: 0, j: 0})
                 document.body.style.overflowY = "auto";
-                setCounter(value => value+1);
+              
             })
         } else {
             if (bool) {
@@ -199,7 +223,7 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
                 setUserAnswers([]);
                 setShow({show: false, i: 0, j: 0})
                 document.body.style.overflowY = "auto";
-                setCounter(value => value+1);
+        
             }
             
         }
@@ -270,7 +294,11 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
                     </div>
                 
                 )}
-                <div onClick={saveButtonClick} className='admin_button'>Сохранить</div>
+                <div style={{display: 'flex'}}>
+                    <div onClick={removeButtonClick} className='admin_button red'>Удалить</div>
+                    <div onClick={saveButtonClick} className='admin_button'>Сохранить</div>
+                </div>
+                
             </div>
         </div>
     );

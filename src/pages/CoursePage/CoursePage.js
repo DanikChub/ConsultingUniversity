@@ -11,10 +11,11 @@ import check from "../../assets/imgs/check.png"
 import test_src from "../../assets/imgs/test.png"
 import { Context } from '../../index';
 import { getOneProgram } from '../../http/programAPI';
-import { TEST_ROUTE, VIDEO_ROUTE } from '../../utils/consts';
+import { PRACTICAL_WORK_ROUTE, TEST_ROUTE, VIDEO_ROUTE } from '../../utils/consts';
 import { setWellPracticalWorks, setWellTest, setWellVideos } from '../../http/userAPI';
 import { observer } from 'mobx-react-lite';
 import { getStatistic, updatePracticalWorks, updateVideos } from '../../http/statisticAPI';
+
 
 const CoursePage = observer(() => {
     const userContext = useContext(Context);
@@ -41,17 +42,63 @@ const CoursePage = observer(() => {
 
       
         getOneProgram(program_id).then(program => {
-            setCourseItems(program.themes);
             setProgram(program)
             setUser(userContext.user.user)
+            getStatistic(userContext.user.user.id, userContext.user.user.programs_id[0]).then(data => {
+            
+                setStatistic(data);
+                let prevValue = [...program.themes];
+                prevValue.forEach((theme, i) => {
+                    
+                    theme.puncts.forEach((punct, j) => {
+                        data.themesStatistic.forEach((themeStatistic, d) => {
+                            let s = true;
+                            themeStatistic.punctsStatistic.forEach((punctStatistic, r) => {
+                                if (theme.id == themeStatistic.theme_id) {
+                                    
+                                    if (punct.id == punctStatistic.punct_id) {
+                                       
+                                        if (Boolean(punct.lection_src) != Boolean(punctStatistic.lection)) {
+                                            
+                                            s *= false;
+                                         
+                                        } 
+                                        if (Boolean(punct.video_src) != Boolean(punctStatistic.video)) {
+                                            s *= false;
+                                        }
+                                        
+                                        if (Boolean(punct.test_id) != Boolean(punctStatistic.test_bool)) {
+                                        
+                                            s *= false;
+                                        }
+                                        theme['well'] = Boolean(s);
+                                    } 
+                                }
+                            })
+                           
+                            
+                            
+                            
+                        })
+                    })
+                 
+                    
+                })
+                setCourseItems(prevValue);
+                
+            })
+
+            
         })
         
-        getStatistic(userContext.user.user.id, userContext.user.user.programs_id[0]).then(data => {
-            setStatistic(data);
-        })
-
+        
+        
        
     }, [])
+
+    useEffect(() => {
+        console.log(courseItems);
+    }, [courseItems])
 
     useEffect(() => {
         let arr = []
@@ -128,7 +175,7 @@ const CoursePage = observer(() => {
                 </div>
             </div>
             <div className="course">
-                {courseItems.map(({title, puncts}, i) => 
+                {courseItems.map(({title, puncts, well}, i) => 
                     <div className={"course_item " + courseActives[i]}>
                     <div onClick={() => accordeon_item_click(i)} className="course_item_main">
                         <div className="course_item_description">
@@ -140,9 +187,14 @@ const CoursePage = observer(() => {
                                 <img src={presentation} alt=""/>
                                 <div>Презентация</div>
                             </a>
-                            <div className="course_item_completed">
-                                <img src={check} alt=""/>
-                            </div>
+                            
+                            {well &&
+                                <div className="course_item_completed">
+                                    <img src={check} alt=""/>
+                                </div>
+                                
+                            }
+                            
                             <svg classNameName='course_item_svg' width="17" height="11" viewBox="0 0 17 11" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M14.9854 1L8.24196 9.79687" stroke="#898989" stroke-opacity="0.78" strokeWidth="2" strokeLinecap="round"/>
                                 <path d="M1.16919 1.36328L7.97597 9.6843" stroke="#898989" stroke-opacity="0.78" strokeWidth="2" strokeLinecap="round"/>
@@ -151,28 +203,30 @@ const CoursePage = observer(() => {
                         </div>
                     </div>
                     <div className="course_item_hide">
-                        {puncts.map(({title, video_src, lection_src, test_id}, j) => 
+                        {puncts.map(({title, video_src, lection_src, test_id, id}, j) => 
                             <div className="course_item_hide_punct">
                                 <div className="course_item_hide_title">{i+1}.{j+1} {title}</div>
                                 <div className="course_item_hide_materials">
                                     {lection_src && 
-                                    <a onClick={() => updatePracticalWorks(user.id, user.programs_id[0])} href={process.env.REACT_APP_API_URL + lection_src} className="course_item_download">
+                                    <a onClick={() => updatePracticalWorks(user.id, user.programs_id[0], statistic.themesStatistic[i].punctsStatistic[j].id)} href={process.env.REACT_APP_API_URL + lection_src} className="course_item_download">
                                         <img src={word} alt=""/>
                                         <div>Лекция</div>
                                     </a>
                                     }
                                     {video_src && 
-                                    <Link onClick={() => updateVideos(user.id, user.programs_id[0])} to={VIDEO_ROUTE + '?link=' + video_src} className="course_item_download">
+                                    <Link onClick={() => updateVideos(user.id, user.programs_id[0], statistic.themesStatistic[i].punctsStatistic[j].id)} to={VIDEO_ROUTE + '?link=' + video_src} className="course_item_download">
                                         <img src={video_play} alt=""/>
                                         <div>Видео</div>
                                     </Link>
                                     }
                                     {test_id && 
-                                    <Link to={'/user/course/test/' + test_id} className="course_item_download">
+                                    <Link to={`/user/course/test/${test_id}?user_id=${user.id}&program_id=${user.programs_id[0]}&punct_id=${statistic.themesStatistic[i].punctsStatistic[j].id}`} className="course_item_download">
                                         <img src={test_src} alt=""/>
                                         <div>Тест</div>
                                     </Link>
                                     }
+                                    
+                                    {/* <Link to={PRACTICAL_WORK_ROUTE} className="course_item_download">практическая работа</Link> */}
                                 </div>
                             </div>
                         )}
