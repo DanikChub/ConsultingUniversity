@@ -22,7 +22,7 @@ const ApplicationPage = () => {
         <div className="content">
         <div className="container">
             <div className="admin_inner">
-                <LeftMenu/>
+                <LeftMenu active_arr={['', '', 'active', '', '', '', '', '',]}/>
                 <div className="admin_container">
                     <div className="admin_path">Главная / <b>Заявки</b></div>
               

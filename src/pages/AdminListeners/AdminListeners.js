@@ -2,39 +2,56 @@ import React, { useEffect, useState } from 'react';
 import { deleteUser, getAllUsers } from '../../http/userAPI';
 import { ADMIN_REGISTRATE_USER } from '../../utils/consts';
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+import pencil from '../../assets/imgs/pencil.png'
 
 import "./AdminListeners.css"
 import LeftMenu from '../../components/LeftMenu/LeftMenu';
 import { getStatistic } from '../../http/statisticAPI';
 
 function dateToString(date) {
+    
     const newDate = new Date(date);
     const dateSrc = newDate.toLocaleString('ru-RU', { year: 'numeric', month: 'numeric', day: 'numeric' });
-    return dateSrc;
+    if (date) {
+        return dateSrc;
+    } else {
+        return '-'
+    }
+    
 }
 
 const AdminListeners = () => {
     const [users, setUsers] = useState([]);
+    const navigate = useNavigate();
     
 
     useEffect(() => {
         getAllUsers().then(data => {
                 let users = data.filter(item => item.role == "USER");
-                users.forEach(user => {
+                users.forEach(async (user, i) => {
                   
-                    getStatistic(user.id, user.programs_id[0]).then(statistic => {
-                        user["statistic"] = statistic
+                    await getStatistic(user.id, user.programs_id[0]).then(statistic => {
+                        user["statistic"] = Math.round((statistic.well_tests)/(statistic.max_tests)*100)
+                    }).then(data => {
+                        if (i+1 == users.length) {
+                            setUsers(users);
+                            console.log(users);
+                        }
                     })
+
+                    
                     
                 })
-                setTimeout(() => {
-                    console.log(users);
-                    setUsers(users);
-                }, 1000)
+                
+              
+                
+               
+                
+               
                 
                 
-                console.log(data);
             });
         
     }, [])
@@ -52,7 +69,7 @@ const AdminListeners = () => {
         <div className="content">
         <div className="container">
             <div className="admin_inner">
-                <LeftMenu/>
+                <LeftMenu active_arr={['', 'active', '', '', '', '', '', '',]}/>
                 <div className="admin_container">
                     <div className="admin_path">Главная / <b>Слушатели</b></div>
                     <Link to={ADMIN_REGISTRATE_USER} className="admin_button">Добавить слушателя</Link>
@@ -66,6 +83,7 @@ const AdminListeners = () => {
                                 <th>Организация</th>
                                 <th>Дата начала обучения</th>
                                 <th>Дата окончания обучения</th>
+                                <th>Изменить</th>
                                 <th>Удалить</th>
                             </tr>
                         </thead>
@@ -78,13 +96,14 @@ const AdminListeners = () => {
                                         <td><a href={"/admin/listeners/new_listener/" + user.id}>{user.name}</a></td>
                                         <td>
                                             <div className="progress-bar_container">
-                                                <div className="prorgress-bar" style={{width: `${user.statistic?(user.statistic.well_videos+user.statistic.well_tests+user.statistic.well_practical_works)/(user.statistic.max_videos+user.statistic.max_tests+user.statistic.max_practical_works)*100:''}%`}}></div>
+                                                <div className="prorgress-bar" style={{width: `${user.statistic}%`}}></div>
                                             </div>
-                                            <span>{user.statistic?Math.round((user.statistic.well_videos+user.statistic.well_tests+user.statistic.well_practical_works)/(user.statistic.max_videos+user.statistic.max_tests+user.statistic.max_practical_works)*100): ''}%</span>
+                                            <span>{user.statistic}%</span>
                                         </td>
-                                        <td>Администрация Ивановского ...</td>
+                                        <td>{user.organiztion}</td>
                                         <td>{dateToString(user.createdAt)}</td>
-                                        <td>-</td>
+                                        <td>{dateToString(user.graduation_date)}</td>
+                                        <td className='remakeButton' onClick={() => navigate("/admin/listeners/new_listener/" + user.id)}><img src={pencil} width="22px"/></td>
                                         <td className='deleteButton' onClick={() => destroyUser(user.id)}>x</td>
                                         
                                     </tr>

@@ -21,3 +21,11 @@ body {
 .notification.active {
     right: 50px;
 }
+
+.content {
+    min-height: 60vh;
+}
+
+.cotrol_height {
+    min-width: 60vh;
+}

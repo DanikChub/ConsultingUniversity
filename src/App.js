@@ -32,15 +32,18 @@ const App = observer(() => {
     }) 
   }, [])
 
-  if (loading) {
-    return <Spinner/>
-    
-  }
+  
 
   return (
     <BrowserRouter>
       <NavBar/>
-      <AppRouter/>
+      {
+        loading ?
+        <Spinner/>
+        :
+        <AppRouter/>
+      }
+  
       
       <FooterNavBar/>
     </BrowserRouter>

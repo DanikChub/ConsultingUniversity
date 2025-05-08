@@ -28,7 +28,8 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
           
             getOneTest(show.remake).then(data => {
                 setTestTitle(data.title)
-                setTestPuncts(data.puncts)
+                setTestPuncts(data.puncts.sort((a, b) => a.id-b.id))
+                console.log(data)
                 setHourInput(Math.floor(data.time_limit/(3600)))
                 setMinInput(Math.floor((data.time_limit-hourInput*3600)/60))
                 setSecInput(data.time_limit-hourInput*3600-minInput*60)
@@ -50,6 +51,8 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
             correct_answer: [],
             several_answers: false
         },)
+
+        setNumberQuestion(prevValue.length-1)
 
         setTestPuncts(prevValue);
 
@@ -143,7 +146,7 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
         setUserAnswers([]);
         setShow({show: false, i: 0, j: 0})
         document.body.style.overflowY = "auto";
-    
+        setCounter(value => value-1);
         setTestTitle('');
                 setTestPuncts([{
                         question: "",
@@ -161,9 +164,28 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
     const saveButtonClick = (bool) => {
         let timeLimit = Number(hourInput)*60*60+Number(minInput)*60+Number(secInput) || null;
         if (show.remake) {
-            remakeTest(show.remake, testTitle, timeLimit, testPuncts).then(data => {
-                const prevValue = [...themesArray];
-                prevValue[show.i].puncts[show.j].test_title = data.testCreate.title;
+            if (bool) {
+                remakeTest(show.remake, testTitle, timeLimit, testPuncts).then(data => {
+                    const prevValue = [...themesArray];
+                    prevValue[show.i].puncts[show.j].test_title = data.testCreate.title;
+                    setTestTitle('');
+                    setTestPuncts([{
+                            question: "",
+                            answers: [
+                                "",
+                                "",
+                                "",
+                            ],
+                            correct_answer: [],
+                            several_answers: false
+                        },
+                    ])
+                    setUserAnswers([]);
+                    setShow({show: false, i: 0, j: 0})
+                    document.body.style.overflowY = "auto";
+                
+                })
+            } else {
                 setTestTitle('');
                 setTestPuncts([{
                         question: "",
@@ -179,8 +201,8 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
                 setUserAnswers([]);
                 setShow({show: false, i: 0, j: 0})
                 document.body.style.overflowY = "auto";
-              
-            })
+            }
+
         } else {
             if (bool) {
                 
@@ -254,7 +276,7 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
             
                     {
                         testPuncts.map((punct, i) => 
-                        <div onClick={() => navHandlerClick(i)} className={punct.correct_answer.length ? 'test_punct active' : 'test_punct'}>{i+1}</div>
+                        <div onClick={() => navHandlerClick(i)} className={userAnswers[i]+1 ? (numberQuestion == i ? 'test_punct active bordered' : 'test_punct active') : (numberQuestion == i ? 'test_punct bordered' : 'test_punct') }>{i+1}</div>
                         )
                     }
                     <div onClick={() => addNewQuestion()} className='test_punct'>+</div>

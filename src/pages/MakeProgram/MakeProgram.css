@@ -103,7 +103,7 @@
     padding-bottom: 0;
     border-bottom: 1px solid rgb(125, 125, 125);
     font-size: 18px;
-    width: 50%;
+    width: 80%;
     margin-top: 20px;
 }
 
@@ -156,14 +156,13 @@
 }
 
 .MakeProgramTitle {
-    margin-top: 40px;
     font-size: 20px;
     font-weight: 800;
 }
 
 
 .MakeProgram_Punct_Materials {
-    margin-left: 30px;
+    margin-left: 50px;
     margin-top: 25px;
     display: flex;
     align-items: center;
@@ -182,9 +181,7 @@
 }
 
 .MakeProgram_Theme {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: end;
+
     margin-left: 30px;
     margin-top: 20px;
 }
@@ -195,8 +192,7 @@
 }
 
 .MakeProgram_Theme_Punct {
-    display: flex;
-    align-items: end;
+    
     width: 100%;
     margin-top: 20px;
 }
@@ -229,8 +225,15 @@
 
 .MakeProgramFlex {
     display: flex;
+    margin-top: 40px;
     justify-content: space-between;
-    width: 150px;
+    width: 200px;
+    align-items: center;
+}
+
+.MakeProgramFlex.long {
+    width: 100%;
+    justify-content: start;
     align-items: end;
 }
 .button_container {
@@ -239,3 +242,74 @@
     justify-content: end;
 }
 
+.MakeProgram_Theme_Marker {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.content {
+    position: relative;
+}
+
+.loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+}
+
+.loader_container {
+    position: relative;
+    width: 500px;
+    height: 40px;
+    background-color: rgb(186, 186, 186);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.loader_container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+
+    background-color: #2C3E50;
+    border-radius: 20px;
+    animation: loaderAnim 20s ease-in-out forwards;
+}
+
+.loader_text {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 22px;
+}
+
+@keyframes loaderAnim {
+    0% {
+        width: 0;
+    }
+    10% {
+        width: 30%;
+    }
+
+    25% {
+        width: 35%;
+    }
+
+    50% {
+        width: 45%;
+    }
+
+    65% {
+        width: 70%;
+    }
+    90% {
+        width: 73%;
+    }
+
+    100% {
+        width: 100%;
+    }
+}

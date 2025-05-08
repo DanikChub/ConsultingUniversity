@@ -17,6 +17,10 @@
     cursor: pointer;
 }
 
+.test_punct.bordered {
+    border: 2px solid rgb(168, 168, 168);
+}
+
 .test_punct.active {
     background-color: #2980B9;
     color: #fff;
@@ -61,11 +65,40 @@
 .answer_option {
     display: flex;
     align-items: start;
-    margin-top: 40px;
+    margin-top: 30px;
 }
+
+.answer_option.user {
+    margin-top: 0;
+}
+
+.answer_option.user input:checked ~ .answer_option_text {
+    background-color: #2980B9;
+    border: 1px solid #2980B9;
+    color: #fff;
+}
+
+.answer_option.user input {
+    display: none;
+}
+
+
 .answer_option_text {
-    margin-left: 15px;
+    padding: 15px 20px ;
+    border: 1px solid rgb(231, 231, 231);
+    transition: .2s linear;
+    cursor: pointer;
+    width: 100%;
 }
+
+.answer_option_text:hover {
+    background-color: rgb(216, 216, 216);
+}
+
+.answer_option_text.active {
+    background-color: rgb(78, 229, 103);
+}
+
 
 .finish_test {
     display: flex;

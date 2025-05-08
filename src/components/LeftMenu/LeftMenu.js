@@ -1,17 +1,23 @@
-import React from 'react';
-import { ADMIN_PROGRAMS_ROUTE, ADMIN_LISTENERS_ROUTE, ADMIN_ROUTE, ADMIN_APPLICATIONS_ROUTE } from '../../utils/consts';
+import React, { useEffect } from 'react';
+import { ADMIN_PROGRAMS_ROUTE, ADMIN_LISTENERS_ROUTE, ADMIN_ROUTE, ADMIN_APPLICATIONS_ROUTE, ADMIN_PRACTICAL_WORKS_ROUTE } from '../../utils/consts';
 import { Link } from 'react-router-dom';
 
-const LeftMenu = () => {
+const LeftMenu = ({active_arr}) => {
+
+    useEffect(() => {
+        console.log(active_arr)
+    }, [])
+
     return (
         <div className="left_menu">
-            <Link to={ADMIN_ROUTE} className="left_menu_item">Главная</Link>
-            <Link to={ADMIN_LISTENERS_ROUTE} className="left_menu_item">Слушатели</Link>
-            <Link to={ADMIN_APPLICATIONS_ROUTE} className="left_menu_item">Заявки</Link>
-            <Link to={null} className="left_menu_item">Статистика</Link>
-            <Link to={ADMIN_PROGRAMS_ROUTE}  className="left_menu_item">Программы</Link>
-            <Link to={null} className="left_menu_item">Ведомости</Link>
-            <Link to={null} className="left_menu_item">Выданные документы</Link>
+            <Link to={ADMIN_ROUTE} className={`left_menu_item ${active_arr[0]}`}>Главная</Link>
+            <Link to={ADMIN_LISTENERS_ROUTE} className={`left_menu_item ${active_arr[1]}`}>Слушатели</Link>
+            <Link to={ADMIN_APPLICATIONS_ROUTE} className={`left_menu_item ${active_arr[2]}`}>Заявки</Link>
+            {/* <Link to={null} className={`left_menu_item ${active_arr[3]}`}>Статистика</Link> */}
+            <Link to={ADMIN_PROGRAMS_ROUTE}  className={`left_menu_item ${active_arr[4]}`}>Программы</Link>
+            <Link to={ADMIN_PRACTICAL_WORKS_ROUTE} className={`left_menu_item ${active_arr[5]}`}>Практические работы</Link>
+            {/* <Link to={null} className={`left_menu_item ${active_arr[6]}`}>Ведомости</Link>
+            <Link to={null} className={`left_menu_item ${active_arr[7]}`}>Выданные документы</Link> */}
         </div>
     );
 };

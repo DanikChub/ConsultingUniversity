@@ -13,7 +13,7 @@ const AppRouter = observer(() => {
     console.log(user.isAuth && user.user.role == "USER", user.isAuth && user.user.role == "ADMIN" );
 
     return (
-        <Routes>
+        <Routes className="cotrol_height">
             {user.isAuth && user.user.role == "USER" && authRoutes.map(({path, Component}) =>
                 <Route key={path} path={path} element={Component} exact/>
             )}

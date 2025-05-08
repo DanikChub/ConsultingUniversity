@@ -20,7 +20,7 @@ const CreateVideo = ({show, setShow, themesArray, setThemesArray, setCounter}) =
         const prevValueArray = [...themesArray];
 
         prevValueArray[show.i].puncts[show.j].video_src = videoInput;
-
+        
         setThemesArray(prevValueArray)
         setShow(false);
         setVideoInput('');

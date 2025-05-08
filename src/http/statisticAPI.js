@@ -8,8 +8,8 @@ export const updateVideos = async (users_id, programs_id, punct_id) => {
     return data
 }
 
-export const updateTests = async (users_id, programs_id, punct_id) => {
-    const {data} = await $authHost.post('api/statistic/updateTests', {users_id, programs_id, punct_id})
+export const updateTests = async (users_id, programs_id, punct_id, theme_id) => {
+    const {data} = await $authHost.post('api/statistic/updateTests', {users_id, programs_id, punct_id, theme_id})
 
     return data
 }

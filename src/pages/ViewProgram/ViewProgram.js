@@ -10,10 +10,14 @@ import check from "../../assets/imgs/check.png"
 import test_src from "../../assets/imgs/test.png"
 import { Context } from '../../index';
 import { getOneProgram } from '../../http/programAPI';
-import { ADMIN_VIEW_VIDEO, TEST_ROUTE, VIDEO_ROUTE } from '../../utils/consts';
+import { ADMIN_VIEW_VIDEO, TEST_ROUTE, VIDEO_ROUTE, LECTION_ROUTE } from '../../utils/consts';
 import { setWellPracticalWorks, setWellTest, setWellVideos } from '../../http/userAPI';
 import { observer } from 'mobx-react-lite';
 import { getStatistic, updatePracticalWorks, updateVideos } from '../../http/statisticAPI';
+
+
+
+
 
 const ViewProgram = observer(() => {
     const userContext = useContext(Context);
@@ -29,7 +33,10 @@ const ViewProgram = observer(() => {
 
       
         getOneProgram(program_id).then(program => {
+            
+
             setCourseItems(program.themes);
+            console.log(program)
             setProgram(program)
         })
         
@@ -51,6 +58,25 @@ const ViewProgram = observer(() => {
         setCourseActives(arr);
 
     }, [program])
+
+
+    const remakeFileName = (url, new_name, lection_html) => {
+        console.log(lection_html);
+
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'blob';
+        xhr.onload = function(e) {
+            var blob = this.response;
+            var link = document.createElement("a");
+            link.style.display = "none";
+            link.href = window.URL.createObjectURL(blob);
+            link.setAttribute("download", new_name);
+            link.click(); 
+        }
+        xhr.send();
+    }
 
     const accordeon_item_click = (i) => {
         
@@ -85,7 +111,7 @@ const ViewProgram = observer(() => {
                 <div className="block_inner">
                     <div className="block_description">
                         <div className="block_title">{program.title}</div>
-                        <div className="block_statistic">
+                        {/* <div className="block_statistic">
                             <div className="block_statistic_item">
                                 <span className="block_statistic_item_value">{0+ '/' + 0}</span>
                                 <span> видео</span>
@@ -98,7 +124,7 @@ const ViewProgram = observer(() => {
                                 <span className="block_statistic_item_value">{0 + '/' + 0}</span>
                                 <span> практических работ</span>
                             </div>
-                        </div>
+                        </div> */}
                         <div className="content_program_well_progressbar_container">
                             <div className="content_program_well_progressbar">
                                 <div className='content_program_well_progressbar_inner' style={{width: `0px`}}></div>
@@ -112,7 +138,7 @@ const ViewProgram = observer(() => {
                 </div>
             </div>
             <div className="course">
-                {courseItems.map(({title, puncts, presentation_src}, i) => 
+                {courseItems.map(({title, puncts, presentation_src, lection_src, id}, i) => 
                     <div className={"course_item " + courseActives[i]}>
                     <div onClick={() => accordeon_item_click(i)} className="course_item_main">
                         <div className="course_item_description">
@@ -126,9 +152,15 @@ const ViewProgram = observer(() => {
                                 <div>Презентация</div>
                             </a>
                             }
-                            <div className="course_item_completed">
+                            {lection_src && 
+                                <Link to={`/user/course/lection/${id}?theme=true`} className="course_item_download">
+                                    <img src={word} alt=""/>
+                                    <div>Лекция</div>
+                                </Link>
+                            }
+                            {/* <div className="course_item_completed">
                                 <img src={check} alt=""/>
-                            </div>
+                            </div> */}
                             <svg classNameName='course_item_svg' width="17" height="11" viewBox="0 0 17 11" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M14.9854 1L8.24196 9.79687" stroke="#898989" stroke-opacity="0.78" strokeWidth="2" strokeLinecap="round"/>
                                 <path d="M1.16919 1.36328L7.97597 9.6843" stroke="#898989" stroke-opacity="0.78" strokeWidth="2" strokeLinecap="round"/>
@@ -137,16 +169,24 @@ const ViewProgram = observer(() => {
                         </div>
                     </div>
                     <div className="course_item_hide">
-                        {puncts.map(({title, video_src, lection_src, test_id, practical_work}, j) => 
+                        {puncts.map(({title, video_src, lection_src, id, test_id, practical_work}, j) => 
                             <div className="course_item_hide_punct">
                                 <div className="course_item_hide_title">{i+1}.{j+1} {title}</div>
                                 <div className="course_item_hide_materials">
+                                    {/* {lection_src && 
+                                    <a  onClick={() => remakeFileName(process.env.REACT_APP_API_URL + lection_src, lection_title, lection_html)}   className="course_item_download">
+                                        <img src={word} alt=""/>
+                                        <div>{lection_title}</div>
+                                    </a>
+                                    } */}
+
                                     {lection_src && 
-                                    <a href={process.env.REACT_APP_API_URL + lection_src} className="course_item_download">
+                                    <Link to={`/user/course/lection/${id}`} className="course_item_download">
                                         <img src={word} alt=""/>
                                         <div>Лекция</div>
-                                    </a>
+                                    </Link>
                                     }
+                                    
                                     {video_src && 
                                     <Link to={ADMIN_VIEW_VIDEO + '?link=' + video_src} className="course_item_download">
                                         <img src={video_play} alt=""/>

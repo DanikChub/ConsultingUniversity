@@ -4,9 +4,12 @@ import "./Spinner.css"
 
 const Spinner = () => {
     return (
-        <div className='Spinner'>
+        <div className='control_height'>
+            <div className='Spinner'>
             
+            </div>
         </div>
+        
     );
 };
 

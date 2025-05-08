@@ -8,6 +8,16 @@ export const getOneProgram = async (id) => {
     return data;
 }
 
+export const getOnePunct = async (id) => {
+    const {data} = await $authHost.get(`api/program/punct/${id}`)
+
+    return data;
+}
+export const getOneTheme = async (id) => {
+    const {data} = await $authHost.get(`api/program/theme/${id}`)
+
+    return data;
+}
 
 export const createProgram = async (formData) => {
     const {data} = await $authHost.post(`api/program/`, formData)

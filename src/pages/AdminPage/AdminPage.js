@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import LeftMenu from '../../components/LeftMenu/LeftMenu';
 import { getAllPrograms } from '../../http/programAPI';
+import { getStatistic } from '../../http/statisticAPI';
 import { getAllUsers } from '../../http/userAPI';
 import { ADMIN_LISTENERS_ROUTE, ADMIN_PROGRAMS_ROUTE } from '../../utils/consts';
 import './AdminPage.css';
@@ -10,43 +11,64 @@ const AdminPage = () => {
 
     const [numberOfUsers, setNumberOfUsers] = useState(0);
     const [numberOfTests, setNumberOfTests] = useState(0);
+    const [numberOfEnd, setNumberOfEnd] = useState(0);
     const [programs, setPrograms] = useState([]);
     const [users, setUsers] = useState([]);
 
+    const navigate = useNavigate();
+
     useEffect(() => {
-        getAllUsers().then(data => {
-            setUsers(data);
-            console.log(data);
-            let users = 0;
+        getAllUsers().then(users => {
+            setUsers(users);
+     
+            let users_count = 0;
+            let ends = 0;
             let tests = 0;
-            data.forEach(user => {
+            users.forEach(user => {
                 if (user.role != "ADMIN") {
-                    users++;
-                    tests += user.well_tests;
+                    users_count++;
+            
+                    if (user.graduation_date) {
+                        ends++;
+                    }
+                    getStatistic(user.id, user.programs_id[0]).then(user_statistic => {
+                        tests += user_statistic.well_tests;
+                        setNumberOfTests(tests);
+                    })
                 }
             })
 
-            setNumberOfUsers(users);
-            setNumberOfTests(tests)
-        })
-        let new_programs = [];
-        getAllPrograms().then(data => {
-            new_programs = data;
-            new_programs.forEach(program => {
-                program["listeners"] = 0;
-            }) 
-    
-            users.forEach(user => {
-                new_programs.forEach(program => {
-                    if (user.programs_id[0] == program.id) {
-                        program.listeners += 1;
-                    }
-                })
-            })
-            console.log(new_programs);
-            setPrograms(new_programs);
-        }) 
+            setNumberOfUsers(users_count);
+            setNumberOfEnd(ends)
 
+
+
+            
+            let new_programs = [];
+            getAllPrograms().then(data => {
+                new_programs = data;
+                new_programs.forEach(program => {
+                    program["listeners"] = 0;
+                }) 
+                
+                users.forEach(user => {
+                    new_programs.forEach(program => {
+                    
+                        if (user.programs_id[0] == program.id) {
+                            program.listeners += 1;
+                        }
+                    })
+                })
+                
+                setPrograms(new_programs);
+            }) 
+        })
+      
+        
+    
+        
+        
+        
       
         
     }, [])
@@ -54,14 +76,14 @@ const AdminPage = () => {
         <div className="content">
         <div className="container">
             <div className="admin_inner">
-                <LeftMenu/>
+                <LeftMenu active_arr={['active', '', '', '', '', '', '', '', '']}/>
                 <div className="admin_container">
                     <div className="admin_statisitcs_items">
-                        <div className="admin_statisitcs_item">
+                        <Link to={ADMIN_LISTENERS_ROUTE} className="admin_statisitcs_item">
                             <img src={null} className="admin_statisitcs_item_img" alt=""/>
                             <div className="admin_statisitcs_item_value">{numberOfUsers}</div>
                             <div className="admin_statisitcs_item_title">Активные слушатели</div>
-                        </div>
+                        </Link>
                         <div className="admin_statisitcs_item">
                             <img src={null} className="admin_statisitcs_item_img" alt=""/>
                             <div className="admin_statisitcs_item_value">{numberOfTests}</div>
@@ -69,7 +91,7 @@ const AdminPage = () => {
                         </div>
                         <div className="admin_statisitcs_item">
                             <img src={null} className="admin_statisitcs_item_img" alt=""/>
-                            <div className="admin_statisitcs_item_value">0</div>
+                            <div className="admin_statisitcs_item_value">{numberOfEnd}</div>
                             <div className="admin_statisitcs_item_title">Завершено курсов</div>
                         </div>
                     </div>
@@ -80,13 +102,13 @@ const AdminPage = () => {
                         {
                             programs.map(program => 
                                 
-                                <div className="admin_program">
+                                <Link to={`/admin/programs/${program.id}`} className="admin_program">
                                     <img src={null} alt="" className="admin_program_img"/>
                                     <div className="admin_program_content">
                                         <div className="admin_program_title">{program.title}</div>
                                         <div className="admin_program_listeners">Слушатели: <b>{program.listeners}</b></div>
                                     </div>
-                                </div>
+                                </Link>
                             )
                         }
                         

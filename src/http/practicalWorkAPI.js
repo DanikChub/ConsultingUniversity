@@ -8,9 +8,22 @@ export const createPracticalWork = async (formData) => {
     return data
 }
 
+export const createPracticalAnswer = async (id, answer) => {
+    const {data} = await $authHost.post('api/practical_work/answer', {id, answer} )
 
-export const getOneApplications = async (id) => {
+    return data
+}
+
+
+export const getOnePracticalWork = async (id) => {
     const {data} = await $authHost.get(`api/practical_work/${id}`)
 
     return data
 }
+
+export const getAllPracticalWork = async () => {
+    const {data} = await $authHost.get(`api/practical_work/`)
+
+    return data
+}
+

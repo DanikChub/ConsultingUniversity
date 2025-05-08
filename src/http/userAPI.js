@@ -73,3 +73,9 @@ export const setWellPracticalWorks = async(id) => {
 
     return data;
 }
+
+export const setGraduationDate = async (id, graduation_date) => {
+    const {data} = await $host.post('api/user/setGraduationDate', {id, graduation_date})
+
+    return data
+}

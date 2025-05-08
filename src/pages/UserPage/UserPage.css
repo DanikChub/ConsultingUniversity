@@ -208,6 +208,9 @@
 /* LEFT MENU */
 
 .left_menu {
+    position: fixed;
+    top: 0;
+    left: 0;
     height: 100%;
     width: 204px;
     padding-top: 33px;

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import FooterNavBar from '../../components/FooterNavBar/FooterNavBar';
 import NavBar from '../../components/NavBar/NavBar';
-import { COURSE_ROUTE } from '../../utils/consts';
+import { COURSE_ROUTE, STATEMENT_ROUTE } from '../../utils/consts';
 
 
 import statement from "../../assets/imgs/statement.png"
@@ -32,7 +32,8 @@ const UserPage = () => {
         max_tests: 0,
         max_practical_works: 0,
         userId: null,
-        programId: null
+        programId: null,
+        themesStatistic: []
     });
 
     useEffect(() => {
@@ -67,7 +68,7 @@ const UserPage = () => {
                                 </div>
                                 <div className="statement_description">
                                     <div className="statement_title">Электронная ведомость</div>
-                                    <div className="statement_link">Смотреть</div>
+                                    <Link to={STATEMENT_ROUTE} className="statement_link">Смотреть</Link>
                                 </div>
                             </div>
                         </div>
@@ -83,9 +84,9 @@ const UserPage = () => {
                                     </div>
                                     <div className="content_program_well_progressbar_container">
                                         <div className="content_program_well_progressbar">
-                                            <div className='content_program_well_progressbar_inner' style={{width: `${(statistic.well_videos+statistic.well_tests+statistic.well_practical_works)/(statistic.max_videos+statistic.max_tests+statistic.max_practical_works)*100}%`}}></div>
+                                            <div className='content_program_well_progressbar_inner' style={{width: `${(statistic.well_tests)/(statistic.max_tests)*100}%`}}></div>
                                         </div>
-                                        <div className="content_program_well_procent">{Math.round((statistic.well_videos+statistic.well_tests+statistic.well_practical_works)/(statistic.max_videos+statistic.max_tests+statistic.max_practical_works)*100)}%</div>
+                                        <div className="content_program_well_procent">{Math.round((statistic.well_tests)/(statistic.max_tests)*100)}%</div>
                                     </div>
                                 </Link>
                                 <div className="content_program_well how">

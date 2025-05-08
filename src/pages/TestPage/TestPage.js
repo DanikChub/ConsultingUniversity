@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { updateTests } from '../../http/statisticAPI';
 import { getOneTest } from '../../http/testAPI';
 import { FINISH_TEST_ROUTE } from '../../utils/consts';
-
+import CountDown from '../../components/CountDown/CountDown';
 import "./TestPage.css"
 
 function compareArray(arr_1, j) {
@@ -13,6 +13,12 @@ function compareArray(arr_1, j) {
     return false;
 }
 
+function shuffle(array) {
+    const new_arr = array;
+    new_arr.sort(() => Math.random() - 0.5);
+    return new_arr
+}
+
 const TestPage = () => {
     const [test, setTest] = useState({title: null, puncts: []});
     const params = useParams();
@@ -20,11 +26,16 @@ const TestPage = () => {
     const [numberQuestion, setNumberQuestion] = useState(0);
     const [userAnswers, setUserAnswers] = useState([[]]);
     const [checkAnswers, setCheckAnswers] = useState();
+    const [secForEnd, setSecForEnd] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
         console.log(queryParams.get("user_id"), queryParams.get("program_id"), queryParams.get("punct_id"))
-        getOneTest(params.id).then(data => setTest(data));
+        getOneTest(params.id).then(data => {
+            data.puncts = shuffle(data.puncts);
+            setTest(data)
+            setSecForEnd(data.time_limit)
+        });
     }, [])
 
     const testHadlerClick = (i) => {
@@ -38,7 +49,7 @@ const TestPage = () => {
         } else {
             prevArr[i] = [j];
         }
-        console.log(prevArr);
+
         setUserAnswers(prevArr);
       
     }
@@ -55,7 +66,7 @@ const TestPage = () => {
             prevArr[i] = prevArr[i].filter(el => el != j);
         }
         
-        console.log(prevArr);
+
         setUserAnswers(prevArr);
     }
 
@@ -82,10 +93,11 @@ const TestPage = () => {
             
         })
         
-        if (test.puncts.length/correct_answers > 0.75) {
-            console.log('asd');
-            updateTests(queryParams.get("user_id"), queryParams.get("program_id"), queryParams.get("punct_id"))
-        }
+        if (correct_answers/test.puncts.length > 0.75) {
+            
+
+            updateTests(queryParams.get("user_id"), queryParams.get("program_id"), queryParams.get("punct_id"), queryParams.get("theme_id"))
+        } 
         navigate(FINISH_TEST_ROUTE + '?title=' + test.title + '&questions=' + test.puncts.length + '&correct_answers=' + correct_answers);
         
     }
@@ -107,11 +119,12 @@ const TestPage = () => {
             <div className="title">
                 <b>Тест.</b><span> {test.title}</span>
             </div>
+            {secForEnd && <CountDown seconds={secForEnd}/>}
             <div className="test_puncts">
           
                 {
                     test.puncts.map((punct, i) => 
-                     <div onClick={() => testHadlerClick(i)} className={userAnswers[i]+1 ? 'test_punct active' : 'test_punct'}>{i+1}</div>
+                     <div onClick={() => testHadlerClick(i)} className={userAnswers[i]+1 ? (numberQuestion == i ? 'test_punct active bordered' : 'test_punct active') : (numberQuestion == i ? 'test_punct bordered' : 'test_punct') }>{i+1}</div>
                     )
                 }
             </div>
@@ -127,15 +140,15 @@ const TestPage = () => {
                             { punct.several_answers ?  
                                 punct.answers.map((answer, j) => 
                             
-                                <div className="answer_option">
+                                <div className="answer_option user">
                                     <input onChange={(e) => newSeveralUserAnswers(i, j, e.target.checked)} checked={userAnswers[i] ? userAnswers[i].indexOf(j)+1 ? true : false : false} type="checkbox" id={"answer_" + j} name="1"/>
-                                    <label htmlFor={"answer_" + j} className="answer_option_text">{answer}</label>
+                                    <label htmlFor={"answer_" + j} className={`answer_option_text ${userAnswers[i] ? 'active' : 'asd'}`}>{answer}</label>
                                 </div>)
                 
                                 :
                                 punct.answers.map((answer, j) => 
                                                         
-                                <div className="answer_option">
+                                <div className="answer_option user">
                                     <input onChange={() => newUserAnswer(i, j)} checked={userAnswers[i] == j ? true : false} type="radio" id={"answer_" + j} name="1"/>
                                     <label htmlFor={"answer_" + j} className="answer_option_text">{answer}</label>
                                 </div>)   

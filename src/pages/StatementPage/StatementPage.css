@@ -1,0 +1,16 @@
+
+
+.block_table {
+    width: 100%;
+}
+
+.block_table_th {
+    text-align: left;
+    padding: 10px;
+}
+
+.block_table_td {
+    text-align: left;
+    padding: 10px;
+    background-color: #fff;
+}
