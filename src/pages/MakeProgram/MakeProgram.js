@@ -351,33 +351,33 @@ const MakeProgram = () => {
             if (params.id) {
                 formData.append("id", params.id)
                 
-                // setNotActive(true);
-                // remakeProgram(formData).then(data => {
+                setNotActive(true);
+                remakeProgram(formData).then(data => {
                  
                    
                     
-                //     setNotActive(false);
+                    setNotActive(false);
                     
                    
-                //     navigate(ADMIN_PROGRAMS_ROUTE)
+                    navigate(ADMIN_PROGRAMS_ROUTE)
                    
-                // })
+                })
             } else {
-                // setNotActive(true);
+                setNotActive(true);
 
-                // createProgram(formData)
-                // .then(data => {
+                createProgram(formData)
+                .then(data => {
               
-                //     setNotActive(false);
+                    setNotActive(false);
                     
                     
-                //     navigate(ADMIN_PROGRAMS_ROUTE)
+                    navigate(ADMIN_PROGRAMS_ROUTE)
                     
-                // })
-                // .catch(e => {
-                //     setNotActive(false);
-                //     setServerMessage(e.response.data.message)
-                // })
+                })
+                .catch(e => {
+                    setNotActive(false);
+                    setServerMessage(e.response.data.message)
+                })
             }
         } else {
             setValidate(true);
