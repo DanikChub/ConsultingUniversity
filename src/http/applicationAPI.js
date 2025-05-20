@@ -14,3 +14,10 @@ export const getAllApplications = async () => {
 
     return data
 }
+
+
+export const destroyApplication = async (id) => {
+    const {data} = await $authHost.post('api/application/delete', {id})
+
+    return data;
+}

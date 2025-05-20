@@ -22,12 +22,16 @@ const AdminProgramsPage = () => {
 
     const deleteProgramClick = (program_id) => {
         setItemClassDelete('delete');
-        deleteProgram(program_id).then(d => 
+        deleteProgram(program_id)
+        .then(d => 
             getAllPrograms().then(data =>
                 setPrograms(data)
             )
             
-        );
+        )
+        .catch(e => {
+            alert(e.response.data.message);
+        })
     }
     return (
         <div className="content">
@@ -52,7 +56,10 @@ const AdminProgramsPage = () => {
                                         <div className={"admin_program_item"}>                          
                                             <div className="admin_program_item_title">{program.title}</div>
                                             <div className='admin_program_item_button_group'>
-                                            <div onClick={() => navigate(`/admin/programs/${program.id}`)} className="MakeProgram_Theme_Button">
+                                            <div onClick={() => {
+                                                navigate(`/admin/programs/${program.id}`)
+                                                localStorage.removeItem('arr_open');
+                                            }} className="MakeProgram_Theme_Button">
                                                 <img width="50" src={video_play}/>
                                             </div>
                                             <div onClick={() => navigate(`${MAKE_PROGRAM_ROUTE}/${program.id}`)} className="MakeProgram_Theme_Button"><svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100" height="100" viewBox="0 0 50 50">

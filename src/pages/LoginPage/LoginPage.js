@@ -22,7 +22,7 @@ const LoginPage = () => {
                 getUserById(data.id).then(data => {
                     user.setUser(data)
                     user.setIsAuth(true)
-                    console.log(user.isAuth);
+              
                 })
                 .finally(data => {
                     if (user.user.role == "USER") {

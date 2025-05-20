@@ -26,6 +26,7 @@ const MainPage = () => {
 
             setPhoneInput('');
         })
+        .catch(e => alert(e.response.data.message))
     }
     return (
         <div>

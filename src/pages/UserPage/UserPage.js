@@ -37,6 +37,7 @@ const UserPage = () => {
     });
 
     useEffect(() => {
+       
        if (userContext.user.user.programs_id) {
         let program_id = userContext.user.user.programs_id[0]
         async function getProgram(id) {
@@ -75,7 +76,7 @@ const UserPage = () => {
                         <div className="content_program">
                             <div className="content_program_title">Ваша программа</div>
                             <div className="content_program_inner">
-                                <Link to={COURSE_ROUTE} className="content_program_well">
+                                <Link onClick={() => localStorage.removeItem('arr_open')} to={COURSE_ROUTE} className="content_program_well">
                                     <div className="content_program_well_description">
                                         <div className="content_program_well_title">{program.title}</div>
                                         <div className="content_program_well_img">

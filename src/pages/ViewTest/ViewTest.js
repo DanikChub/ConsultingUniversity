@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import CountDown from '../../components/CountDown/CountDown';
+import LeftMenu from '../../components/LeftMenu/LeftMenu';
 import { getOneTest } from '../../http/testAPI';
 import { FINISH_TEST_ROUTE } from '../../utils/consts';
 
@@ -21,7 +22,7 @@ const ViewTest = () => {
     const [test, setTest] = useState({title: null, puncts: []});
     const params = useParams();
     const [numberQuestion, setNumberQuestion] = useState(0);
-    const [userAnswers, setUserAnswers] = useState([[]]);
+    const [userAnswers, setUserAnswers] = useState([[-1]]);
     const [checkAnswers, setCheckAnswers] = useState();
 
     const [secForEnd, setSecForEnd] = useState(null);
@@ -30,7 +31,7 @@ const ViewTest = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-
+  
         getOneTest(params.id).then(data => {
             
             data.puncts = shuffle(data.puncts);
@@ -54,7 +55,7 @@ const ViewTest = () => {
         } else {
             prevArr[i] = [j];
         }
-        console.log(prevArr);
+
         setUserAnswers(prevArr);
       
     }
@@ -71,7 +72,7 @@ const ViewTest = () => {
             prevArr[i] = prevArr[i].filter(el => el != j);
         }
         
-        console.log(prevArr);
+  
         setUserAnswers(prevArr);
     }
 
@@ -83,8 +84,7 @@ const ViewTest = () => {
 
         test.puncts.forEach(el => new_arr.push(el.correct_answer));
 
-        
-        console.log(new_arr, userAnswers);
+    
         userAnswers.forEach((userAnswer, i) => {
             let s = true;
             userAnswer.forEach((el, j) => {
@@ -100,7 +100,7 @@ const ViewTest = () => {
             
         })
         
-        console.log(correct_answers);
+        
   
         
         
@@ -109,6 +109,7 @@ const ViewTest = () => {
     
     return (
         <div className="content">
+            <LeftMenu active_arr={['', '', '', '', 'active', '', '', '',]}/>
         <div className="container">
             <div className="back_button">
                 <a onClick={() => navigate(-1)}>

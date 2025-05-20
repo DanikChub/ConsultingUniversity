@@ -29,7 +29,7 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
             getOneTest(show.remake).then(data => {
                 setTestTitle(data.title)
                 setTestPuncts(data.puncts.sort((a, b) => a.id-b.id))
-                console.log(data)
+             
                 setHourInput(Math.floor(data.time_limit/(3600)))
                 setMinInput(Math.floor((data.time_limit-hourInput*3600)/60))
                 setSecInput(data.time_limit-hourInput*3600-minInput*60)
@@ -139,6 +139,7 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
 
     const removeButtonClick = () => {
         const prevValue = [...themesArray];
+        prevValue[show.i].have_test = false;
         prevValue[show.i].puncts[show.j].test_title = null;
         prevValue[show.i].puncts[show.j].test_id = null;
 
@@ -167,6 +168,7 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
             if (bool) {
                 remakeTest(show.remake, testTitle, timeLimit, testPuncts).then(data => {
                     const prevValue = [...themesArray];
+                    prevValue[show.i].have_test = true;
                     prevValue[show.i].puncts[show.j].test_title = data.testCreate.title;
                     setTestTitle('');
                     setTestPuncts([{
@@ -208,7 +210,7 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
                 
                 createTest(testTitle, timeLimit, testPuncts).then(data => {
                     const prevValue = [...themesArray];
-    
+                    prevValue[show.i].have_test = true;
                     prevValue[show.i].puncts[show.j].test_id = data.testCreate.id;
                     prevValue[show.i].puncts[show.j].test_title = data.testCreate.title;
                     setTestTitle('');

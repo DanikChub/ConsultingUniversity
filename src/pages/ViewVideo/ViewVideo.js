@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import LeftMenu from '../../components/LeftMenu/LeftMenu';
 
 const ViewVideo = () => {
     const [queryParams] = useSearchParams();
@@ -7,6 +8,7 @@ const ViewVideo = () => {
    
     return (
         <div className='content'>
+            <LeftMenu active_arr={['', '', '', '', 'active', '', '', '',]}/>
             <div className='container'>
             <div className="back_button">
                     <a onClick={() => navigate(-1)}>

@@ -24,13 +24,13 @@ const TestPage = () => {
     const params = useParams();
     const [queryParams] = useSearchParams();
     const [numberQuestion, setNumberQuestion] = useState(0);
-    const [userAnswers, setUserAnswers] = useState([[]]);
+    const [userAnswers, setUserAnswers] = useState([[-1]]);
     const [checkAnswers, setCheckAnswers] = useState();
     const [secForEnd, setSecForEnd] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        console.log(queryParams.get("user_id"), queryParams.get("program_id"), queryParams.get("punct_id"))
+   
         getOneTest(params.id).then(data => {
             data.puncts = shuffle(data.puncts);
             setTest(data)
@@ -79,7 +79,7 @@ const TestPage = () => {
         test.puncts.forEach(el => new_arr.push(el.correct_answer));
 
         let s = true;
-        console.log(new_arr, userAnswers);
+       
         userAnswers.forEach((userAnswer, i) => {
             userAnswer.forEach((el, j) => {
                 if (el != new_arr[i][j]) {

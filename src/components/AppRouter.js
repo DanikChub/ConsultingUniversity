@@ -10,7 +10,7 @@ import ErrorPage from '../pages/ErrorPage/ErrorPage';
 const AppRouter = observer(() => {
     const {user} = useContext(Context);
 
-    console.log(user.isAuth && user.user.role == "USER", user.isAuth && user.user.role == "ADMIN" );
+  
 
     return (
         <Routes className="cotrol_height">

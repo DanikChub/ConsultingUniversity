@@ -1,3 +1,18 @@
+
+
+.background-yellow {
+    background-color: rgb(238, 238, 62);
+}
+.admin_flex {
+    
+    display: flex;
+    justify-content: end;
+}
+
+.admin_flex div {
+    margin-top: 20px;
+    margin-right: 20px;
+}
 .admin_table {
     margin-top: 34px;
 }
@@ -51,6 +66,10 @@
     background-color: #2980B9;
     height: 100%;
     border-radius: 11px;
+
+    width: 0;
+
+    transition: .4s ease-in-out;
 }
 
 .admin_path {
@@ -71,6 +90,11 @@
     margin-top: 31px;
     cursor: pointer;
     transition: .2s linear;
+}
+
+.admin_button.active {
+    background-color: rgb(45, 145, 203);
+    color: #fff;
 }
 
 .admin_button:hover {
@@ -165,4 +189,22 @@
 
 .content_program_well.listener_page {
     width: 50%;
+}
+
+
+.skeleton tr td {
+    padding: 20px;
+    background-color: rgb(210, 210, 210);
+    animation: fade .6s linear infinite alternate;
+    color: #fff;
+}
+
+@keyframes fade {
+    0% {
+        opacity: .4;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }

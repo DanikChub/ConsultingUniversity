@@ -11,9 +11,7 @@ const FinishTestPage = () => {
     const navigate = useNavigate();
     const [params] = useSearchParams();
 
-    useEffect(() => {
-        console.log(params.get("title"))
-    }, [])
+   
     return (
         <div className="content">
         <div className="container">

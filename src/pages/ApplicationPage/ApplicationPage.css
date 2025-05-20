@@ -54,15 +54,7 @@
     height: 11px;
     width: 70%;
 }
-.prorgress-bar {
-    position: absolute;
-    left: 0;
-    top: 0;
 
-    background-color: #2980B9;
-    height: 100%;
-    border-radius: 11px;
-}
 
 .admin_path {
     font-weight: 400;
@@ -149,4 +141,25 @@
 
 .content_program_well.listener_page {
     width: 50%;
+}
+
+.skeleton tr td {
+    padding: 20px;
+    background-color: rgb(222, 222, 222);
+    animation: fade .6s linear infinite alternate;
+
+}
+
+@keyframes fade {
+    0% {
+        opacity: .4;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.admin_table.big {
+    width: 100%;
 }

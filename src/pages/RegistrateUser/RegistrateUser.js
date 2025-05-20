@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import './RegistrateUser.css'
 
@@ -22,12 +22,15 @@ const RegistrateUser = () => {
     const [datalistActive, setDatalistActive] = useState('');
 
     const params = useParams();
+    const [queryParams] = useSearchParams();
 
     const navigate = useNavigate();
 
     const [programs, setPrograms] = useState([]);
     const [filteredPrograms, setFilteredPrograms] = useState([]);
     const [selectedPrograms, setSelectedPrograms] = useState([]);
+    const [validate, setValidate] = useState(false);
+    const [serverMessage, setServerMessage] = useState('');
     
 
     useEffect(() => {
@@ -40,10 +43,14 @@ const RegistrateUser = () => {
                 setOrg(user.organiztion)
                 setPhone(user.number)
             
-                getOneProgram(user.programs_id[0]).then(data => setProgram(data.title))
+                getOneProgram(user.programs_id[0]).then(data => setSelectedPrograms([data]))
                 setUserProgramId(user.programs_id)
             })
         } 
+        setName(queryParams.get('name'));
+        setEmail(queryParams.get('email'));
+        setPhone(queryParams.get('number'));
+        
         getAllPrograms().then(data => {
             setPrograms(data)
             setFilteredPrograms(data);
@@ -94,19 +101,33 @@ const RegistrateUser = () => {
     }
 
     const handleDiplomCheck = (value) => {
-        console.log(value)
+  
         setDiplom(value);
     }
 
     const createUser = () => {
-     
-        if (params.id) {
-            remakeUser(params.id, email, password, "USER", name, phone, org, userProgramId, diplom).then(data => navigate(ADMIN_LISTENERS_ROUTE))
-        } else {
-            registrateUser(email, password, "USER", name, phone, org, userProgramId, diplom).then(data => navigate(ADMIN_LISTENERS_ROUTE))
-        }
         
+        
+            if (params.id) {
+                if (name && email && phone && userProgramId[0]) {
+                    remakeUser(params.id, email, password, "USER", name, phone, org, userProgramId, diplom)
+                    .then(data => navigate(ADMIN_LISTENERS_ROUTE))
+                    .catch(e => setServerMessage(e.response.data.message))
+                } else {
+                    setValidate(true);
+                }
 
+            } else {
+                if (name && email && phone && password && userProgramId[0]) {
+                    registrateUser(email, password, "USER", name, phone, org, userProgramId, diplom)
+                    .then(data => navigate(ADMIN_LISTENERS_ROUTE))
+                    .catch(e => setServerMessage(e.response.data.message))
+                } else {
+                    setValidate(true);
+                }
+    
+            }
+       
 
     }
 
@@ -122,15 +143,15 @@ const RegistrateUser = () => {
                     <div className="add_input_items">
                         <div className="add_input_item">
                             <label htmlFor="name" className="add_input_label">ФИО</label>
-                            <input onChange={(e) => setName(e.target.value)} value={name} id="name" type="text" className="add_input" placeholder="Введите ФИО пользователя"/>
+                            <input onChange={(e) => setName(e.target.value)} value={name} id="name" type="text" className={`add_input ${validate?' red':''}`} placeholder="Введите ФИО пользователя"/>
                         </div>
                         <div className="add_input_item">
                             <label htmlFor="email" className="add_input_label">e-mail</label>
-                            <input onChange={(e) => setEmail(e.target.value)} value={email} id="email" type="text" className="add_input" placeholder="Введите e-mail пользователя"/>
+                            <input onChange={(e) => setEmail(e.target.value)} value={email} id="email" type="text" className={`add_input ${validate?' red':''}`} placeholder="Введите e-mail пользователя"/>
                         </div>
                         <div className="add_input_item">
                             <label htmlFor="password" className="add_input_label">Пароль</label>
-                            <input onChange={(e) => setPassword(e.target.value)} value={password} id="password" type="text" className="add_input" placeholder={params.id ? 'Чтобы не менять пароль не трогайте это поле!' : "Введите пароль пользователя"}/>
+                            <input onChange={(e) => setPassword(e.target.value)} value={password} id="password" type="text" className={`add_input ${validate && !Boolean(params.id)?' red':''}`} placeholder={params.id ? 'Чтобы не менять пароль не трогайте это поле!' : "Введите пароль пользователя"}/>
                         </div>
                         
                         <div className="add_input_item">
@@ -140,7 +161,7 @@ const RegistrateUser = () => {
                         
                         <div className="add_input_item">
                             <label htmlFor="phone" className="add_input_label">Телефон</label>
-                            <input onChange={(e) => setPhone(e.target.value)} value={phone} id="phone" type="text" className="add_input" placeholder="Введите телефон пользователя"/>
+                            <input onChange={(e) => setPhone(e.target.value)} value={phone} id="phone" type="text" className={`add_input ${validate?' red':''}`} placeholder="Введите телефон пользователя"/>
                         </div>
                         <div className="add_input_item relative">
                             <label htmlFor="program" className="add_input_label">Программа</label>
@@ -148,9 +169,9 @@ const RegistrateUser = () => {
                             <input list='programs' onClick={(e) => handleClickInput()} onChange={(e) => handleChangeOption(e.target.value)} value={program} id="program" type="text" className="add_input" placeholder="Введите наименование программы обучения"/>
                             
                             
-                            <div class={"datalist " + datalistActive} id="programs">
+                            <div className={"datalist " + datalistActive} id="programs">
                                 {filteredPrograms.map(program => 
-                                    <div onClick={() => handleClickOption(program)} class="datalist_item" dangerouslySetInnerHTML={{__html: program.title.replace(program.yellow_value, "<b class=\"background-yellow\">"+program.yellow_value+"</b>")}}/>
+                                    <div onClick={() => handleClickOption(program)} className="datalist_item" dangerouslySetInnerHTML={{__html: program.title.replace(program.yellow_value, "<b class=\"background-yellow\">"+program.yellow_value+"</b>")}}/>
                                 )}
                                 
                             </div>
@@ -175,11 +196,13 @@ const RegistrateUser = () => {
                             <span>Заберет сам</span>
                         </div>
                     </div>
+                    <div className='login_form_message'>{serverMessage}</div>
                     <div className="add_input_button_container">
+                        
                         <div onClick={() => navigate(-1)} className="add_input_button back admin_button">Отменить</div>
                         <div onClick={() => createUser()} className="add_input_button admin_button">{params.id?'Сохранить изменения':'Создать пользователя'}</div>
                     </div>
-                
+                  
                     
                 </div>
                 

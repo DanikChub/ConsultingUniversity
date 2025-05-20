@@ -5,9 +5,10 @@ import { getOnePunct, getOneTheme } from '../../http/programAPI';
 import download from "../../assets/imgs/download.png"
 
 
-import './LectionPage.css'
+import './ViewLection.css'
+import LeftMenu from '../../components/LeftMenu/LeftMenu';
 
-const LectionPage = () => {
+const ViewLection = () => {
     const params = useParams();
     const [queryParams] = useSearchParams();
     const navigate = useNavigate();
@@ -59,7 +60,8 @@ const LectionPage = () => {
    
     return (
         <div className='content'>
-
+           
+            <LeftMenu active_arr={['', '', '', '', 'active', '', '', '',]}/>
             <div className='container'>
                
                 <div className='nav_panel'>
@@ -89,4 +91,4 @@ const LectionPage = () => {
     );
 };
 
-export default LectionPage;
+export default ViewLection;

@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useContext} from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 
 import learn from "../../assets/imgs/learn.png"
@@ -14,6 +14,7 @@ import { ADMIN_VIEW_VIDEO, TEST_ROUTE, VIDEO_ROUTE, LECTION_ROUTE } from '../../
 import { setWellPracticalWorks, setWellTest, setWellVideos } from '../../http/userAPI';
 import { observer } from 'mobx-react-lite';
 import { getStatistic, updatePracticalWorks, updateVideos } from '../../http/statisticAPI';
+import LeftMenu from '../../components/LeftMenu/LeftMenu';
 
 
 
@@ -27,6 +28,7 @@ const ViewProgram = observer(() => {
     const [courseActives, setCourseActives] = useState([]);
     
     const params = useParams();
+    const [queryParams] = useSearchParams();
 
     useEffect(() => {
         let program_id = params.id;
@@ -34,34 +36,43 @@ const ViewProgram = observer(() => {
       
         getOneProgram(program_id).then(program => {
             
-
-            setCourseItems(program.themes);
-            console.log(program)
+            console.log(program.themes[5])
+            setCourseItems(program.themes.sort((a, b) => a.theme_id - b.theme_id));
+          
             setProgram(program)
+
+            let local_arr = localStorage.getItem('arr_open');
+  
+            if (local_arr) {
+                setCourseActives(JSON.parse(local_arr));
+                
+
+            } else {
+                let arr = []
+        
+                
+                if (program.themes) {
+                
+                    for (let i = 0; i < program.themes.length; i++) {
+
+                        arr.push('');
+                    }
+                }
+        
+                localStorage.setItem('arr_open', JSON.stringify(arr));
+                
+                setCourseActives(arr);
+            }
         })
         
 
        
     }, [])
 
-    useEffect(() => {
-        let arr = []
-
-        if (program.themes) {
-            for (let i = 0; i < program.themes.length; i++) {
-                arr.push('');
-            }
-        }
-
-        
-        
-        setCourseActives(arr);
-
-    }, [program])
 
 
     const remakeFileName = (url, new_name, lection_html) => {
-        console.log(lection_html);
+     
 
 
         var xhr = new XMLHttpRequest();
@@ -90,12 +101,22 @@ const ViewProgram = observer(() => {
             
            
         ));
-       
+        console.log(courseActives)
+        localStorage.setItem('arr_open', JSON.stringify(courseActives.map((item, j) =>  
+            i == j
+            ?
+            item == 'active' ? '': 'active'
+            :
+            item
+            
+        
+        )));
     }  
 
     const navigate = useNavigate();
     return (
         <div className="content">
+            <LeftMenu active_arr={['', '', '', '', 'active', '', '', '',]}/>
         <div className="container">
             <div className="back_button">
                 <a onClick={() => navigate(-1)}>
@@ -147,7 +168,7 @@ const ViewProgram = observer(() => {
                         </div>
                         <div className="course_item_panel">
                             {presentation_src &&
-                                <a target="_blank" href={process.env.REACT_APP_API_URL + presentation_src} className="course_item_download">
+                                <a onClick={() => accordeon_item_click(i)} target="_blank" href={process.env.REACT_APP_API_URL + presentation_src} className="course_item_download">
                                 <img src={presentation} alt=""/>
                                 <div>Презентация</div>
                             </a>
@@ -181,7 +202,7 @@ const ViewProgram = observer(() => {
                                     } */}
 
                                     {lection_src && 
-                                    <Link to={`/user/course/lection/${id}`} className="course_item_download">
+                                    <Link to={`/admin/programs/lection/${id}`} className="course_item_download">
                                         <img src={word} alt=""/>
                                         <div>Лекция</div>
                                     </Link>

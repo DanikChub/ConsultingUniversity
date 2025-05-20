@@ -39,3 +39,7 @@
 .add_checkbox {
     width: 10%;
 }
+
+.add_input.red::placeholder {
+    color: rgb(255, 72, 72);
+}

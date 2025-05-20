@@ -10,6 +10,10 @@ const PracticalWorkPage = () => {
     const [file, setFile] = useState(null);
 
     const {user} = useContext(Context);
+
+    useEffect(() => {
+        
+    }, [])
     
     const handleFinishButton = () => {
         const formData = new FormData();
@@ -20,7 +24,7 @@ const PracticalWorkPage = () => {
 
         createPracticalWork(formData).then(data => {
             alert('файл отправлен')
-            setFile(null);
+           
         });
     }
 
