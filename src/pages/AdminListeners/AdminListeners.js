@@ -91,12 +91,7 @@ const AdminListeners = () => {
                         }
                     })
                     .catch(e => {
-                        try {
-                            alert(`Ошибка сервера: ${e.response.data.message}`);
-                        } catch(err) {
-                            alert('Непредвиденная ошибка сервера', err);
-                        }
-                        console.log(users);
+                       
                         setUsers(users);
 
 
