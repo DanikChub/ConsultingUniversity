@@ -103,7 +103,7 @@ const AdminListeners = () => {
                         let sort_down = Boolean(localStorage.getItem("sort_down"));
                         
                         setSortDown(sort_down);
-
+                        setLoading(true);
                         setFilteredUsers(sortArrayBy(users, sortType, sort_down));
                     })
 

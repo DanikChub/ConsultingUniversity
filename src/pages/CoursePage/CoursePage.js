@@ -199,7 +199,12 @@ const CoursePage = observer(() => {
                                     </a>
                                 }
                                 
-                                
+                                {lection_src && 
+                                    <Link to={`/user/course/lection/${id}?theme=true`} className="course_item_download">
+                                        <img src={word} alt=""/>
+                                        <div>Лекция</div>
+                                    </Link>
+                                }
                                 {statistic.themesStatistic[i].well &&
                                     <div className="course_item_completed">
                                         <img src={check} alt=""/>
