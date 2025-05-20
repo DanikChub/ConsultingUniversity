@@ -327,10 +327,11 @@ const MakeProgram = () => {
 
             let number_of_test = 0;
 
-            
+            console.log(themesArray);
             themesArray.forEach(theme => {
                 
                 formData.append("presentation_src", theme.presentation_src)
+                
                 formData.append("theme_lection_src", theme.lection_src)
                 theme.puncts.forEach(punct => {
                     formData.append("docs", punct.lection_src)

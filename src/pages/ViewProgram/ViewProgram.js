@@ -101,7 +101,7 @@ const ViewProgram = observer(() => {
             
            
         ));
-        console.log(courseActives)
+
         localStorage.setItem('arr_open', JSON.stringify(courseActives.map((item, j) =>  
             i == j
             ?
