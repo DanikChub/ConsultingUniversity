@@ -6,10 +6,12 @@ import { createPracticalAnswer, getOnePracticalWork } from '../../http/practical
 import download from '../../assets/imgs/download.png'
 import { getUserById } from '../../http/userAPI';
 import { getOneProgram } from '../../http/programAPI';
+import { updatePracticalWorks } from '../../http/statisticAPI';
 
 const AdminOnePracticalPage = () => {
     const [practicalWork, setPracticalWork] = useState([]);
     const [answerInput, setAnswerInput] = useState('');
+    const [test, setTest] = useState(false);
     const [user, setUser] = useState({
         name: ''
     });
@@ -37,8 +39,12 @@ const AdminOnePracticalPage = () => {
     }, [])
 
     const handlerClick = () => {
- 
-        createPracticalAnswer(practicalWork.id, answerInput)
+
+        createPracticalAnswer(practicalWork.id, answerInput, test)
+        if (test) {
+            updatePracticalWorks(user.id, user.programs_id[0])
+        }
+        
         navigate(-1);
     }
     return (
@@ -69,17 +75,21 @@ const AdminOnePracticalPage = () => {
                         <a href={process.env.REACT_APP_API_URL + practicalWork.file_src} className='MakeProgram_Punct_Material_Plus'>
                             <img width="22px" src={download}/>
                         </a>
-                        <div className='MakeProgram_Punct_Material_Text'>Скачать</div>
+                        <div className='MakeProgram_Punct_Material_Text'>{"Скачать работу \"" + practicalWork.practic_title + "\""}</div>
                     </div>
                     {
                         practicalWork.answer ? 
-                        <div>Ваше сообщение: {practicalWork.answer}</div>
+                        <div>
+                            <div>Ваше сообщение: {practicalWork.answer}</div>
+                            <div>Ваша оценка: {practicalWork.test? 'зачет' : "не зачет"}</div>
+                        </div>
+                        
                         :
                         <div>
-                            <select name="select">
+                            <select onChange={(e) => {setTest(Boolean(Number(e.target.value)))}} name="select">
                                 
-                                <option value={true}>Зачет</option>
-                                <option value={false} selected>Не зачет</option>
+                                <option value={1} {...test ? "" : "selected"}>Зачет</option>
+                                <option value={0} {...test ? "" : "selected"}>Не зачет</option>
                             </select>
                             <input onChange={(e) => setAnswerInput(e.target.value)} value={answerInput} className='MakeProgramInput' placeholder='Ответ пользователю'/>
                             <button onClick={() => handlerClick()}>Отправить</button>

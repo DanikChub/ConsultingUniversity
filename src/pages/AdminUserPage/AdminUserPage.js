@@ -87,6 +87,10 @@ const AdminUserPage = () => {
                                             <td>{user.organiztion}</td>
                                         </tr>
                                         <tr>
+                                            <td>ИНН организации: </td>
+                                            <td>{user.inn}</td>
+                                        </tr> 
+                                        <tr>
                                             <td>Дата регистрации: </td>
                                             <td>{dateToString(user.createdAt)}</td>
                                         </tr>
@@ -102,7 +106,10 @@ const AdminUserPage = () => {
                                             <td>e-mail: </td>
                                             <td>{user.email}</td>
                                         </tr>     
-                                        
+                                        <tr>
+                                            <td>Диплом: </td>
+                                            <td>{user.diplom?'Заберет сам':'Отправить по адресу: ' + user.address}</td>
+                                        </tr> 
                                         
                                     </tbody>
                                     

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { deleteUser, getAllUsers } from '../../http/userAPI';
+import { deleteUser, getAllUsers, getAllUsersWithPage, searchUsers } from '../../http/userAPI';
 import { ADMIN_REGISTRATE_USER } from '../../utils/consts';
 
 import { Link, useNavigate } from 'react-router-dom';
@@ -43,8 +43,11 @@ function sortArrayBy(array, type, down) {
     }
 }
 
+
+
 const AdminListeners = () => {
     const [users, setUsers] = useState([]);
+    const [countUsers, setCountUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [searchInput, setSearchInput] = useState('');
@@ -52,10 +55,11 @@ const AdminListeners = () => {
     const [sortClasses, setSortClasses] = useState(['', '', 'active']);
     const [sortType, setSortType] = useState(0);
     const [sortDown, setSortDown] = useState(true);
+    const [sort_type_variations, setSortTypeVariations] = useState(["statistic", "name", "createdAt"]);
 
     useEffect(() => {
         let sort_down = Boolean(Number(localStorage.getItem("sort_down")));
-       
+
         setSortDown(sort_down);
 
         let sort_type = Number(localStorage.getItem('sort_type'))
@@ -65,74 +69,94 @@ const AdminListeners = () => {
 
         setSortClasses(prev_value);
         setSortType(sort_type);
-
-
-
-
-
-        
-        getAllUsers().then(data => {
-                let users = data.filter(item => item.role == "USER");
-                users.forEach(async (user, i) => {
-                    user["statistic"] = 0;
-                    
-                    await getStatistic(user.id, user.programs_id[0])
-                    .then(statistic => {
-                      
-                        user.statistic = Math.round((statistic.well_tests)/(statistic.max_tests)*100)
-                    }).then(data => {
-                        if (i+1 == users.length) {
-                            setUsers(users);
-                            
-
-                            setFilteredUsers(sortArrayBy(users, sort_type, sort_down));
-                            
-                            setLoading(true);
-                        }
-                    })
-                    .catch(e => {
-                       
-                        setUsers(users);
-
-
-                        let sort_down = Boolean(localStorage.getItem("sort_down"));
-                        
-                        setSortDown(sort_down);
-                        setLoading(true);
-                        setFilteredUsers(sortArrayBy(users, sortType, sort_down));
-                    })
-
-                    
-                    
-                })
-                
-            });
+      
+        getAllUsersWithPage(1, sort_type_variations[sort_type], sort_down?'DESC':'ASC').then(data => {
+            let arr = []
+            for (let i = 0; i < Math.ceil(data.count/10); i++) {
+                arr.push({
+                    number: i+1,
+                    class: i==0?'active':''
+                });
+            }
+            
+            setCountUsers(arr)
+            let users = data.rows.filter(item => item.role == "USER");
+            setUsers(users);
+            setFilteredUsers(users);
+            setLoading(true);
+        })
         
     }, [])
 
     const destroyUser = (id) => {
         deleteUser(id).then(d => 
-            getAllUsers().then(data => {
-                setUsers(data.filter(item => item.role == "USER"));
+            getAllUsersWithPage(1, sort_type_variations[sortType], sortDown?'DESC':'ASC').then(data => {
+                setUsers(data.rows.filter(item => item.role == "USER"));
                
             })
         );
     }
 
     const handleSearchInput = (value) => {
-        let prev_users = users;
+        let realValue = searchInput;
 
-        setSearchInput(value);
+        if (value.search(/[^а-яА-Яa-zA-Z0-9]/) == -1) {
+            setSearchInput(value);
+            realValue = value
+        }
 
-        let new_users = prev_users.filter(user => user.name.toLowerCase().includes(value.toLowerCase()) || user.organiztion.toLowerCase().includes(value.toLowerCase()))
-        
-        new_users.forEach(user => {
-            user["yellow_value"] = value;
-        })
 
         
+        // let new_users = prev_users.filter(user => user.name.toLowerCase().includes(value.toLowerCase()) || user.organiztion.toLowerCase().includes(value.toLowerCase()))
         
-        setFilteredUsers(sortArrayBy(new_users, sortType, sortDown));
+        // new_users.forEach(user => {
+        //     user["yellow_value"] = value;
+        // })
+        
+
+        if (realValue) {
+            
+            searchUsers(1, realValue)
+            .then(data => 
+                {
+                    let prev_users = data.rows;
+                    prev_users.forEach(user => {
+                        user["yellow_value"] = value || '';
+                    })
+
+                    console.log(prev_users)
+
+                    let arr = []
+                    for (let i = 0; i < Math.ceil(data.count/10); i++) {
+                        arr.push({
+                            number: i+1,
+                            class: i==0?'active':''
+                        });
+                    }
+                    setCountUsers(arr)
+                    setFilteredUsers(prev_users);
+                   
+                });
+        } else {
+            getAllUsersWithPage(1, sort_type_variations[sortType], sortDown?'DESC':'ASC').then(data => {
+                let arr = []
+                for (let i = 0; i < Math.ceil(data.count/10); i++) {
+                    arr.push({
+                        number: i+1,
+                        class: i==0?'active':''
+                    });
+                }
+                
+                setCountUsers(arr)
+                let users = data.rows.filter(item => item.role == "USER");
+                setUsers(users);
+                setFilteredUsers(users);
+                
+            })
+        }
+        
+        
+        
 
     }
 
@@ -146,19 +170,65 @@ const AdminListeners = () => {
         setSortClasses(prev_value);
         setSortType(type);
         localStorage.setItem('sort_type', type)
-
-        let prev_users = filteredUsers;
-
-        setFilteredUsers(sortArrayBy(prev_users, type, sortDown));
+        setSearchInput('');
+        getAllUsersWithPage(1, sort_type_variations[type], sortDown?'DESC':'ASC').then(data => {
+            let arr = []
+            for (let i = 0; i < Math.ceil(data.count/10); i++) {
+                arr.push({
+                    number: i+1,
+                    class: i==0?'active':''
+                });
+            }
+            
+            setCountUsers(arr)
+            let users = data.rows.filter(item => item.role == "USER");
+            setUsers(users);
+            setFilteredUsers(users);
+            
+        })
     }
 
     const handleSortDown = () => {
-        
-        setFilteredUsers(sortArrayBy(filteredUsers, sortType, !sortDown));
+        setSearchInput('');
         setSortDown(type => type = !type);
         localStorage.setItem('sort_down', Number(!sortDown))
 
+        getAllUsersWithPage(1, sort_type_variations[sortType], !sortDown?'DESC':'ASC').then(data => {
+            let arr = []
+            for (let i = 0; i < Math.ceil(data.count/10); i++) {
+                arr.push({
+                    number: i+1,
+                    class: i==0?'active':''
+                });
+            }
+            
+            setCountUsers(arr)
+            let users = data.rows.filter(item => item.role == "USER");
+            setUsers(users);
+            setFilteredUsers(users);
+            
+        })
+    }
+
+    const handleClickPagination = (i) => {
+     
+        const prev_value = countUsers;
+
         
+        prev_value.forEach(el => el.class = '')
+        prev_value[i].class = 'active';
+
+        setLoading(false)
+        getAllUsersWithPage(i+1, sort_type_variations[sortType], sortDown?'DESC':'ASC').then(data => {
+           
+        
+            let users = data.rows.filter(item => item.role == "USER");
+            setUsers(users);
+            setFilteredUsers(users);
+            setLoading(true);
+        })
+        
+        setCountUsers([...prev_value]);
     }
 
     return (
@@ -180,56 +250,70 @@ const AdminListeners = () => {
                         <div onClick={() => handleSortButton(1)} className={`admin_button ` + sortClasses[1]}>По алфавиту</div>
                         <div onClick={() => handleSortButton(2)} className={`admin_button ` + sortClasses[2]}>По дате</div>
                     </div>
-                    <table className="admin_table">
-                        <thead>
-                            <tr>
-                                <th>№</th>
-                                <th>Фамилия Имя Отчество</th>
-                                <th>Процент  завершенности</th>
-                                <th>Организация</th>
-                                <th>Дата начала обучения</th>
-                                <th>Дата окончания обучения</th>
-                                <th>Изменить</th>
-                                <th>Удалить</th>
-                            </tr>
-                        </thead>
-                        {
-                            loading?
-                        
-                        <tbody>
+                    <div className='admin_table_container'>
+                        <table className="admin_table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Фамилия Имя Отчество</th>
+                                    <th>Процент  завершенности</th>
+                                    <th>Организация</th>
+                                    <th>Дата начала обучения</th>
+                                    <th>Дата окончания обучения</th>
+                                    <th>Изменить</th>
+                                    <th>Удалить</th>
+                                </tr>
+                            </thead>
                             {
-                                filteredUsers.map((user, i) => 
-                                    
-                                    <tr>
-                                        <td>{i+1}.</td>
-                                        <td>
-                                            <Link to={"/admin/listeners/" + user.id}>
-                                                <div dangerouslySetInnerHTML={{__html: user.name.replace(user.yellow_value, "<b class=\"background-yellow\">"+user.yellow_value+"</b>")}}/>
-                                            </Link>
-                                        </td>
-                                        <td>
-                                            <div className="progress-bar_container">
-                                                <div className="prorgress-bar" style={{width: `${user.statistic}%`}}></div>
-                                            </div>
-                                            <span>{user.statistic?user.statistic:'0'}%</span>
-                                        </td>
-                                        <td>{<div dangerouslySetInnerHTML={{__html: user.organiztion.replace(user.yellow_value, "<b class=\"background-yellow\">"+user.yellow_value+"</b>")}}/>}</td>
-                                        <td>{dateToString(user.createdAt)}</td>
-                                        <td>{dateToString(user.graduation_date)}</td>
-                                        <td className='remakeButton' onClick={() => navigate("/admin/listeners/new_listener/" + user.id)}><img src={pencil} width="22px"/></td>
-                                        <td className='deleteButton' onClick={() => destroyUser(user.id)}>x</td>
+                                loading?
+                            
+                            <tbody>
+                                {
+                                    filteredUsers.map((user, i) => 
                                         
-                                    </tr>
-                                    )
+                                        <tr>
+                                            <td>#{user.id}</td>
+                                            <td>
+                                                <Link to={"/admin/listeners/" + user.id}>
+                                                    <div dangerouslySetInnerHTML={{__html: user.name.replace(user.yellow_value, "<b class=\"background-yellow\">"+user.yellow_value+"</b>")}}/>
+                                                </Link>
+                                            </td>
+                                            <td>
+                                                <div className="progress-bar_container">
+                                                    <div className="prorgress-bar" style={{width: `${user.statistic}%`}}></div>
+                                                </div>
+                                                <span>{user.statistic?user.statistic:'0'}%</span>
+                                            </td>
+                                            <td>{<div dangerouslySetInnerHTML={{__html: user.organiztion.replace(user.yellow_value, "<b class=\"background-yellow\">"+user.yellow_value+"</b>")}}/>}</td>
+                                            <td>{dateToString(user.createdAt)}</td>
+                                            <td>{dateToString(user.graduation_date)}</td>
+                                            <td className='remakeButton' onClick={() => navigate("/admin/listeners/new_listener/" + user.id)}><img src={pencil} width="22px"/></td>
+                                            <td className='deleteButton' onClick={() => destroyUser(user.id)}>x</td>
+                                            
+                                        </tr>
+                                        )
+                                }
+                                
+                            </tbody>
+                            : <ListenersSkeleton/>
                             }
                             
-                        </tbody>
-                        : <ListenersSkeleton/>
-                        }
-                        
 
-                        
-                    </table>
+                            
+                        </table>
+                    </div>
+                    
+                    
+                    <ul className='pagination'>
+                        {
+                            countUsers.map((count, i) => 
+                                <li onClick={() => handleClickPagination(i)} className={count.class}>{count.number}</li>
+                            )
+                        }
+                    </ul>
+                                        
+                    
+                    
                 </div>
                 
             </div>

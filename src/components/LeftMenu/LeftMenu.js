@@ -12,7 +12,7 @@ const LeftMenu = ({active_arr}) => {
             <Link to={ADMIN_APPLICATIONS_ROUTE} className={`left_menu_item ${active_arr[2]}`}>Заявки</Link>
             {/* <Link to={null} className={`left_menu_item ${active_arr[3]}`}>Статистика</Link> */}
             <Link to={ADMIN_PROGRAMS_ROUTE}  className={`left_menu_item ${active_arr[4]}`}>Программы</Link>
-            {/* <Link to={ADMIN_PRACTICAL_WORKS_ROUTE} className={`left_menu_item ${active_arr[5]}`}>Практические работы</Link> */}
+            <Link to={ADMIN_PRACTICAL_WORKS_ROUTE} className={`left_menu_item ${active_arr[5]}`}>Практические работы</Link>
             {/* <Link to={null} className={`left_menu_item ${active_arr[6]}`}>Ведомости</Link>
             <Link to={null} className={`left_menu_item ${active_arr[7]}`}>Выданные документы</Link> */}
         </div>

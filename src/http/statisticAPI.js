@@ -14,9 +14,9 @@ export const updateTests = async (users_id, programs_id, punct_id, theme_id) => 
     return data
 }
 
-export const updatePracticalWorks = async (users_id, programs_id, punct_id) => {
+export const updatePracticalWorks = async (users_id, programs_id) => {
 
-    const {data} = await $authHost.post('api/statistic/updatePracticalWorks', {users_id, programs_id, punct_id})
+    const {data} = await $authHost.post('api/statistic/updatePracticalWorks', {users_id, programs_id})
 
     return data
 }

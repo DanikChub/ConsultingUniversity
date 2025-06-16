@@ -51,6 +51,23 @@
     transition: .2s linear;
 }
 
+
+.admin_program_item_skelet {
+    background-color: rgb(217 217 217);
+    border: none;
+    animation: fade .6s linear infinite alternate;
+}
+
+@keyframes fade {
+    0% {
+        opacity: .4;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
 /* .admin_program_item:hover {
     box-shadow: 2px 2px 15px 4px rgba(139, 139, 139, 0.266);
 } */
@@ -72,6 +89,11 @@
     font-size: 16px;
     font-weight: 400;
     color: #2C3E50;
+}
+.admin_program_item_title_skelet {
+    width: 80%;
+    height: 80%;
+    border-bottom:2px solid rgb(172, 172, 172);
 }
 .admin_program_item_peoples {
     
@@ -123,6 +145,16 @@
     transition: .2s linear;
 }
 
+.MakeProgram_Theme_Button.hide_punct.active svg {
+    transform: rotate(180deg);
+}
+
+.MakeProgram_Theme_Button_skelet {
+    background-color: rgb(189 189 189);
+    border: none;
+    cursor:auto;
+}
+
 .admin_program_item_button_group {
     display: flex;
 }
@@ -140,7 +172,9 @@
     background-color: rgb(241, 55, 55);
     color: #fff;
 }
-
+.MakeProgram_Theme_Button_skelet:hover {
+    background-color: rgb(189 189 189);
+}
 .MakeProgram_Theme_Button svg {
     transition: .2s linear;
     width: 20px;
@@ -157,12 +191,13 @@
 
 .MakeProgramTitle {
     font-size: 20px;
+    margin-top: 40px;
     font-weight: 800;
 }
 
 
 .MakeProgram_Punct_Materials {
-    margin-left: 90px;
+    margin-left: 10%;
     margin-top: 25px;
     display: flex;
     align-items: center;
@@ -182,12 +217,12 @@
 
 .MakeProgram_Theme {
 
-    margin-left: 30px;
+    margin-left: 5%;
     margin-top: 20px;
 }
 
 .MakeProgram_Theme_Puncts {
-    margin-left: 100px;
+    margin-left: 10%;
     width: 100%;
 }
 
@@ -225,7 +260,7 @@
 
 .MakeProgramFlex {
     display: flex;
-    margin-top: 40px;
+
     justify-content: space-between;
     width: 200px;
     align-items: center;

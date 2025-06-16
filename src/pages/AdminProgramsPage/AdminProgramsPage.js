@@ -10,6 +10,7 @@ const AdminProgramsPage = () => {
     const [programs, setPrograms] = useState([]);
     const [numberOfPrograms, setNumberOfPrograms] = useState(0);
     const [itemClassDelete, setItemClassDelete] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -17,6 +18,7 @@ const AdminProgramsPage = () => {
         getAllPrograms().then(data => {
             setPrograms(data)
             setNumberOfPrograms(data.length);
+            setLoading(true);
         })
     }, [])
 
@@ -50,6 +52,9 @@ const AdminProgramsPage = () => {
                         </div>
                         
                         <div className="tab active">
+                            {loading?
+                            
+                            
                             <div className="admin_program_items">
                                 {
                                     programs.map(program => 
@@ -75,6 +80,55 @@ const AdminProgramsPage = () => {
                                 }
                                 
                             </div>
+                            :
+                            <div className="admin_program_items admin_program_items_skelet">                          
+                                <div className='admin_program_item admin_program_item_skelet'>
+                                    <div className="admin_program_item_title admin_program_item_title_skelet"></div>
+                                    <div className='admin_program_item_button_group'>
+                                            <div className='MakeProgram_Theme_Button MakeProgram_Theme_Button_skelet'></div>
+                                          
+                                            <div  className="MakeProgram_Theme_Button MakeProgram_Theme_Button_skelet"></div>
+                                            <div className="MakeProgram_Theme_Button MakeProgram_Theme_Button_skelet"></div>
+                                        </div>
+                                </div>
+                                <div className='admin_program_item admin_program_item_skelet'>
+                                    <div className="admin_program_item_title admin_program_item_title_skelet"></div>
+                                    <div className='admin_program_item_button_group'>
+                                            <div className='MakeProgram_Theme_Button MakeProgram_Theme_Button_skelet'></div>
+                                          
+                                            <div  className="MakeProgram_Theme_Button MakeProgram_Theme_Button_skelet"></div>
+                                            <div className="MakeProgram_Theme_Button MakeProgram_Theme_Button_skelet"></div>
+                                        </div>
+                                </div>
+                                <div className='admin_program_item admin_program_item_skelet'>
+                                    <div className="admin_program_item_title admin_program_item_title_skelet"></div>
+                                    <div className='admin_program_item_button_group'>
+                                            <div className='MakeProgram_Theme_Button MakeProgram_Theme_Button_skelet'></div>
+                                          
+                                            <div  className="MakeProgram_Theme_Button MakeProgram_Theme_Button_skelet"></div>
+                                            <div className="MakeProgram_Theme_Button MakeProgram_Theme_Button_skelet"></div>
+                                        </div>
+                                </div>
+                                <div className='admin_program_item admin_program_item_skelet'>
+                                    <div className="admin_program_item_title admin_program_item_title_skelet"></div>
+                                    <div className='admin_program_item_button_group'>
+                                            <div className='MakeProgram_Theme_Button MakeProgram_Theme_Button_skelet'></div>
+                                          
+                                            <div  className="MakeProgram_Theme_Button MakeProgram_Theme_Button_skelet"></div>
+                                            <div className="MakeProgram_Theme_Button MakeProgram_Theme_Button_skelet"></div>
+                                        </div>
+                                </div>
+                                <div className='admin_program_item admin_program_item_skelet'>
+                                    <div className="admin_program_item_title admin_program_item_title_skelet"></div>
+                                    <div className='admin_program_item_button_group'>
+                                            <div className='MakeProgram_Theme_Button MakeProgram_Theme_Button_skelet'></div>
+                                          
+                                            <div  className="MakeProgram_Theme_Button MakeProgram_Theme_Button_skelet"></div>
+                                            <div className="MakeProgram_Theme_Button MakeProgram_Theme_Button_skelet"></div>
+                                        </div>
+                                </div>
+                            </div>
+                            }
                         </div>
                        
                     </div>

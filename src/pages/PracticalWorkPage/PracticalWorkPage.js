@@ -1,31 +1,60 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { createPracticalWork } from '../../http/practicalWorkAPI';
+import { createPracticalWork, getOnePracticalWorkToUser } from '../../http/practicalWorkAPI';
 import { Context } from "../../index"
 import './PracticalWorkPage.css'
+
+import word from "../../assets/imgs/word.png"
+
 
 const PracticalWorkPage = () => {
     const [queryParams] = useSearchParams();
 
     const [file, setFile] = useState(null);
+    const [fileName, setFileName] = useState('');
+    const [send, setSend] = useState(false);
+    const [practicWork, setPracticWork] = useState({answer: ''});
+    
 
     const {user} = useContext(Context);
 
     useEffect(() => {
         
+        getOnePracticalWorkToUser(user.user.id, user.user.programs_id[0], Number(queryParams.get('theme_id')), Number(queryParams.get('punct_id')))
+        .then(practic => {
+            if (practic) {
+                
+                if (practic.test || typeof practic.test == 'object') {
+                    setFileName(practic.practic_title);
+                    console.log(practic.test)
+                    setSend(true);
+                }
+                setPracticWork(practic);
+            }
+            
+        })
     }, [])
     
     const handleFinishButton = () => {
-        const formData = new FormData();
+        if (!send) {
+            const formData = new FormData();
 
-        formData.append("task", queryParams.get('title'))
-        formData.append("file_src", file)
-        formData.append("users_id", user.user.id)
+            formData.append("task", queryParams.get('title'))
+            formData.append("file_src", file)
+            formData.append("users_id", user.user.id)
+            formData.append("program_id", user.user.programs_id[0])
+            formData.append("theme_id", queryParams.get('theme_id'))
+            formData.append("punct_id", queryParams.get('punct_id'))
+            formData.append("practic_title", file.name)
 
-        createPracticalWork(formData).then(data => {
-            alert('файл отправлен')
-           
-        });
+            createPracticalWork(formData).then(data => {
+                alert('файл отправлен')
+            
+            });
+        } else {
+            alert('Вы уже отправили файл, дождитесь его проверки!')
+        }
+        
     }
 
     const navigate = useNavigate();
@@ -48,15 +77,45 @@ const PracticalWorkPage = () => {
             </div>
             
             
-            <div className="finish_text" style={{marginTop: '25px'}}>{queryParams.get('title')}</div>
-            <div className="finish_text" style={{marginTop: '25px'}}>Прикрепите документ с выполненным заданием через форму ниже </div>
-            <div className='MakeProgram_Punct_Material'>
-                <input id="one" onChange={(e ) => setFile( e.target.files[0])} accept='.docx' className='MakeProgram_Punct_Material_input'  type="file"/>
-                <label htmlFor="one" className='MakeProgram_Punct_Material_Plus'>+</label>
-                <div className='MakeProgram_Punct_Material_Text'>{file?file.name:'Добавить файл'}</div>
-            </div>
-            <div onClick={handleFinishButton} className="finish_button">Отправить файл</div>
-         
+            <div className="finish_text" style={{marginTop: '25px'}}>"{queryParams.get('title')}"</div>
+
+            {
+                practicWork.test ?
+                
+                
+                <div>
+                    {
+                        practicWork.answer &&
+                        <div style={{fontSize: "25px", padding: "20px", backgroundColor: "rgb(38, 186, 38)", color: "#fff"}}>{`${practicWork.answer} ${typeof practicWork.test == 'object' ? '' : practicWork.test ? 'У вас зачет':'У вас не зачет' }`}</div>
+                    }
+                </div>
+                :
+
+                <div>
+                    
+                    {
+                        !send &&
+                        <div>
+                            <div className="finish_text" style={{marginTop: '25px'}}>Прикрепите документ с выполненным заданием через форму ниже </div>
+                            <div className='MakeProgram_Punct_Material'>
+                                <input id="one" onChange={(e ) => {setFile( e.target.files[0]); setFileName(e.target.files[0].name)}} accept='.docx' className='MakeProgram_Punct_Material_input'  type="file"/>
+                                <label htmlFor="one" className='MakeProgram_Punct_Material_Plus'>{fileName?<img src={word}/>:'+'}</label>
+                                <div className='MakeProgram_Punct_Material_Text'>{fileName?fileName:'Добавить файл'}</div>
+                            </div>
+                        </div>
+                        
+                    }
+                    
+                    <div onClick={handleFinishButton} className="finish_button">{send? "Файл проверяется": "Отправить файл"}</div>
+                    {
+                        practicWork.answer &&
+                        <div>{`${practicWork.answer} ${typeof practicWork.test == 'object' ? '' : practicWork.test ? 'У вас зачет':'У вас не зачет' }`}</div>
+                    }
+
+
+                </div>
+            }
+            
             
         </div>
     </div>

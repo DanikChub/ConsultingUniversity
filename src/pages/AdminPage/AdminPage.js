@@ -18,13 +18,13 @@ const AdminPage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        getAllUsers().then(users => {
-            setUsers(users);
+        getAllUsers().then(data => {
+            setUsers(data);
      
             let users_count = 0;
             let ends = 0;
             let tests = 0;
-            users.forEach(user => {
+            data.forEach(user => {
                 if (user.role != "ADMIN") {
                     users_count++;
             

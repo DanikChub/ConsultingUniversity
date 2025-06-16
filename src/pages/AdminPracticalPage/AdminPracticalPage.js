@@ -4,35 +4,76 @@ import LeftMenu from '../../components/LeftMenu/LeftMenu';
 import { getAllPracticalWork } from '../../http/practicalWorkAPI';
 import { getUserById } from '../../http/userAPI';
 
+import arrow_down from '../../assets/imgs/arrow_down.png'
+import arrow_up from '../../assets/imgs/arrow_up.png'
+
+import "./AdminPracticalPage.css"
+import ListenersSkeleton from '../../components/ListenersSkeleton/ListenersSkeleton';
+
+function dateToString(date) {
+    const newDate = new Date(date);
+    const dateSrc = newDate.toLocaleString('ru-RU', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' });
+    return dateSrc;
+}
+
+
+
 const AdminPracticalPage = () => {
     const [practicalWorks, setPracticalWorks] = useState([]);
+    const [filteredPractical, setFilteredPractical] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
-
+ 
 
     useEffect(() => {
         getAllPracticalWork().then(data => {
             const practics_copy = data;
-            practics_copy.forEach((practic, i) => {
-                getUserById(practic.users_id).then(user => {
-                    practic['user_name'] = user.name;
-                    if (i+1 == practics_copy.length) {
-                        setPracticalWorks(practics_copy)
-                    }
-                })
-
-                
-            })
-
+            
+            console.log(practics_copy)
+            practics_copy.sort((a, b) =>  new Date(a.createdAt) - new Date(b.createdAt))
+            setPracticalWorks(practics_copy)
+            setFilteredPractical(practics_copy)
+           
+            setLoading(true);
             
          
         })
     }, [])
+
+    const handleOption = (type) => {
+        const prev_value = practicalWorks;
+        let filtered;
+        console.log(type);
+        switch (type) {
+            case "3":
+                
+                setFilteredPractical(practicalWorks);
+                break;
+            case "2":
+                filtered = prev_value.filter(practic => typeof practic.test == 'object')
+                setFilteredPractical(filtered);
+                break;
+            case "1":
+                filtered = prev_value.filter(practic => typeof practic.test != 'object' && practic.test)
+                setFilteredPractical(filtered);
+                break;
+            case "0":
+                filtered = prev_value.filter(practic => typeof practic.test != 'object' && !practic.test)
+                setFilteredPractical(filtered);
+                break;
+        }
+    }   
+
+    
     return (
 
         <div className='content'>
 
             <div className='container'>
+                <div className='admin_inner'>
+
+                
                 <LeftMenu active_arr={['', '', '', '', '', 'active', '', '',]}/>
                 
                 <div className='admin_container'>
@@ -46,33 +87,49 @@ const AdminPracticalPage = () => {
                         
                         <span>Назад</span>
                     </div>
-                    <table className="admin_table">
+                    <div className='admin_flex'>
+                       
+                        <div>Фильтр по: </div>
+                        <select onChange={(e) => handleOption(e.target.value)} className='select'>
+                            <option value={3}  selected>Показать все</option>
+                            <option value={2} className='test_button gray'>Не проверено</option>
+                            <option value={1} className='test_button'>Зачет</option>
+                            <option value={0} className='test_button red'>Не зачет</option>
+                        </select>
+                        
+                    </div>
+                    <table className="admin_table big">
                         <thead>
                             <tr>
                                 <th>№</th>
                                 <th>Фамилия Имя Отчество</th>
                                 <th>Название практической работы</th>
                                 <th>Статус</th>
-                                
+                                <th>Оценка</th>
+                                <th>Дата</th>
                             </tr>
                         </thead>
+                        {
+                            loading?
                         
                         <tbody>
                             {
-                                practicalWorks.map((practic, i) => 
+                                filteredPractical.map((practic, i) => 
                                     <tr>
                                         <td>{i+1}.</td>
                                         <td>{practic.user_name}</td>
                                         <td><Link style={{display: 'block'}} to={`http://localhost:3000/admin/practical_works/${practic.id}`}>{practic.task}</Link></td>
                                         <td>{practic.answer? 'Проверено' : 'Ждет проверки'}</td>
-                                 
-                                       
+                                        <td><div className={`test_button ${typeof practic.test == "object" ? 'gray':practic.test? '' : 'red'}`}>{typeof practic.test == "object" ? 'Не проверено':practic.test? 'Зачет' : 'Не зачет'}</div></td>
+                                        <td>{dateToString(practic.createdAt)}</td>
                                     </tr>
                                     )
                             }
                             
                         </tbody>
-                        
+                        :
+                        <ListenersSkeleton/>
+                        }
                         
 
                         
@@ -80,7 +137,7 @@ const AdminPracticalPage = () => {
                     
                     
                 </div>
-                
+                </div>
             </div>
         </div>
         

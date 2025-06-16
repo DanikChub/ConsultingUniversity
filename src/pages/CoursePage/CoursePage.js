@@ -5,6 +5,7 @@ import "./CoursePage.css";
 
 import learn from "../../assets/imgs/learn.png"
 import word from "../../assets/imgs/word.png"
+import practic_work_img from "../../assets/imgs/practic_work.png"
 import video_play from "../../assets/imgs/video_play.png"
 import presentation from "../../assets/imgs/presentation.png"
 import check from "../../assets/imgs/check.png"
@@ -183,7 +184,7 @@ const CoursePage = observer(() => {
                     </div>
                 </div>
                 <div className="course">
-                    {courseItems.map(({title, puncts, presentation_src}, i) => 
+                    {courseItems.map(({title, puncts, lection_src, presentation_src}, i) => 
                         <div className={"course_item " + courseActives[i]}>
                         <div onClick={() => accordeon_item_click(i)} className="course_item_main">
                             <div className="course_item_description">
@@ -244,7 +245,10 @@ const CoursePage = observer(() => {
                                         </Link>
                                         }
                                         {practical_work && 
-                                            <Link to={PRACTICAL_WORK_ROUTE + '?title=' + practical_work} className="course_item_download">практическая работа</Link>
+                                            <Link to={PRACTICAL_WORK_ROUTE + '?title=' + practical_work + '&theme_id=' + courseItems[i].id + '&punct_id=' + puncts[j].id} className="course_item_download">
+                                                <img width="20px" src={practic_work_img} alt=""/>
+                                                <div>Практическая<br></br> работа</div>
+                                            </Link>
                                         }
                                 
                                     </div>

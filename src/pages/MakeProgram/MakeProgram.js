@@ -13,6 +13,7 @@ import CreatePracticalWork from '../../components/CreatePracticalWork/CreatePrac
 
 import word from "../../assets/imgs/word.png"
 import test_img from "../../assets/imgs/test.png"
+import practic_work_img from "../../assets/imgs/practic_work.png"
 import video_play from "../../assets/imgs/video_play.png"
 
 const MakeProgram = () => {
@@ -243,11 +244,16 @@ const MakeProgram = () => {
         setThemesArray(added); // Обновляем состояние
     }
 
+
+
     const hidePunct = (theme_id) => {
         const prev_value = [...themesArray]; // Получаем текущее состояние
         
-        console.log(prev_value, theme_id);
+        
+
+
         prev_value[theme_id].hide = !prev_value[theme_id].hide;
+
  
         setThemesArray(prev_value); // Обновляем состояние
     }
@@ -268,6 +274,7 @@ const MakeProgram = () => {
         if (punct_ides.length-1 < i) {
             punct_ides.push(0);
             setPunctId(punct_ides)
+            console.log(i);
         } else {
             punct_ides[i]+=1;
             const data = {
@@ -282,7 +289,7 @@ const MakeProgram = () => {
                 practical_work: null,
             }
             setPunctId(punct_ides)
-
+            
             added[i].puncts.push(data); // Добавляем элемент
             setThemesArray(added); // Обновляем состояние
         }
@@ -327,7 +334,7 @@ const MakeProgram = () => {
 
             let number_of_test = 0;
 
-            console.log(themesArray);
+          
             themesArray.forEach(theme => {
                 
                 formData.append("presentation_src", theme.presentation_src)
@@ -335,7 +342,7 @@ const MakeProgram = () => {
                 formData.append("theme_lection_src", theme.lection_src)
                 theme.puncts.forEach(punct => {
                     formData.append("docs", punct.lection_src)
-                    if (punct.test_id) {
+                    if (punct.test_id || punct.practical_work) {
                         number_of_test++;
                     }
                 })
@@ -431,28 +438,25 @@ const MakeProgram = () => {
 
                             <input onChange={(e) => setProgramTitleInput(e.target.value)} value={programTitleInput} className={`MakeProgramInput ${validate?'red_input':''}`} placeholder='Название программы'/>
                             
-                            <div className='MakeProgramFlex'>
-                                <div className='MakeProgramTitle'>Темы</div>
-                                <div onClick={() => newTheme()} className='admin_button'>Добавить тему</div>
                             
-                            </div>
                             
                             <div className='MakeProgram_Themes'>
                             {themesArray.map((theme, i) => 
                                 <div className='MakeProgram_Theme'>
+                                    <div className='MakeProgramTitle'>Модуль:</div>
                                     <div className='MakeProgramFlex long'>
                                         <button onClick={() => deleteTheme(theme.theme_id)} className='MakeProgram_Theme_Button red'>-</button>
                                         <span className='MakeProgram_Theme_Marker'>{i+1}. </span>
 
-                                        <input  onChange={(e) => inputTitleHandler(i, e.target.value)} value={theme.title} className={`MakeProgramInput ${validate?'red_input':''}`} placeholder='Название темы'/>
+                                        <input  onChange={(e) => inputTitleHandler(i, e.target.value)} value={theme.title} className={`MakeProgramInput ${validate?'red_input':''}`} placeholder='Название модуля'/>
                                         
                                         
                                         
-                                        <div  onClick={() => newPunct(i)}  className='admin_button'>Добавить пункт</div>
-                                        <button onClick={() => hidePunct(i)} className='MakeProgram_Theme_Button'>
+                                        
+                                        <button onClick={() => hidePunct(i)} className={`MakeProgram_Theme_Button hide_punct ${theme.hide?'active':''}`}>
                                             <svg classNameName='course_item_svg' width="17" height="11" viewBox="0 0 17 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M14.9854 1L8.24196 9.79687" stroke="#898989" stroke-opacity="0.78" strokeWidth="2" strokeLinecap="round"/>
-                                                <path d="M1.16919 1.36328L7.97597 9.6843" stroke="#898989" stroke-opacity="0.78" strokeWidth="2" strokeLinecap="round"/>
+                                                <path d="M14.9854 1L8.24196 9.79687" stroke="#000000" stroke-opacity="0.78" strokeWidth="2" strokeLinecap="round"/>
+                                                <path d="M1.16919 1.36328L7.97597 9.6843" stroke="#000000" stroke-opacity="0.78" strokeWidth="2" strokeLinecap="round"/>
                                             </svg>
                                         </button>
                                       
@@ -482,15 +486,16 @@ const MakeProgram = () => {
                                     
                                     {
                                         !theme.hide &&
-                                    
+                                        
                                     <div className='MakeProgram_Theme_Puncts'>
+                                        <div className='MakeProgramTitle'>Тема:</div>
                                     {theme.puncts.map((punct, j) => 
                                         <div  className='MakeProgram_Theme_Punct'>
                                             <div className='MakeProgramFlex long'>
                                                 <button  onClick={() => deletePunct(i, punct.punct_id)} className='MakeProgram_Theme_Button red'>-</button>
                                                 <span className='MakeProgram_Theme_Marker'>{i+1}.{j+1} </span>
 
-                                                <input onChange={(e) => inputPunctsHandler(i, j, "title", e.target.value)} value={punct.title} className={`MakeProgramInput ${validate?'red_input':''}`} placeholder='Название пункта'/>
+                                                <input onChange={(e) => inputPunctsHandler(i, j, "title", e.target.value)} value={punct.title} className={`MakeProgramInput ${validate?'red_input':''}`} placeholder='Название темы'/>
                                             </div>
                                            
 
@@ -516,18 +521,22 @@ const MakeProgram = () => {
                                                     </div>
                                                 }
                                                
-                                                {/* <div className='MakeProgram_Punct_Material'>
-                                                    <button onClick={() => setShowPracticalWork({show:true, i: i, j: j, remake: punct.practical_work})} className='MakeProgram_Punct_Material_Plus' id={"button_practic_" + i + "_" + j} >+</button>
+                                                <div className='MakeProgram_Punct_Material'>
+                                                    <button onClick={() => setShowPracticalWork({show:true, i: i, j: j, remake: punct.practical_work})} className='MakeProgram_Punct_Material_Plus' id={"button_practic_" + i + "_" + j} >{punct.practical_work?<img width="20px" src={practic_work_img}/>:'+'}</button>
                                                     <div className='MakeProgram_Punct_Material_Text'>{punct.practical_work? punct.practical_work.slice(0, 10) + "..."  :'Добавить практическую работу'}</div>
-                                                </div> */}
+                                                </div>
                                             </div>
-                                        </div>    
+                                            
+                                        </div>   
+                                         
                                     )}
                                     </div>
                                     }
+                                    <div  onClick={() => newPunct(i)} style={{marginLeft: '100px'}} className='admin_button'>Добавить тему</div>
                                 </div>
                                )}
                             </div>
+                            <div onClick={() => newTheme()} className='admin_button'>Добавить модуль</div>
                             <div className='login_form_message'>{serverMessage}</div>
                             <div className='button_container'>
                                  

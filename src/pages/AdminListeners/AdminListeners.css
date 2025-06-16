@@ -13,9 +13,16 @@
     margin-top: 20px;
     margin-right: 20px;
 }
+
+.admin_table_container {
+    min-height: 464px;
+}
 .admin_table {
+    
     margin-top: 34px;
 }
+
+
 
 .admin_table tr th {
     font-weight: 600;
@@ -207,4 +214,33 @@
     100% {
         opacity: 1;
     }
+}
+
+.pagination {
+    padding-left: 0;
+    display: flex;
+
+}
+
+.pagination li {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    list-style-type: none;
+    margin-right: 5px;
+    border: 1px solid rgb(200, 200, 200);
+    transition: .2s linear;
+    cursor: pointer;
+}
+
+.pagination li:hover {
+    background-color:#2980B9;
+    color: #fff;
+}
+
+.pagination li.active {
+    background-color:#2980B9;
+    color: #fff;
 }

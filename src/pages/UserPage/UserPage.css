@@ -208,10 +208,10 @@
 /* LEFT MENU */
 
 .left_menu {
-    position: fixed;
+    position: sticky;
     top: 0;
     left: 0;
-    height: 100%;
+    height: 500px;
     width: 204px;
     padding-top: 33px;
     padding-bottom: 100px;
@@ -245,10 +245,11 @@
 
 .admin_inner {
     display: flex;
-
+    position: relative;
 }
 
 .admin_container {
+
     margin-left: 70px;
     width: 100%;
 }

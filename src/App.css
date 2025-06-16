@@ -1,5 +1,6 @@
 body {
     overflow-x: hidden;
+    width: 100%;
 }
 
 .notification {
@@ -28,10 +29,4 @@ body {
 
 .cotrol_height {
     min-width: 60vh;
-}
-
-@media (max-width: 1859px) {
-    .container {
-        margin-left: 215px;
-    }
 }

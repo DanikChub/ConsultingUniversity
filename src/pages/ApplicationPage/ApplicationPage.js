@@ -42,12 +42,13 @@ const ApplicationPage = () => {
     const [sortType, setSortType] = useState(2);
     const [sortDown, setSortDown] = useState(true);
     const [applications, setApplications] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         getAllApplications().then(data => {
             setApplications(data)
             setFilteredUsers(data);
-            
+            setLoading(true);
         });
     }, [])
 
@@ -116,6 +117,8 @@ const ApplicationPage = () => {
                                 <th>Удалить</th>
                             </tr>
                         </thead>
+                        {
+                            loading ?
                         
                         <tbody>
                             {
@@ -135,8 +138,9 @@ const ApplicationPage = () => {
                             }
                             
                         </tbody>
-                        
-                        
+                        :
+                        <ListenersSkeleton/>
+                        }
 
                         
                     </table>

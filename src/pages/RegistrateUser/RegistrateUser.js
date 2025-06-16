@@ -13,11 +13,13 @@ const RegistrateUser = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [org, setOrg] = useState('');
+    const [inn, setInn] = useState('');
     const [phone, setPhone] = useState('');
     const [program, setProgram] = useState('');
     const [userProgramId, setUserProgramId] = useState([]);
 
     const [diplom, setDiplom] = useState(false);
+    const [address, setAddress] = useState('');
 
     const [datalistActive, setDatalistActive] = useState('');
 
@@ -39,9 +41,11 @@ const RegistrateUser = () => {
                 setName(user.name)
                 setEmail(user.email)
               
-                
+                setInn(user.inn)
                 setOrg(user.organiztion)
                 setPhone(user.number)
+                setDiplom(user.diplom)
+                setAddress(user.address)
             
                 getOneProgram(user.programs_id[0]).then(data => setSelectedPrograms([data]))
                 setUserProgramId(user.programs_id)
@@ -100,9 +104,14 @@ const RegistrateUser = () => {
         setUserProgramId([program.id]);
     }
 
+    const [addressClass, setAddressClass] = useState(false)
+
     const handleDiplomCheck = (value) => {
   
         setDiplom(value);
+        if (value) {
+            setAddress('')
+        }
     }
 
     const createUser = () => {
@@ -110,7 +119,7 @@ const RegistrateUser = () => {
         
             if (params.id) {
                 if (name && email && phone && userProgramId[0]) {
-                    remakeUser(params.id, email, password, "USER", name, phone, org, userProgramId, diplom)
+                    remakeUser(params.id, email, password, "USER", name, phone, org, userProgramId, diplom, inn, address)
                     .then(data => navigate(ADMIN_LISTENERS_ROUTE))
                     .catch(e => setServerMessage(e.response.data.message))
                 } else {
@@ -118,8 +127,9 @@ const RegistrateUser = () => {
                 }
 
             } else {
+               
                 if (name && email && phone && password && userProgramId[0]) {
-                    registrateUser(email, password, "USER", name, phone, org, userProgramId, diplom)
+                    registrateUser(email, password, "USER", name, phone, org, userProgramId, diplom, inn, address)
                     .then(data => navigate(ADMIN_LISTENERS_ROUTE))
                     .catch(e => setServerMessage(e.response.data.message))
                 } else {
@@ -157,6 +167,8 @@ const RegistrateUser = () => {
                         <div className="add_input_item">
                             <label htmlFor="org" className="add_input_label">Организация</label>
                             <input onChange={(e) => setOrg(e.target.value)} value={org} id="org" type="text" className="add_input" placeholder="Введите наименование организации"/>
+                            <label htmlFor="inn" className="add_input_label">ИНН</label>
+                            <input onChange={(e) => setInn(e.target.value)} value={inn} id="inn" type="text" className="add_input" placeholder="Введите ИНН организации"/>
                         </div>
                         
                         <div className="add_input_item">
@@ -192,8 +204,22 @@ const RegistrateUser = () => {
                         
                         <div className="add_input_item">
                             <label htmlFor="diploma" className="add_input_label">Диплом</label>
+                      
                             <input id="diploma" onChange={(e) => handleDiplomCheck(e.target.checked)} checked={diplom} type="checkbox" className="add_checkbox" value="заберет сам"/>
                             <span>Заберет сам</span>
+                          
+                            
+                            
+                            
+                        </div>
+                        <div className="add_input_item">
+                            <label htmlFor="address" className="add_input_label">Отправить почтой России по адресу:</label>
+                            <input onChange={(e) => setAddress(diplom?'': e.target.value)} className="add_input" value={address} id="address" type="text"  placeholder="Введите адрес"/>
+                            
+                          
+                            
+                            
+                            
                         </div>
                     </div>
                     <div className='login_form_message'>{serverMessage}</div>

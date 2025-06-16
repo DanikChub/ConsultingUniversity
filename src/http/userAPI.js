@@ -32,20 +32,32 @@ export const getUserById = async (id) => {
     return data;
 }
 
-export const getAllUsers = async (id) => {
+export const getAllUsers = async () => {
     const {data} = await $authHost.get(`api/user/getUser/`)
     
     return data;
 }
 
-export const registrateUser = async (email, password, role, name, number, organiztion, programs_id, diplom) => {
-    const {data} = await $authHost.post('api/user/registration', {email, password, role, name, number, organiztion, programs_id, diplom})
+export const searchUsers = async (page, q) => {
+    const {data} = await $authHost.get(`api/user/search/${page}?q=${q}`)
+    
+    return data;
+}
+
+export const getAllUsersWithPage = async (page, sort_type, sort_down) => {
+    const {data} = await $authHost.get(`api/user/getAllUser/${page}?sort_type=${sort_type}&sort_down=${sort_down}`)
+    
+    return data;
+}
+
+export const registrateUser = async (email, password, role, name, number, organiztion, programs_id, diplom, inn, address) => {
+    const {data} = await $authHost.post('api/user/registration', {email, password, role, name, number, organiztion, programs_id, diplom, inn, address})
 
     return data
 }
 
-export const remakeUser = async (id, email, password, role, name, number, organiztion, programs_id, diplom) => {
-    const {data} = await $authHost.post('api/user/remake', {id, email, password, role, name, number, organiztion, programs_id, diplom})
+export const remakeUser = async (id, email, password, role, name, number, organiztion, programs_id, diplom, inn, address) => {
+    const {data} = await $authHost.post('api/user/remake', {id, email, password, role, name, number, organiztion, programs_id, diplom, inn, address})
 
     return data
 }
