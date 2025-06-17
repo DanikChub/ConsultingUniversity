@@ -184,7 +184,7 @@ const CoursePage = observer(() => {
                     </div>
                 </div>
                 <div className="course">
-                    {courseItems.map(({title, puncts, lection_src, presentation_src}, i) => 
+                    {courseItems.map(({title, puncts, lection_src, presentation_src, id}, i) => 
                         <div className={"course_item " + courseActives[i]}>
                         <div onClick={() => accordeon_item_click(i)} className="course_item_main">
                             <div className="course_item_description">
