@@ -19,7 +19,7 @@ const VideoPage = () => {
                         </svg>
                     </a>
                     
-                    <span>Назад</span>
+                    <span>Назад </span>
                 </div>
                 <div className='video_container'>
                     <iframe  src={queryParams.get("link")+'&id='+queryParams.get('id')+'&hd=2&autoplay=1'} width="1100" height="620" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>

@@ -92,7 +92,7 @@ const AdminPracticalPage = () => {
                         <div>Фильтр по: </div>
                         <select onChange={(e) => handleOption(e.target.value)} className='select'>
                             <option value={3}  selected>Показать все</option>
-                            <option value={2} className='test_button gray'>Не проверено</option>
+                            <option value={2} className='test_button gray'>Не проверено </option>
                             <option value={1} className='test_button'>Зачет</option>
                             <option value={0} className='test_button red'>Не зачет</option>
                         </select>
@@ -102,7 +102,7 @@ const AdminPracticalPage = () => {
                         <thead>
                             <tr>
                                 <th>№</th>
-                                <th>Фамилия Имя Отчество</th>
+                                <th>Фамилия Имя Отчество </th>
                                 <th>Название практической работы</th>
                                 <th>Статус</th>
                                 <th>Оценка</th>

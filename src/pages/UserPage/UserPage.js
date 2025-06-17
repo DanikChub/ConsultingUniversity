@@ -61,7 +61,7 @@ const UserPage = () => {
                         <div className="content_inner">
                             <div className="content_welocme">
                                 <div className="content_welcome_title">{userContext.user.user.name}, привет!</div>
-                                <div className="content_welcome_text">Сегодня отличный день,<br/> чтобы узнать что-то новое.</div>
+                                <div className="content_welcome_text">Сегодня отличный день, <br/>чтобы узнать что-то новое.</div>
                             </div>
                             <div className="statement">
                                 <div className="statement_img">
@@ -74,7 +74,7 @@ const UserPage = () => {
                             </div>
                         </div>
                         <div className="content_program">
-                            <div className="content_program_title">Ваша программа</div>
+                            <div className="content_program_title">Ваша программа </div>
                             <div className="content_program_inner">
                                 <Link onClick={() => localStorage.removeItem('arr_open')} to={COURSE_ROUTE} className="content_program_well">
                                     <div className="content_program_well_description">

@@ -21,8 +21,7 @@
     display: flex;
     align-items: center;
 }
-.main_nav_links {
-}
+
 .main_nav_link {
     color: #fff;
     text-decoration: none;
@@ -42,8 +41,7 @@
     justify-content: space-between;
     align-items: start;
 }
-.content_welocme {
-}
+
 .content_welcome_title {
     font-weight: 700;
     font-size: 30px;
@@ -60,8 +58,7 @@
     display: flex;
     align-items: center;
 }
-.statement_img {
-}
+
 .statement_description {
     margin-left: 10px;
 }
@@ -192,8 +189,7 @@
 .how_check_container {
     display: flex;
 }
-.how_check {
-}
+
 .how_check_text {
     margin-left: 12px;
     font-size: 16px;

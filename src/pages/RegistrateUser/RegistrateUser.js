@@ -152,11 +152,11 @@ const RegistrateUser = () => {
                     
                     <div className="add_input_items">
                         <div className="add_input_item">
-                            <label htmlFor="name" className="add_input_label">ФИО</label>
+                            <label htmlFor="name" className="add_input_label">ФИО </label>
                             <input onChange={(e) => setName(e.target.value)} value={name} id="name" type="text" className={`add_input ${validate?' red':''}`} placeholder="Введите ФИО пользователя"/>
                         </div>
                         <div className="add_input_item">
-                            <label htmlFor="email" className="add_input_label">e-mail</label>
+                            <label htmlFor="email" className="add_input_label">e-mail </label>
                             <input onChange={(e) => setEmail(e.target.value)} value={email} id="email" type="text" className={`add_input ${validate?' red':''}`} placeholder="Введите e-mail пользователя"/>
                         </div>
                         <div className="add_input_item">
