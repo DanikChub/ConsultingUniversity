@@ -43,7 +43,10 @@ const AdminPracticalPage = () => {
             setLoading(true);
             
          
-        })
+        }).catch(e => {
+            alert('Практических работ еще нет', e.response.data.message)
+            setLoading(true);
+        }) 
     }, [])
 
     const handleOption = (type) => {
@@ -83,7 +86,10 @@ const AdminPracticalPage = () => {
             setLoading(true);
             
          
-        })
+        }).catch(e => {
+            alert('Практических работ еще нет', e.response.data.message)
+            setLoading(true);
+        }) 
     }
 
     const deletePractical = (id) => {
