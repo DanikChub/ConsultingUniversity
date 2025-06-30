@@ -173,6 +173,7 @@ a:hover {
 
 .nav_links {
     display: flex;
+    flex-wrap: wrap;
 }
 
 .nav_link {
