@@ -136,13 +136,7 @@ const AdminDocumentsPage = () => {
                     </div>
                     
                     
-                    <ul className='pagination'>
-                        {
-                            countUsers.map((count, i) => 
-                                <li onClick={() => handleClickPagination(i)} className={count.class}>{count.number}</li>
-                            )
-                        }
-                    </ul>
+                    
                                         
                     
                     
