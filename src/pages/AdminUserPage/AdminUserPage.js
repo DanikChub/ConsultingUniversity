@@ -12,6 +12,7 @@ import { getOneProgram } from '../../http/programAPI';
 import { getStatistic } from '../../http/statisticAPI';
 import Spinner from '../../components/Spinner/Spinner';
 import LeftMenu from '../../components/LeftMenu/LeftMenu';
+import { ADMIN_STATEMENT_USER } from '../../utils/consts';
 
 function dateToString(date) {
     
@@ -57,10 +58,16 @@ const AdminUserPage = () => {
       
     }, []) 
     return (
-        !loading ?
+        
         <div className="content">
-            <LeftMenu active_arr={['', 'active', '', '', '', '', '', '',]}/>  
-                    <div className="container">
+            
+                <div className="container">
+                        <div className="admin_inner">
+                        <LeftMenu active_arr={['', 'active', '', '', '', '', '', '',]}/>  
+                        {!loading ?
+                        <div className='admin_container'>
+
+                        
                         <div className="back_button">
                             <a onClick={() => navigate(-1)}>
                                 <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -124,7 +131,7 @@ const AdminUserPage = () => {
                                 </div>
                                 <div className="statement_description">
                                     <div className="statement_title">Электронная ведомость</div>
-                                    <Link className="statement_link">Редактировать</Link>
+                                    <Link to={'/admin/listeners/statement/' + user.id} className="statement_link">Смотреть</Link>
                                 </div>
                             </div>
                         </div>
@@ -151,10 +158,15 @@ const AdminUserPage = () => {
                                
                             </div>
                         </div>
+                        </div>
+                        :
+                        <Spinner/>
+                            }
                     </div>
+              
                 </div>
-        :
-        <Spinner/>
+            </div>
+        
     );
 };
 

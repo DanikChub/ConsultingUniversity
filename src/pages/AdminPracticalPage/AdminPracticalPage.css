@@ -20,6 +20,20 @@
     border: 1px solid rgb(205, 205, 205);
     padding: 10px 15px;
 }
+
 option:hover {
     box-shadow: 0 0 10px 100px orange inset;
+}
+
+.update_button {
+    margin-top: 20px;
+    max-height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.update_button span {
+    margin-right: 5px;
+
 }

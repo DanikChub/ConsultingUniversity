@@ -24,15 +24,16 @@ const TestPage = () => {
     const params = useParams();
     const [queryParams] = useSearchParams();
     const [numberQuestion, setNumberQuestion] = useState(0);
-    const [userAnswers, setUserAnswers] = useState([[-1]]);
+    const [userAnswers, setUserAnswers] = useState([]);
     const [checkAnswers, setCheckAnswers] = useState();
     const [secForEnd, setSecForEnd] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-   
+        
         getOneTest(params.id).then(data => {
             data.puncts = shuffle(data.puncts);
+           
             setTest(data)
             setSecForEnd(data.time_limit)
         });
@@ -50,12 +51,15 @@ const TestPage = () => {
             prevArr[i] = [j];
         }
 
+        
+
         setUserAnswers(prevArr);
       
     }
 
     const newSeveralUserAnswers= (i, j, checked) => {
         let prevArr = [...userAnswers];
+        
         if (checked) {
             if (i >= userAnswers.length) {
                 prevArr.push([j])
@@ -66,7 +70,7 @@ const TestPage = () => {
             prevArr[i] = prevArr[i].filter(el => el != j);
         }
         
-
+        console.log(prevArr)
         setUserAnswers(prevArr);
     }
 
@@ -78,20 +82,24 @@ const TestPage = () => {
 
         test.puncts.forEach(el => new_arr.push(el.correct_answer));
 
+
+        
         let s = true;
        
+        
+        console.log(userAnswers)
+        console.log(new_arr)
+            
         userAnswers.forEach((userAnswer, i) => {
-            userAnswer.forEach((el, j) => {
-                if (el != new_arr[i][j]) {
-                    s *= false
-                } 
-            })
-            if (s) {
-                correct_answers+=1;
+            userAnswer.sort()
+            if (userAnswer.every((element, index) => element === new_arr[i][index])) {
+                correct_answers+=1
             }
-           
             
         })
+           
+            
+      
         
         if (correct_answers/test.puncts.length > 0.75) {
             
@@ -119,7 +127,7 @@ const TestPage = () => {
             <div className="title">
                 <b>Тест.</b><span> {test.title}</span>
             </div>
-            {secForEnd && <CountDown seconds={secForEnd}/>}
+            {secForEnd && <CountDown checkAllAnswers={checkAllAnswers} seconds={secForEnd}/>}
             <div className="test_puncts">
           
                 {
@@ -142,7 +150,7 @@ const TestPage = () => {
                             
                                 <div className="answer_option user">
                                     <input onChange={(e) => newSeveralUserAnswers(i, j, e.target.checked)} checked={userAnswers[i] ? userAnswers[i].indexOf(j)+1 ? true : false : false} type="checkbox" id={"answer_" + j} name="1"/>
-                                    <label htmlFor={"answer_" + j} className={`answer_option_text ${userAnswers[i] ? 'active' : 'asd'}`}>{answer}</label>
+                                    <label htmlFor={"answer_" + j} className={`answer_option_text`}>{answer}</label>
                                 </div>)
                 
                                 :

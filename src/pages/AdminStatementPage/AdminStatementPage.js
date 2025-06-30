@@ -1,14 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getOneProgram } from '../../http/programAPI';
 import { getStatistic } from '../../http/statisticAPI';
+import { getUserById } from '../../http/userAPI';
 
 import { Context } from '../../index';
 
-import './StatementPage.css'
+import './AdminStatementPage.css'
 
-const StatementPage = () => {
-    const userContext = useContext(Context);
+const AdminStatementPage = () => {
+    const params = useParams();
     const navigate = useNavigate();
     const [courseTitle, setCourseTitle] = useState('');
     const [statistic, setStatistic] = useState({
@@ -28,20 +29,21 @@ const StatementPage = () => {
 
 
     useEffect(() => {
-        if (userContext.user.user.programs_id) {
-         let program_id = userContext.user.user.programs_id[0]
-         async function getProgram(id) {
-             let program = await getOneProgram(id)
-             setCourseTitle(program.title);
+        getUserById(params.id).then(user => {
+            async function getProgram(id) {
+                let program = await getOneProgram(id)
+                setCourseTitle(program.title);
+           
+            }
+            getProgram(user.programs_id[0])
+           
+            getStatistic(user.id, user.programs_id[0]).then(data => {
+                setStatistic(data);
+               
+            })
+        })
+         
         
-         }
-         getProgram(program_id)
-        
-         getStatistic(userContext.user.user.id, userContext.user.user.programs_id[0]).then(data => {
-             setStatistic(data);
-            
-         })
-        }
          
      }, [])
     return (
@@ -78,9 +80,7 @@ const StatementPage = () => {
                                 {
                                     statistic.themesStatistic.map((el) => 
                                     <td className={ el.well?'block_table_td green':'block_table_td'}>{el.well?'Зачет':'-'}</td>
-                                    
                                     )
-                                    
                                 }
                                
                             </tr>
@@ -95,4 +95,4 @@ const StatementPage = () => {
     );
 };
 
-export default StatementPage;
+export default AdminStatementPage;

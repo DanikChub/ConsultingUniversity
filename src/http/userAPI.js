@@ -38,6 +38,18 @@ export const getAllUsers = async () => {
     return data;
 }
 
+export const getAllUsersGraduation = async () => {
+    const {data} = await $authHost.get(`api/user/getAllUsersGraduation/`)
+    
+    return data;
+}
+
+export const getAllAdmins = async () => {
+    const {data} = await $authHost.get(`api/user/getAdmins/`)
+    
+    return data;
+}
+
 export const searchUsers = async (page, q) => {
     const {data} = await $authHost.get(`api/user/search/${page}?q=${q}`)
     
@@ -56,8 +68,20 @@ export const registrateUser = async (email, password, role, name, number, organi
     return data
 }
 
+export const registrateAdmin = async (email, password, role, name, number) => {
+    const {data} = await $authHost.post('api/user/registrationAdmin', {email, password, role, name, number})
+
+    return data
+}
+
 export const remakeUser = async (id, email, password, role, name, number, organiztion, programs_id, diplom, inn, address) => {
     const {data} = await $authHost.post('api/user/remake', {id, email, password, role, name, number, organiztion, programs_id, diplom, inn, address})
+
+    return data
+}
+
+export const remakeAdmin = async (id, email, password, name, number) => {
+    const {data} = await $authHost.post('api/user/remakeAdmin', {id, email, password, name, number})
 
     return data
 }

@@ -4,13 +4,19 @@
     background-color: rgb(238, 238, 62);
 }
 .admin_flex {
-    
+    margin-top: 20px;
     display: flex;
+    align-items: center;
     justify-content: end;
+}
+.admin_between {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
 }
 
 .admin_flex div {
-    margin-top: 20px;
+
     margin-right: 20px;
 }
 
@@ -85,6 +91,7 @@
     color: #2C3E50;
 }
 .admin_button {
+    margin-top: 20px;
     display: block;
     font-size: 14px;
     font-weight: 500;
@@ -94,7 +101,6 @@
     max-width: max-content;
 
     border-radius: 7px;
-    margin-top: 31px;
     cursor: pointer;
     transition: .2s linear;
 }
@@ -243,4 +249,15 @@
 .pagination li.active {
     background-color:#2980B9;
     color: #fff;
+}
+
+@media (max-width: 1260px) {
+    .th_orh {
+        display: none;
+    }
+}
+
+
+.admin_table .active td {
+    color: rgb(95, 143, 255)
 }

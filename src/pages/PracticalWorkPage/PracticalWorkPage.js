@@ -5,7 +5,7 @@ import { Context } from "../../index"
 import './PracticalWorkPage.css'
 
 import word from "../../assets/imgs/word.png"
-
+import comment from "../../assets/imgs/comment.png"
 
 const PracticalWorkPage = () => {
     const [queryParams] = useSearchParams();
@@ -42,15 +42,34 @@ const PracticalWorkPage = () => {
             formData.append("task", queryParams.get('title'))
             formData.append("file_src", file)
             formData.append("users_id", user.user.id)
+            formData.append("user_name", user.user.name)
             formData.append("program_id", user.user.programs_id[0])
             formData.append("theme_id", queryParams.get('theme_id'))
+  
+            formData.append("theme_statistic_id", queryParams.get('theme_statistic_id'))
             formData.append("punct_id", queryParams.get('punct_id'))
             formData.append("practic_title", file.name)
 
-            createPracticalWork(formData).then(data => {
+            createPracticalWork(formData)
+            .then(data => {
                 alert('файл отправлен')
             
-            });
+            })
+            .then(data => {
+                getOnePracticalWorkToUser(user.user.id, user.user.programs_id[0], Number(queryParams.get('theme_id')), Number(queryParams.get('punct_id')))
+                    .then(practic => {
+                        if (practic) {
+                            
+                            if (practic.test || typeof practic.test == 'object') {
+                                setFileName(practic.practic_title);
+                                console.log(practic.test)
+                                setSend(true);
+                            }
+                            setPracticWork(practic);
+                        }
+                        
+                    })
+            })
         } else {
             alert('Вы уже отправили файл, дождитесь его проверки!')
         }
@@ -80,24 +99,15 @@ const PracticalWorkPage = () => {
             <div className="finish_text" style={{marginTop: '25px'}}>"{queryParams.get('title')}"</div>
 
             {
-                practicWork.test ?
                 
-                
-                <div>
-                    {
-                        practicWork.answer &&
-                        <div style={{fontSize: "25px", padding: "20px", backgroundColor: "rgb(38, 186, 38)", color: "#fff"}}>{`${practicWork.answer} ${typeof practicWork.test == 'object' ? '' : practicWork.test ? 'У вас зачет':'У вас не зачет' }`}</div>
-                    }
-                </div>
-                :
 
                 <div>
                     
                     {
                         !send &&
                         <div>
-                            <div className="finish_text" style={{marginTop: '25px'}}>Прикрепите документ с выполненным заданием через форму ниже </div>
-                            <div className='MakeProgram_Punct_Material'>
+                            <div className="finish_text" style={{marginTop: '25px'}}>Прикрепите документ с выполненным заданием через форму ниже:</div>
+                            <div className='MakeProgram_Punct_Material' style={{marginTop: '25px'}}>
                                 <input id="one" onChange={(e ) => {setFile( e.target.files[0]); setFileName(e.target.files[0].name)}} accept='.docx' className='MakeProgram_Punct_Material_input'  type="file"/>
                                 <label htmlFor="one" className='MakeProgram_Punct_Material_Plus'>{fileName?<img src={word}/>:'+'}</label>
                                 <div className='MakeProgram_Punct_Material_Text'>{fileName?fileName:'Добавить файл'}</div>
@@ -106,12 +116,30 @@ const PracticalWorkPage = () => {
                         
                     }
                     
-                    <div onClick={handleFinishButton} className="finish_button">{send? "Файл проверяется": "Отправить файл"}</div>
+                    {
+                        typeof practicWork.test == 'object' ? 
+                            <div onClick={handleFinishButton} className="finish_button">{send? "Файл проверяется": "Отправить файл"}</div>
+                        : practicWork.test ? 
+                        ''
+                        : 
+                        <div onClick={handleFinishButton} className="finish_button">{send? "Файл проверяется": "Отправить файл"}</div>
+                    }
+                    
                     {
                         practicWork.answer &&
-                        <div>{`${practicWork.answer} ${typeof practicWork.test == 'object' ? '' : practicWork.test ? 'У вас зачет':'У вас не зачет' }`}</div>
+                        <div style={{display: 'flex', marginTop: '25px'}}>
+                            <img height='25px' src={comment}/>
+                            <div className='' style={{marginLeft: '10px'}}>{`${practicWork.answer}`}</div>
+                            
+                        </div>
+                        
                     }
-
+                    {
+                        typeof practicWork.test == 'object' ? '' : practicWork.test ? 
+                        <div className='tester'>Зачет</div>
+                        : 
+                        <div className='failure'>Незачет</div> 
+                    }
 
                 </div>
             }

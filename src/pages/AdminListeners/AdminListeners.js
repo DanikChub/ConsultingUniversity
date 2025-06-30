@@ -89,10 +89,12 @@ const AdminListeners = () => {
     }, [])
 
     const destroyUser = (id) => {
+        setLoading(false)
         deleteUser(id).then(d => 
             getAllUsersWithPage(1, sort_type_variations[sortType], sortDown?'DESC':'ASC').then(data => {
                 setUsers(data.rows.filter(item => item.role == "USER"));
-               
+                setFilteredUsers(data.rows.filter(item => item.role == "USER"));
+                setLoading(true)
             })
         );
     }
@@ -257,9 +259,9 @@ const AdminListeners = () => {
                                     <th>ID</th>
                                     <th>Фамилия Имя Отчество</th>
                                     <th>Процент  завершенности</th>
-                                    <th>Организация</th>
+                                    <th class='th_orh'>Организация</th>
                                     <th>Дата начала обучения</th>
-                                    <th>Дата окончания обучения</th>
+                                    <th class='th_orh'>Дата окончания обучения</th>
                                     <th>Изменить</th>
                                     <th>Удалить</th>
                                 </tr>
@@ -284,9 +286,9 @@ const AdminListeners = () => {
                                                 </div>
                                                 <span>{user.statistic?user.statistic:'0'}%</span>
                                             </td>
-                                            <td>{<div dangerouslySetInnerHTML={{__html: user.organiztion.replace(user.yellow_value, "<b class=\"background-yellow\">"+user.yellow_value+"</b>")}}/>}</td>
+                                            <td  class='th_orh'>{<div dangerouslySetInnerHTML={{__html: user.organiztion.replace(user.yellow_value, "<b class=\"background-yellow\">"+user.yellow_value+"</b>")}}/>}</td>
                                             <td>{dateToString(user.createdAt)}</td>
-                                            <td>{dateToString(user.graduation_date)}</td>
+                                            <td class='th_orh'>{dateToString(user.graduation_date)}</td>
                                             <td className='remakeButton' onClick={() => navigate("/admin/listeners/new_listener/" + user.id)}><img src={pencil} width="22px"/></td>
                                             <td className='deleteButton' onClick={() => destroyUser(user.id)}>x</td>
                                             

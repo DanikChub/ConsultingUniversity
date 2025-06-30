@@ -14,3 +14,8 @@
     padding: 10px;
     background-color: #fff;
 }
+
+.block_table_td.green {
+
+    background-color: rgb(171, 255, 182);
+}

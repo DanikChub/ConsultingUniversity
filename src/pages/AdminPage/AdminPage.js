@@ -19,7 +19,7 @@ const AdminPage = () => {
 
     useEffect(() => {
         getAllUsers().then(data => {
-            setUsers(data);
+            
      
             let users_count = 0;
             let ends = 0;
@@ -37,7 +37,7 @@ const AdminPage = () => {
                     })
                 }
             })
-
+            setUsers(data);
             setNumberOfUsers(users_count);
             setNumberOfEnd(ends)
 
@@ -45,13 +45,13 @@ const AdminPage = () => {
 
             
             let new_programs = [];
-            getAllPrograms().then(data => {
-                new_programs = data;
+            getAllPrograms().then(programs => {
+                new_programs = programs;
                 new_programs.forEach(program => {
                     program["listeners"] = 0;
                 }) 
                 
-                users.forEach(user => {
+                data.forEach(user => {
                     new_programs.forEach(program => {
                     
                         if (user.programs_id[0] == program.id) {

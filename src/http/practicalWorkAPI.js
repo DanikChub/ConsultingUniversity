@@ -8,6 +8,12 @@ export const createPracticalWork = async (formData) => {
     return data
 }
 
+export const deletePracticalWork = async (id) => {
+    const {data} = await $authHost.post('api/practical_work/delete', {id} )
+
+    return data
+}
+
 export const createPracticalAnswer = async (id, answer, test) => {
     const {data} = await $authHost.post('api/practical_work/answer', {id, answer, test} )
 

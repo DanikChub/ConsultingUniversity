@@ -74,7 +74,7 @@ const LectionPage = () => {
                         <span>Назад</span>
                     </div>
                     
-                    <a  onClick={() => remakeFileName(process.env.REACT_APP_API_URL + punct.lection_src,punct. lection_title)}   className="course_item_download">
+                    <a  onClick={() => remakeFileName(process.env.REACT_APP_API_URL + punct.lection_src, punct.lection_title)}   className="course_item_download">
                         <img src={download} alt="" width='28px'/>
                         <div>{punct.lection_title}</div>
                     </a>

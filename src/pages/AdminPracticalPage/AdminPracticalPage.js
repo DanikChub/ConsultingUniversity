@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import LeftMenu from '../../components/LeftMenu/LeftMenu';
-import { getAllPracticalWork } from '../../http/practicalWorkAPI';
+import { deletePracticalWork, getAllPracticalWork } from '../../http/practicalWorkAPI';
 import { getUserById } from '../../http/userAPI';
 
 import arrow_down from '../../assets/imgs/arrow_down.png'
 import arrow_up from '../../assets/imgs/arrow_up.png'
+import update from '../../assets/imgs/update.png'
 
 import "./AdminPracticalPage.css"
 import ListenersSkeleton from '../../components/ListenersSkeleton/ListenersSkeleton';
+
 
 function dateToString(date) {
     const newDate = new Date(date);
@@ -22,6 +24,7 @@ const AdminPracticalPage = () => {
     const [practicalWorks, setPracticalWorks] = useState([]);
     const [filteredPractical, setFilteredPractical] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [option, setOption] = useState("2")
 
     const navigate = useNavigate();
  
@@ -30,10 +33,12 @@ const AdminPracticalPage = () => {
         getAllPracticalWork().then(data => {
             const practics_copy = data;
             
-            console.log(practics_copy)
+          
             practics_copy.sort((a, b) =>  new Date(a.createdAt) - new Date(b.createdAt))
             setPracticalWorks(practics_copy)
-            setFilteredPractical(practics_copy)
+
+            
+            setFilteredPractical(practics_copy.filter(practic => typeof practic.test == 'object'))
            
             setLoading(true);
             
@@ -44,7 +49,7 @@ const AdminPracticalPage = () => {
     const handleOption = (type) => {
         const prev_value = practicalWorks;
         let filtered;
-        console.log(type);
+        
         switch (type) {
             case "3":
                 
@@ -64,6 +69,40 @@ const AdminPracticalPage = () => {
                 break;
         }
     }   
+
+    const update_data = () => {
+        setLoading(false)
+        getAllPracticalWork().then(data => {
+            const practics_copy = data;
+            
+          
+            practics_copy.sort((a, b) =>  new Date(a.createdAt) - new Date(b.createdAt))
+            setPracticalWorks(practics_copy)
+            handleOption(handleOption)
+           
+            setLoading(true);
+            
+         
+        })
+    }
+
+    const deletePractical = (id) => {
+        deletePracticalWork(id).then(d => {
+            setLoading(false)
+            getAllPracticalWork().then(data => {
+                const practics_copy = data;
+                
+            
+                practics_copy.sort((a, b) =>  new Date(a.createdAt) - new Date(b.createdAt))
+                setPracticalWorks(practics_copy)
+                handleOption(handleOption)
+            
+                setLoading(true);
+                
+            
+            })
+        }) 
+    }
 
     
     return (
@@ -87,17 +126,24 @@ const AdminPracticalPage = () => {
                         
                         <span>Назад</span>
                     </div>
-                    <div className='admin_flex'>
-                       
-                        <div>Фильтр по: </div>
-                        <select onChange={(e) => handleOption(e.target.value)} className='select'>
-                            <option value={3}  selected>Показать все</option>
-                            <option value={2} className='test_button gray'>Не проверено </option>
-                            <option value={1} className='test_button'>Зачет</option>
-                            <option value={0} className='test_button red'>Не зачет</option>
-                        </select>
+                    <div className='admin_between'>
+                        <button onClick={() => update_data()} className='update_button'>
+                            <span>Обновить </span> 
+                            <img width="16px" height="16px" src={update}/>
+                        </button>
+                        <div className='admin_flex'>
                         
+                            <div>Фильтр по: </div>
+                            <select onChange={(e) => handleOption(e.target.value)} className='select'>
+                                <option value={2} selected className='test_button gray'>Не проверено </option>
+                                <option value={3} >Показать все</option>
+                                <option value={1} className='test_button'>Зачет</option>
+                                <option value={0} className='test_button red'>Не зачет</option>
+                            </select>
+                            
+                        </div>
                     </div>
+                    
                     <table className="admin_table big">
                         <thead>
                             <tr>
@@ -107,6 +153,7 @@ const AdminPracticalPage = () => {
                                 <th>Статус</th>
                                 <th>Оценка</th>
                                 <th>Дата</th>
+                                <th>Удалить</th>
                             </tr>
                         </thead>
                         {
@@ -122,6 +169,7 @@ const AdminPracticalPage = () => {
                                         <td>{practic.answer? 'Проверено' : 'Ждет проверки'}</td>
                                         <td><div className={`test_button ${typeof practic.test == "object" ? 'gray':practic.test? '' : 'red'}`}>{typeof practic.test == "object" ? 'Не проверено':practic.test? 'Зачет' : 'Не зачет'}</div></td>
                                         <td>{dateToString(practic.createdAt)}</td>
+                                        <td onClick={() => deletePractical(practic.id)} class="deleteButton">x</td>
                                     </tr>
                                     )
                             }

@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const CountDown = ({ hours = 0, minutes = 0, seconds = 0 }) => {
+const CountDown = ({checkAllAnswers, hours = 0, minutes = 0, seconds = 0 }) => {
     const [paused, setPaused] = React.useState(false);
     const [over, setOver] = React.useState(false);
     const [[h, m, s], setTime] = React.useState([hours, minutes, seconds]);
@@ -9,7 +9,7 @@ const CountDown = ({ hours = 0, minutes = 0, seconds = 0 }) => {
   
     const tick = () => {
       if (over) {
-        navigate(-1)
+        checkAllAnswers()
       };
   
       if (h === 0 && m === 0 && s === 0) {
@@ -39,8 +39,7 @@ const CountDown = ({ hours = 0, minutes = 0, seconds = 0 }) => {
         <p>{`${h.toString().padStart(2, '0')}:${m
           .toString()
           .padStart(2, '0')}:${s.toString().padStart(2, '0')}`}</p>
-        <div>{over ? "Time's up!" : ''}</div>
-        
+       
       </div>
     );
   };

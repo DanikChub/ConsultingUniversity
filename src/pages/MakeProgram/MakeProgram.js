@@ -167,7 +167,7 @@ const MakeProgram = () => {
 
     const inputPunctsHandler = (i_1, i_2, type, value) => {
         const valueNew = [...themesArray]; 
-        
+        console.log(themesArray)
         switch (type){
             case "title":
                 valueNew[i_1].puncts[i_2].title = value; 
@@ -185,14 +185,6 @@ const MakeProgram = () => {
                 break;
             case "lection":
 
-                if (!valueNew[i_1].puncts[i_2].lection_src) {
-                    setLectionCounter(prev => prev+1)
-                    valueNew[i_1].puncts[i_2].lection_id = 0;
-                    valueNew[i_1].puncts[i_2].lection_id += lectionCounter;
-                }
-
-                
-                
                 valueNew[i_1].puncts[i_2].lection_src = value; 
                 valueNew[i_1].puncts[i_2].lection_title = valueNew[i_1].puncts[i_2].lection_src.name; 
                 
@@ -334,14 +326,21 @@ const MakeProgram = () => {
 
             let number_of_test = 0;
 
-          
+            let prev_lection_id = 0
             themesArray.forEach(theme => {
                 
                 formData.append("presentation_src", theme.presentation_src)
                 
                 formData.append("theme_lection_src", theme.lection_src)
+                
                 theme.puncts.forEach(punct => {
                     formData.append("docs", punct.lection_src)
+                    if (punct.lection_src) {
+                        punct.lection_id = prev_lection_id
+                        prev_lection_id+=1
+                    } else {
+                        punct.lection_id = null
+                    }
                     if (punct.test_id || punct.practical_work) {
                         number_of_test++;
                     }
@@ -355,7 +354,7 @@ const MakeProgram = () => {
             formData.append("number_of_videos", videoCounter)
           
             formData.append("themes", JSON.stringify(themesArray))
-            console.log(themesArray);
+        
             if (params.id) {
                 formData.append("id", params.id)
                 
@@ -369,6 +368,9 @@ const MakeProgram = () => {
                    
                     navigate(ADMIN_PROGRAMS_ROUTE)
                    
+                }).catch(e => {
+                    setNotActive(false);
+                    setServerMessage(e.response.data.message)
                 })
             } else {
                 setNotActive(true);
@@ -404,6 +406,35 @@ const MakeProgram = () => {
         } else {
             document.body.style.overflow = "auto";
         }
+    }
+
+    const remakeFileName = (url, new_name) => {
+        if (url && new_name) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.responseType = 'blob';
+            xhr.onload = function(e) {
+            var blob = this.response;
+            var link = document.createElement("a");
+            link.style.display = "none";
+            link.href = window.URL.createObjectURL(blob);
+            link.setAttribute("download", new_name);
+            link.click();
+            }
+            xhr.send();
+        }
+        
+    }
+
+    const navigateToUrl = (url) => {
+        if (url) {
+            var link = document.createElement("a");
+            link.style.display = "none";
+            link.href = url;
+            link.setAttribute("target", "_blank")
+            link.click();
+        }
+        
     }
 
     return (
@@ -502,13 +533,13 @@ const MakeProgram = () => {
                                             <div className='MakeProgram_Punct_Materials'>
                                                 <div className='MakeProgram_Punct_Material'>
                                                     <button onClick={() => setShowVideo({show:true, i: i, j: j, remake: punct.video_src})} className='MakeProgram_Punct_Material_input' id={"button" + i + "_" + j} ></button>
-                                                    <label htmlFor={"button" + i + "_" + j} className='MakeProgram_Punct_Material_Plus'>{punct.video_src?<img src={video_play}/>:'+'}</label>
+                                                    <label onContextMenu={() => navigateToUrl(punct.video_src)} htmlFor={"button" + i + "_" + j} className='MakeProgram_Punct_Material_Plus'>{punct.video_src?<img src={video_play}/>:'+'}</label>
                                                     <div className='MakeProgram_Punct_Material_Text'>{punct.video_src? punct.video_src.slice(8, 18) + "..."  :'Добавить видео'}</div>
                                                 </div>
                                                 <div className='MakeProgram_Punct_Material'>
                                                     <input id={i + "_" + j} onChange={(e ) => inputPunctsHandler(i, j, "lection", e.target.files[0])} accept='.docx' className='MakeProgram_Punct_Material_input'  type="file"/>
                                                     
-                                                    <label htmlFor={i + "_" + j} className='MakeProgram_Punct_Material_Plus'>{punct.lection_src?<img src={word}/>:'+'}</label>
+                                                    <label onContextMenu={() => remakeFileName(process.env.REACT_APP_API_URL + punct.lection_src, punct.lection_title)} htmlFor={i + "_" + j} className='MakeProgram_Punct_Material_Plus'>{punct.lection_src?<img src={word}/>:'+'}</label>
                                                     <div className='MakeProgram_Punct_Material_Text'>{punct.lection_src?punct.lection_title:'Добавить лекцию'}</div>
                                                 </div>
                                                 {

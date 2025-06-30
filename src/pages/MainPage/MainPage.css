@@ -19,7 +19,9 @@ body {
 }
 
 .container {
-    max-width: 1432px;
+    max-width: 1350px;
+    padding-left: 40px;
+    padding-right: 40px;
     width: 100%;
     margin: 0 auto;
 }
@@ -697,7 +699,6 @@ a:hover {
     max-width: max-content;
 
     border-radius: 7px;
-    margin-top: 31px;
     cursor: pointer;
     transition: .2s linear;
 }

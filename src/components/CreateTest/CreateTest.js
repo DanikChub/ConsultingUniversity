@@ -7,6 +7,7 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
     const [testTitle, setTestTitle] = useState("");
 
     const [testPuncts, setTestPuncts] = useState([{
+                                        id: 0,
                                         question: "",
                                         answers: [
                                             "",
@@ -22,6 +23,7 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
     const [hourInput, setHourInput] = useState("");
     const [minInput, setMinInput] = useState("");
     const [secInput, setSecInput] = useState("");
+    const [questionId, setQuestionId] = useState(0)
     
     useEffect(() => {
         if (show.remake) {
@@ -40,8 +42,10 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
 
     const addNewQuestion = () => {
         const prevValue = [...testPuncts];
-
+        setQuestionId(prev => prev+=1)
+        let prev = questionId + 1
         prevValue.push({
+            id: prev,
             question: "",
             answers: [
                 "",
@@ -187,6 +191,7 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
                     document.body.style.overflowY = "auto";
                 
                 })
+                .catch(e => alert(e.response.data.message))
             } else {
                 setTestTitle('');
                 setTestPuncts([{
@@ -229,7 +234,8 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
                     setShow({show: false, i: 0, j: 0})
                     document.body.style.overflowY = "auto";
                     setCounter(value => value+1);
-                });
+                })
+                .catch(e => alert(e.response.data.message))
                 
             } else {
                 setTestTitle('');
@@ -256,7 +262,14 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
     }
 
   
-    
+    const deleteQuestion = (i) => {
+        let prevValue = [...testPuncts];
+
+        prevValue = prevValue.filter(el => el.id != i)
+        setNumberQuestion(prevValue.length-1)
+   
+        setTestPuncts(prevValue);
+    }
 
     return (
         <div className={show.show?"modal show": "modal"}>
@@ -278,7 +291,11 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
             
                     {
                         testPuncts.map((punct, i) => 
-                        <div onClick={() => navHandlerClick(i)} className={userAnswers[i]+1 ? (numberQuestion == i ? 'test_punct active bordered' : 'test_punct active') : (numberQuestion == i ? 'test_punct bordered' : 'test_punct') }>{i+1}</div>
+                        <div class="test_punct_container">
+                            <button onClick={() => deleteQuestion(punct.id)} class="test_punct_button">x</button>
+                            <div onClick={() => navHandlerClick(i)} className={userAnswers[i]+1 ? (numberQuestion == i ? 'test_punct active bordered' : 'test_punct active') : (numberQuestion == i ? 'test_punct bordered' : 'test_punct') }>{i+1}</div>
+                        </div>
+                        
                         )
                     }
                     <div onClick={() => addNewQuestion()} className='test_punct'>+</div>

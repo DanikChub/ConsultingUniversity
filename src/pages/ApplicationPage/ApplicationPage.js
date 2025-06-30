@@ -7,6 +7,7 @@ import "./ApplicationPage.css"
 import pencil from '../../assets/imgs/pencil.png'
 import arrow_down from '../../assets/imgs/arrow_down.png'
 import arrow_up from '../../assets/imgs/arrow_up.png'
+import update from '../../assets/imgs/update.png'
 import ListenersSkeleton from '../../components/ListenersSkeleton/ListenersSkeleton';
 
 
@@ -86,6 +87,15 @@ const ApplicationPage = () => {
 
         
     }
+
+    const update_data = () => {
+        setLoading(false)
+        getAllApplications().then(data => {
+            setApplications(data)
+            setFilteredUsers(data);
+            setLoading(true);
+        });
+    }
     return (
         <div className="content">
         <div className="container">
@@ -93,16 +103,21 @@ const ApplicationPage = () => {
                 <LeftMenu active_arr={['', '', 'active', '', '', '', '', '',]}/>
                 <div className="admin_container">
                     <div className="admin_path">Главная / <b>Заявки</b></div>
-                    
-                    <div className='admin_flex'>
-                        <div onClick={() => handleSortDown()} className="admin_button">
-                            <span>{sortDown?'По убыванию':'По возрастанию'}</span>
-                            <img src={sortDown?arrow_down:arrow_up} height={16}/>
+                    <div className='admin_between'>
+                        <button onClick={() => update_data()} className='update_button'>
+                            <span>Обновить </span> 
+                            <img width="16px" height="16px" src={update}/>
+                        </button>
+                        <div className='admin_flex'>
+                            <div onClick={() => handleSortDown()} className="admin_button">
+                                <span>{sortDown?'По убыванию':'По возрастанию'}</span>
+                                <img src={sortDown?arrow_down:arrow_up} height={16}/>
+                            </div>
+                            <div>Сортировка по: </div>
+                        
+                            <div onClick={() => handleSortButton(1)} className={`admin_button ` + sortClasses[1]}>По алфавиту</div>
+                            <div onClick={() => handleSortButton(2)} className={`admin_button ` + sortClasses[2]}>По дате</div>
                         </div>
-                        <div>Сортировка по: </div>
-                       
-                        <div onClick={() => handleSortButton(1)} className={`admin_button ` + sortClasses[1]}>По алфавиту</div>
-                        <div onClick={() => handleSortButton(2)} className={`admin_button ` + sortClasses[2]}>По дате</div>
                     </div>
 
                     <table className="admin_table big">
@@ -126,7 +141,7 @@ const ApplicationPage = () => {
                                     <tr>
                                         <td>{i+1}.</td>
                                         <td><a href="./listener_page.html">{application.name}</a></td>
-                                        <td>{application.email}</td>
+                                        <td style={{display: 'table-cell', width: 'auto'}}>{application.email}</td>
                                         <td>{application.number}</td>
                                         <td>{dateToString(application.createdAt)}</td>
                                         

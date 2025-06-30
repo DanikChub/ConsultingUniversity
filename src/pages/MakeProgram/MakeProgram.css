@@ -145,6 +145,9 @@
     transition: .2s linear;
 }
 
+
+
+
 .MakeProgram_Theme_Button.hide_punct.active svg {
     transform: rotate(180deg);
 }
@@ -157,6 +160,10 @@
 
 .admin_program_item_button_group {
     display: flex;
+}
+
+.admin_program_item_button_group .MakeProgram_Theme_Button {
+    border: none;
 }
 .MakeProgram_Theme_Button:hover {
     background-color: rgb(55, 139, 241);
@@ -183,6 +190,7 @@
 .MakeProgram_Theme_Button:hover svg {
     fill: #fff;
 }
+
 
 .MakeProgramInput::placeholder {
     font-size: 18px;
@@ -217,7 +225,6 @@
 
 .MakeProgram_Theme {
 
-    margin-left: 5%;
     margin-top: 20px;
 }
 

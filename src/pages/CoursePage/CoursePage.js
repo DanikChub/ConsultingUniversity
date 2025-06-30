@@ -12,10 +12,11 @@ import check from "../../assets/imgs/check.png"
 import test_src from "../../assets/imgs/test.png"
 import { Context } from '../../index';
 import { getOneProgram } from '../../http/programAPI';
-import { LECTION_ROUTE, PRACTICAL_WORK_ROUTE, TEST_ROUTE, USER_ROUTE, VIDEO_ROUTE } from '../../utils/consts';
+import { FINISH_TEST_ROUTE, LECTION_ROUTE, PRACTICAL_WORK_ROUTE, TEST_ROUTE, USER_ROUTE, VIDEO_ROUTE } from '../../utils/consts';
 import { setGraduationDate, setWellPracticalWorks, setWellTest, setWellVideos } from '../../http/userAPI';
 import { observer } from 'mobx-react-lite';
 import { getStatistic, updatePracticalWorks, updateVideos } from '../../http/statisticAPI';
+import FinishTestPage from '../FinishTestPage/FinishTestPage';
 
 
 const CoursePage = observer(() => {
@@ -45,13 +46,13 @@ const CoursePage = observer(() => {
 
       
         getOneProgram(program_id).then(program => {
-            program.themes = program.themes.sort((a, b) => a.id-b.id)
+            program.themes = program.themes.sort((a, b) => a.theme_id-b.theme_id)
             setProgram(program)
             
             setUserId(userContext.user.user.id)
             setUserProgramId(userContext.user.user.programs_id[0])
             getStatistic(userContext.user.user.id, userContext.user.user.programs_id[0]).then(data => {
-            
+                
                 setStatistic(data);
                 
                 if (data.well_tests == data.max_tests) {
@@ -124,20 +125,7 @@ const CoursePage = observer(() => {
 
     const navigate = useNavigate();
 
-    const remakeFileName = (url, new_name) => {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.responseType = 'blob';
-        xhr.onload = function(e) {
-        var blob = this.response;
-        var link = document.createElement("a");
-        link.style.display = "none";
-        link.href = window.URL.createObjectURL(blob);
-        link.setAttribute("download", new_name);
-        link.click();
-        }
-        xhr.send();
-    }
+
     return (
     
         <div className="content">
@@ -239,13 +227,13 @@ const CoursePage = observer(() => {
                                         </Link>
                                         }
                                         {test_id && 
-                                        <Link to={`/user/course/test/${test_id}?user_id=${userId}&program_id=${userProgramId}&theme_id=${statistic.themesStatistic[i].id}&punct_id=${statistic.themesStatistic[i].punctsStatistic[0].id}`} className="course_item_download">
+                                        <Link to={!statistic.themesStatistic[i].well?`/user/course/test/${test_id}?user_id=${userId}&program_id=${userProgramId}&theme_id=${statistic.themesStatistic[i].id}&punct_id=${statistic.themesStatistic[i].punctsStatistic[0].id}`:FINISH_TEST_ROUTE + '?look=true'} className="course_item_download">
                                             <img src={test_src} alt=""/>
                                             <div>Тест</div>
                                         </Link>
                                         }
                                         {practical_work && 
-                                            <Link to={PRACTICAL_WORK_ROUTE + '?title=' + practical_work + '&theme_id=' + courseItems[i].id + '&punct_id=' + puncts[j].id} className="course_item_download">
+                                            <Link to={PRACTICAL_WORK_ROUTE + '?title=' + practical_work + '&theme_id=' + courseItems[i].id + '&theme_statistic_id=' + statistic.themesStatistic[i].id + '&punct_id=' + puncts[j].id} className="course_item_download">
                                                 <img width="20px" src={practic_work_img} alt=""/>
                                                 <div>Практическая<br></br> работа</div>
                                             </Link>
