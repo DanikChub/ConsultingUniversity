@@ -308,7 +308,10 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
                         {numberQuestion == i? 
                         <div>
                             
-                            <div className="test_question">{i+1}. <input onChange={(e) => handlerQuestionInput(i, e.target.value)} value={testPuncts[i].question} className='modal_input test' placeholder='Вопрос'/><button onClick={() => addAnswer(i)} className='MakeProgram_Theme_Button'>+</button> </div>
+                            <div className="test_question">{i+1}. 
+                                <textarea onChange={(e) => handlerQuestionInput(i, e.target.value)} value={testPuncts[i].question} className='modal_input test' placeholder='Вопрос'/>
+                                <button onClick={() => addAnswer(i)} className='MakeProgram_Theme_Button'>+</button> 
+                            </div>
                               
                         
                             
@@ -320,8 +323,8 @@ const CreateTest = ({show, setShow, themesArray, setThemesArray, counter, setCou
                                     punct.answers.map((answer, j) => 
                                 
                                     <div className="answer_option">
-                                        <input onChange={(e) => handleAnswerCheck(i, j, e.target.checked)} checked={punct.correct_answer.indexOf(j)+1 ? true : false} type="checkbox" id={"answer_" + j} name="1"/>
-                                        <input onChange={(e) => handlerAnswerInput(i, j, e.target.value)} value={answer} className='modal_input test' placeholder='Ответ'/>
+                                        <input className='modal_checkbox' onChange={(e) => handleAnswerCheck(i, j, e.target.checked)} checked={punct.correct_answer.indexOf(j)+1 ? true : false} type="checkbox" id={"answer_" + j} name="1"/>
+                                        <textarea onChange={(e) => handlerAnswerInput(i, j, e.target.value)} value={answer} className='modal_input test' placeholder='Ответ'/>
                                         <button onClick={() => deleteAnswer(i, j)} className='MakeProgram_Theme_Button red'>-</button>  
                                     </div>)
                     

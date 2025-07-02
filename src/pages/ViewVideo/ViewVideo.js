@@ -5,7 +5,9 @@ import LeftMenu from '../../components/LeftMenu/LeftMenu';
 const ViewVideo = () => {
     const [queryParams] = useSearchParams();
     const navigate = useNavigate();
-   
+    
+  
+
     return (
         <div className='content'>
             <div className='container'>
@@ -23,7 +25,8 @@ const ViewVideo = () => {
                             <span>Назад</span>
                         </div>
                         <div className='video_container'>
-                            <iframe  src={queryParams.get("link")+'&id='+queryParams.get('id')+'&hd=2&autoplay=1'} allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>
+                      
+                            <iframe  src={`https://vkvideo.ru/video_ext.php?oid=${queryParams.get('oid')}&id=${queryParams.get('id')}&hd=2&autoplay=true`} allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>
                         </div>
                     </div>
                 </div>

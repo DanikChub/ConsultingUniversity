@@ -2,14 +2,9 @@
     margin-top: 34px;
 }
 
-.admin_table tr th {
-    font-weight: 600;
-    font-size: 14px;
-    color: #2C3E50;
-    text-align: left;
-}
+
 .admin_table tr th:nth-child(1) {
-    width: 3%;
+    width: 5%;
 }
 .admin_table tr th:nth-child(2) {
     width: 20%;
@@ -41,12 +36,7 @@
     color: #307cc8;
 }
 
-.admin_table tr td:nth-child(3) {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 90%;
-}
+
 .progress-bar_container {
     position: relative;
     border: 1px solid #2980B9;
@@ -96,13 +86,7 @@
 .add_input_item:nth-child(1) {
     border-top: 1px solid #C7C7C7;
 }
-.add_input_label {
-    width: 10%;
-    text-align: right;
-    font-weight: 600;
-    font-size: 14px;
-    color: #334557;
-}
+
 .add_input {
     margin-left: 30px;
     border: none;

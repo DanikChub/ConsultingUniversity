@@ -164,6 +164,10 @@ const RegistrateUser = () => {
 
     }
 
+    const deleteSelectedProgram = () => {
+        setSelectedPrograms([])
+    }
+
     return (
         
         <div onClick={() => handleClickBody()} className="content">
@@ -242,8 +246,14 @@ const RegistrateUser = () => {
                             <div className="add_input_item relative">
                                 <label htmlFor="program" className="add_input_label">Программа</label>
                                 
-                                <input list='programs' onClick={(e) => handleClickInput()} onChange={(e) => handleChangeOption(e.target.value)} value={program} id="program" type="text" className="add_input" placeholder="Введите наименование программы обучения"/>
                                 
+                                {selectedPrograms.length == 0 ? <input list='programs' onClick={(e) => handleClickInput()} onChange={(e) => handleChangeOption(e.target.value)} value={program} id="program" type="text" className="add_input" placeholder="Введите наименование программы обучения"/> 
+                                : selectedPrograms.map(program => 
+                                        <div className="selected_program">
+                                            <span>{program.title}</span>
+                                            <button onClick={() => deleteSelectedProgram()} class="selected_program_delete">x</button>
+                                        </div>
+                                    )}
                                 
                                 <div className={"datalist " + datalistActive} id="programs">
                                     {filteredPrograms.map(program => 
@@ -253,38 +263,25 @@ const RegistrateUser = () => {
                                 </div>
                             </div>
 
+                            
+                            
                             <div className="add_input_item">
-                                <label htmlFor="program" className="add_input_label">Выбранные программа</label>
-                                
-                                <div>
-                                    {selectedPrograms.map(program => 
-                                        <div className="selected_program">{program.title}</div>
-                                    )}
+                                <div className='add_input_item_left'>
+                                <div className="add_input_label">Диплом</div>
+                                    <div class="add_input_item_flex">
+                                        <label className="checkbox_label" htmlFor="diploma">Заберет сам</label>
+                                        <input id="diploma" onChange={(e) => handleDiplomCheck(e.target.checked)} checked={diplom} type="checkbox" className="add_checkbox" value="заберет сам"/>
+                                        
+                                    </div>
                                 </div>
-                                    
-                                    
+                                
+                                <div className='add_input_item_right'>
+                                    <label htmlFor="address" className="add_input_label" style={{minWidth: 'max-content'}}>Отправить почтой России по адресу:</label>
+                                    <input onChange={(e) => setAddress(diplom?'': e.target.value)} style={{width: "100%"}} value={address} id="address" type="text"  placeholder="Введите адрес"/>
+                                </div>
                                 
                             </div>
                             
-                            <div className="add_input_item">
-                                <label htmlFor="diploma" className="add_input_label">Диплом</label>
-                        
-                                <input id="diploma" onChange={(e) => handleDiplomCheck(e.target.checked)} checked={diplom} type="checkbox" className="add_checkbox" value="заберет сам"/>
-                                <span>Заберет сам</span>
-                            
-                                
-                                
-                                
-                            </div>
-                            <div className="add_input_item">
-                                <label htmlFor="address" className="add_input_label">Отправить почтой России по адресу:</label>
-                                <input onChange={(e) => setAddress(diplom?'': e.target.value)} className="add_input" value={address} id="address" type="text"  placeholder="Введите адрес"/>
-                                
-                            
-                                
-                                
-                                
-                            </div>
                         </div>
                         <div className='login_form_message'>{serverMessage}</div>
                         <div className="add_input_button_container">

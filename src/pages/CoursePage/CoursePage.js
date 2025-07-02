@@ -221,7 +221,7 @@ const CoursePage = observer(() => {
                                         </Link>
                                         }
                                         {video_src && 
-                                        <Link to={VIDEO_ROUTE + '?link=' + video_src} className="course_item_download">
+                                        <Link to={VIDEO_ROUTE + '?oid=' + video_src.match(/-\d\d\d\d\d\d\d\d\d/)[0]+ '&id=' + video_src.match(/_\d\d\d\d\d\d\d\d\d/)[0].slice(1, 10)} className="course_item_download">
                                             <img src={video_play} alt=""/>
                                             <div>Видео</div>
                                         </Link>

@@ -50,9 +50,15 @@
     width: 100%;
 }
 
+.modal_checkbox {
+    width: 16px;
+    height: 16px;
+}
+
 .modal_input.test {
-    width: 50%;
-    font-size: 20px;
+    width: 100%;
+    field-sizing: content;
+    font-size: 16px;
     padding-bottom: 2px;
 }
 
@@ -75,7 +81,15 @@
 }
 
 .answer_option {
-    align-items: center;
+    align-items: end;
+}
+
+.answer_option .MakeProgram_Theme_Button {
+    opacity: 0;
+}
+
+.answer_option:hover .MakeProgram_Theme_Button {
+    opacity: 1;
 }
 
 .modal_button {

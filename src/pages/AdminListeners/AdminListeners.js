@@ -102,13 +102,11 @@ const AdminListeners = () => {
     const handleSearchInput = (value) => {
         let realValue = searchInput;
 
-        if (value.search(/[^а-яА-Яa-zA-Z0-9]/) == -1) {
+        if (value.search(/[^а-яА-Яa-zA-Z0-9\s]/) == -1 ) {
             setSearchInput(value);
             realValue = value
         }
 
-
-        
         // let new_users = prev_users.filter(user => user.name.toLowerCase().includes(value.toLowerCase()) || user.organiztion.toLowerCase().includes(value.toLowerCase()))
         
         // new_users.forEach(user => {
@@ -243,11 +241,12 @@ const AdminListeners = () => {
                     <Link to={ADMIN_REGISTRATE_USER} className="admin_button">Добавить слушателя</Link>
                     <input onChange={(e) => handleSearchInput(e.target.value)} value={searchInput} className='MakeProgramInput' placeholder='Поиск пользователя...'/>
                     <div className='admin_flex'>
+                        <div style={{marginTop: '20px'}}>Отображение: </div>
                         <div onClick={() => handleSortDown()} className="admin_button">
                             <span>{sortDown?'По убыванию':'По возрастанию'}</span>
                             <img src={sortDown?arrow_down:arrow_up} height={16}/>
                         </div>
-                        <div>Сортировка по: </div>
+                        <div style={{marginTop: '20px'}}>Сортировка: </div>
                         <div onClick={() => handleSortButton(0)} className={`admin_button ` + sortClasses[0]}>По проценту завершенности</div>
                         <div onClick={() => handleSortButton(1)} className={`admin_button ` + sortClasses[1]}>По алфавиту</div>
                         <div onClick={() => handleSortButton(2)} className={`admin_button ` + sortClasses[2]}>По дате</div>
@@ -277,7 +276,7 @@ const AdminListeners = () => {
                                             <td>#{user.id}</td>
                                             <td>
                                                 <Link to={"/admin/listeners/" + user.id}>
-                                                    <div dangerouslySetInnerHTML={{__html: user.name.replace(user.yellow_value, "<b class=\"background-yellow\">"+user.yellow_value+"</b>")}}/>
+                                                    <div>{`${user.name.split(' ')[0]} ${user.name.split(' ').length > 2 ? user.name.split(' ')[1][0] : ''}. ${user.name.split(' ').length > 2 ? user.name.split(' ')[2][0] : ''}.` }</div>
                                                 </Link>
                                             </td>
                                             <td>
@@ -286,7 +285,8 @@ const AdminListeners = () => {
                                                 </div>
                                                 <span>{user.statistic?user.statistic:'0'}%</span>
                                             </td>
-                                            <td  class='th_orh'>{<div dangerouslySetInnerHTML={{__html: user.organiztion.replace(user.yellow_value, "<b class=\"background-yellow\">"+user.yellow_value+"</b>")}}/>}</td>
+                                            {/* <td  class='th_orh'>{<div dangerouslySetInnerHTML={{__html: user.organiztion.replace(user.yellow_value, "<b class=\"background-yellow\">"+user.yellow_value+"</b>")}}/>}</td> */}
+                                            <td  class='th_orh'>{`${user.organiztion.slice(0, 20)}...`}</td>
                                             <td>{dateToString(user.createdAt)}</td>
                                             <td class='th_orh'>{dateToString(user.graduation_date)}</td>
                                             <td className='remakeButton' onClick={() => navigate("/admin/listeners/new_listener/" + user.id)}><img src={pencil} width="22px"/></td>

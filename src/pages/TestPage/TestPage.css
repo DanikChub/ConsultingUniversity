@@ -59,10 +59,18 @@
     width: 90%;
     margin-top: 76px;
     display: flex;
-    align-items: center;
+    align-items: end;
     font-size: 16px;
     color: #2C3E50;
     font-weight: 500;
+}
+
+.test_question .MakeProgram_Theme_Button {
+    opacity: 0
+}
+
+.test_question:hover .MakeProgram_Theme_Button {
+    opacity: 1
 }
 
 .test_clue {
@@ -92,7 +100,7 @@
 
 .answer_option {
     display: flex;
-    align-items: start;
+    align-items: end;
     margin-top: 30px;
 }
 

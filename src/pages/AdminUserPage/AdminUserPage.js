@@ -83,7 +83,7 @@ const AdminUserPage = () => {
                             <div className="content_welocme">
                                 <div className="content_welcome_title">{user.name}</div>
                              
-                                <table>
+                                <table className='user_table'>
                                   
                                     
                                     <tbody>

@@ -213,7 +213,7 @@ const ViewProgram = observer(() => {
                                                 }
                                                 
                                                 {video_src && 
-                                                <Link to={ADMIN_VIEW_VIDEO + '?link=' + video_src} className="course_item_download">
+                                                <Link to={ADMIN_VIEW_VIDEO + '?oid=' + video_src.match(/-\d\d\d\d\d\d\d\d\d/)[0]+ '&id=' + video_src.match(/_\d\d\d\d\d\d\d\d\d/)[0].slice(1, 10)} className="course_item_download">
                                                     <img src={video_play} alt=""/>
                                                     <div>Видео</div>
                                                 </Link>

@@ -410,18 +410,18 @@ const MakeProgram = () => {
 
     const remakeFileName = (url, new_name) => {
         if (url && new_name) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', url, true);
-            xhr.responseType = 'blob';
-            xhr.onload = function(e) {
-            var blob = this.response;
-            var link = document.createElement("a");
-            link.style.display = "none";
-            link.href = window.URL.createObjectURL(blob);
-            link.setAttribute("download", new_name);
-            link.click();
-            }
-            xhr.send();
+var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'blob';
+        xhr.onload = function(e) {
+        var blob = this.response;
+        var link = document.createElement("a");
+        link.style.display = "none";
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute("download", new_name);
+        link.click();
+        }
+        xhr.send();
         }
         
     }
