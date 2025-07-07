@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { updateTests } from '../../http/statisticAPI';
-import { getOneTest } from '../../http/testAPI';
+import { getOneTest, updateTestStatistic } from '../../http/testAPI';
 import { FINISH_TEST_ROUTE } from '../../utils/consts';
 import CountDown from '../../components/CountDown/CountDown';
 import "./TestPage.css"
@@ -87,8 +87,7 @@ const TestPage = () => {
         let s = true;
        
         
-        console.log(userAnswers)
-        console.log(new_arr)
+        
             
         userAnswers.forEach((userAnswer, i) => {
             userAnswer.sort()
@@ -100,7 +99,7 @@ const TestPage = () => {
            
             
       
-        
+        // updateTestStatistic(queryParams.get("user_id"), test.id, userAnswers)
         if (correct_answers/test.puncts.length > 0.75) {
             
 

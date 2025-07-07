@@ -171,7 +171,7 @@ const AdminPracticalPage = () => {
                                     <tr>
                                         <td>{i+1}.</td>
                                         <td>{practic.user_name}</td>
-                                        <td><Link style={{display: 'block'}} to={`http://localhost:3000/admin/practical_works/${practic.id}`}>{practic.task}</Link></td>
+                                        <td><Link style={{display: 'block'}} to={`/admin/practical_works/${practic.id}`}>{practic.task}</Link></td>
                                         <td>{practic.answer? 'Проверено' : 'Ждет проверки'}</td>
                                         <td><div className={`test_button ${typeof practic.test == "object" ? 'gray':practic.test? '' : 'red'}`}>{typeof practic.test == "object" ? 'Не проверено':practic.test? 'Зачет' : 'Не зачет'}</div></td>
                                         <td>{dateToString(practic.createdAt)}</td>
