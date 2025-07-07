@@ -97,7 +97,7 @@ const PracticalWorkPage = () => {
             
             
             <div className="finish_text" style={{marginTop: '25px'}}>"{queryParams.get('title')}"</div>
-
+            <div className="practical_task_text">{queryParams.get('task')}</div>
             {
                 
 
@@ -106,7 +106,7 @@ const PracticalWorkPage = () => {
                     {
                         !send &&
                         <div>
-                            <div className="finish_text" style={{marginTop: '25px'}}>Прикрепите документ с выполненным заданием через форму ниже:</div>
+                            <div className="finish_text" style={{marginTop: '40px'}}>Прикрепите документ с выполненным заданием через форму ниже:</div>
                             <div className='MakeProgram_Punct_Material' style={{marginTop: '25px'}}>
                                 <input id="one" onChange={(e ) => {setFile( e.target.files[0]); setFileName(e.target.files[0].name)}} accept='.docx' className='MakeProgram_Punct_Material_input'  type="file"/>
                                 <label htmlFor="one" className='MakeProgram_Punct_Material_Plus'>{fileName?<img src={word}/>:'+'}</label>
@@ -135,10 +135,12 @@ const PracticalWorkPage = () => {
                         
                     }
                     {
-                        typeof practicWork.test == 'object' ? '' : practicWork.test ? 
-                        <div className='tester'>Зачет</div>
-                        : 
-                        <div className='failure'>Незачет</div> 
+                        
+                        typeof practicWork.test != 'boolean' ? '' 
+                        : practicWork.test ? 
+                            <div className='tester'>Зачет</div>
+                            : 
+                            <div className='failure'>Незачет</div> 
                     }
 
                 </div>

@@ -101,6 +101,7 @@ const MakeProgram = () => {
                             test_id: null,
                             test_title: null,
                             practical_work: null,
+                            practical_work_task: null,
                         }
                     ]
                     
@@ -226,6 +227,7 @@ const MakeProgram = () => {
                     test_id: null,
                     test_title: null,
                     practical_work: null,
+                    practical_work_task: null,
                 }
             ]
             
@@ -279,6 +281,7 @@ const MakeProgram = () => {
                 test_id: null,
                 test_title: null,
                 practical_work: null,
+                practical_work_task: null,
             }
             setPunctId(punct_ides)
             
@@ -553,7 +556,7 @@ var xhr = new XMLHttpRequest();
                                                 }
                                                
                                                 <div className='MakeProgram_Punct_Material'>
-                                                    <button onClick={() => setShowPracticalWork({show:true, i: i, j: j, remake: punct.practical_work})} className='MakeProgram_Punct_Material_Plus' id={"button_practic_" + i + "_" + j} >{punct.practical_work?<img width="20px" src={practic_work_img}/>:'+'}</button>
+                                                    <button onClick={() => setShowPracticalWork({show:true, i: i, j: j, remake: {practical_work: punct.practical_work, practical_work_task: punct.practical_work_task}})} className='MakeProgram_Punct_Material_Plus' id={"button_practic_" + i + "_" + j} >{punct.practical_work?<img width="20px" src={practic_work_img}/>:'+'}</button>
                                                     <div className='MakeProgram_Punct_Material_Text'>{punct.practical_work? punct.practical_work.slice(0, 10) + "..."  :'Добавить практическую работу'}</div>
                                                 </div>
                                             </div>

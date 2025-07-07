@@ -126,6 +126,16 @@ const CoursePage = observer(() => {
     const navigate = useNavigate();
 
 
+    const makePracticalURL = (practical_work, practical_work_task, courseItems_id, themesStatistic_id, puncts_id) => {
+
+        
+        practical_work = encodeURIComponent(practical_work)
+        practical_work_task = encodeURIComponent(practical_work_task)
+       
+        
+        return `${PRACTICAL_WORK_ROUTE}?title=${practical_work}&task=${practical_work_task}&theme_id=${courseItems_id}&theme_statistic_id=${themesStatistic_id}&punct_id=${puncts_id}`
+    }
+
     return (
     
         <div className="content">
@@ -209,7 +219,7 @@ const CoursePage = observer(() => {
                             </div>
                         </div>
                         <div className="course_item_hide">
-                            {puncts.map(({title, video_src, lection_src, test_id, id, practical_work}, j) => 
+                            {puncts.map(({title, video_src, lection_src, test_id, id, practical_work, practical_work_task}, j) => 
                                 <div className="course_item_hide_punct">
                                     <div className="course_item_hide_title">{i+1}.{j+1} {title}</div>
                                     <div className="course_item_hide_materials">
@@ -233,7 +243,7 @@ const CoursePage = observer(() => {
                                         </Link>
                                         }
                                         {practical_work && 
-                                            <Link to={PRACTICAL_WORK_ROUTE + '?title=' + practical_work + '&theme_id=' + courseItems[i].id + '&theme_statistic_id=' + statistic.themesStatistic[i].id + '&punct_id=' + puncts[j].id} className="course_item_download">
+                                            <Link to={makePracticalURL(practical_work, practical_work_task, courseItems[i].id, statistic.themesStatistic[i].id, puncts[j].id)} className="course_item_download">
                                                 <img width="20px" src={practic_work_img} alt=""/>
                                                 <div>Практическая<br></br> работа</div>
                                             </Link>

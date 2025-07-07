@@ -224,12 +224,12 @@ const ViewProgram = observer(() => {
                                                     <div>Тест</div>
                                                 </Link>
                                                 }
-                                                {practical_work && 
-                                                <Link to={'/admin/programs/test/' + test_id} className="course_item_download">
+                                                {/* {practical_work && 
+                                                <Link to={PRACTICAL_WORK_ROUTE + '?title=' + practical_work + '&theme_id=' + courseItems[i].id + '&theme_statistic_id=' + statistic.themesStatistic[i].id + '&punct_id=' + puncts[j].id}  className="course_item_download">
                                                     <img src={test_src} alt=""/>
                                                     <div>Практическая работа</div>
                                                 </Link>
-                                                }
+                                                } */}
                                             </div>
                                         </div>
                                     )}
