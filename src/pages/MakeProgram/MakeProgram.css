@@ -209,7 +209,7 @@
     margin-left: 10%;
     margin-top: 25px;
     display: flex;
-    align-items: center;
+    align-items: start;
 }
 
 .MakeProgram_Punct_Material {
@@ -246,6 +246,12 @@
     margin-top: 10px;
 }
 
+.MakeProgram_Punct_Material_Text.blue {
+    color: rgb(0 123 255);
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
 .MakeProgram_Punct_Material_Plus {
     width: 30px;
     height: 30px;
@@ -254,7 +260,7 @@
     align-items: center;
     font-size: 25px;
     background-color: transparent;
-    border: 1px solid rgb(142, 142, 142);
+   
     border-radius: 2px;
     margin-left: 10px;
     cursor: pointer;
@@ -262,7 +268,7 @@
 }
 
 .MakeProgram_Punct_Material_Plus:hover {
-    background-color: rgb(55, 139, 241);
+    background-color: rgb(198, 198, 198);
     color: #fff;
 }
 

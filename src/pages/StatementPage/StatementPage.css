@@ -4,8 +4,14 @@
     width: 100%;
 }
 
+.block_table_inner {
+    border: 1px solid rgb(173, 173, 173);
+    border-radius: 4px;
+}
+
 .block_table_th {
     text-align: left;
+    background-color: rgb(221, 221, 221);
     padding: 10px;
 }
 
@@ -17,5 +23,5 @@
 
 .block_table_td.green {
 
-    background-color: rgb(171, 255, 182);
+    background-color: rgb(255, 255, 255);
 }

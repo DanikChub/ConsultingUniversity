@@ -85,12 +85,12 @@ const AdminDocumentsPage = () => {
                         <table className="admin_table">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Фамилия Имя Отчество</th>
-                                    <th>Куда доставить</th>
-                                    <th class='th_orh'>Номер</th>
-                                    <th>Почта</th>
-                                    <th class='th_orh'>Дата окончания обучения</th>
+                                    <th style={{width: '20%'}}>Тип документа</th>
+                                    <th style={{display: 'table-cell', width: "15%"}}>Номер</th>
+                                    <th style={{display: 'table-cell', width: "15%"}}>Дата выдачи</th>
+                                    <th style={{display: 'table-cell', width: "28%"}}>ФИО</th>
+                                    <th style={{display: 'table-cell', width: "30%"}}>Организация</th>
+                                  
                                     
                                 </tr>
                             </thead>
@@ -102,24 +102,24 @@ const AdminDocumentsPage = () => {
                                     filteredUsers.map((user, i) => 
                                         
                                         <tr>
-                                            <td>#{user.id}</td>
-                                            <td>
+                                            <td onClick={() => {copyTextToClipboard(user.diplom?'':user.address)}}>{user.diplom?'Диплом':'Удостоверение'}</td>
+                                            <td >
+                                                <a href={`tel:${user.number}`}>{user.number}</a>
+                                            </td>
+                                            <td style={{display: 'table-cell', width: "20%"}}>
+                                                {dateToString(user.graduation_date)}
+                                            </td>
+                                            <td class='th_orh'>
+                                                
                                                 <Link to={"/admin/listeners/" + user.id}>
                                                     <div dangerouslySetInnerHTML={{__html: user.name.replace(user.yellow_value, "<b class=\"background-yellow\">"+user.yellow_value+"</b>")}}/>
                                                 </Link>
                                             </td>
-                                            <td onClick={() => {copyTextToClipboard(user.diplom?'':user.address)}}>
-                                                {user.diplom?'Заберет сам':user.address}
-                                            </td>
-                                            <td class='th_orh'>
-                                                <a href={`tel:${user.number}`}>{user.number}</a>
-                                                
-                                            </td>
                                             <td>
-                                                <a href={`mailto:${user.email}`}>{user.email}</a>
+                                                <div>{user.organiztion}</div>
                                                
                                             </td>
-                                            <td class='th_orh'>{dateToString(user.graduation_date)}</td>
+                                           
                                             
                                             
                                         </tr>

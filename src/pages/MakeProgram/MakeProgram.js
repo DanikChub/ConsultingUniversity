@@ -11,10 +11,11 @@ import CreateTest from '../../components/CreateTest/CreateTest';
 import { getOneTest } from '../../http/testAPI';
 import CreatePracticalWork from '../../components/CreatePracticalWork/CreatePracticalWork';
 
-import word from "../../assets/imgs/word.png"
-import test_img from "../../assets/imgs/test.png"
+import word from "../../assets/imgs/word_blue.png"
+import pdf from "../../assets/imgs/pdf.png"
+import test_img from "../../assets/imgs/test_blue.png"
 import practic_work_img from "../../assets/imgs/practic_work.png"
-import video_play from "../../assets/imgs/video_play.png"
+import video_play from "../../assets/imgs/video_play_blue.png"
 
 const MakeProgram = () => {
     const params = useParams();
@@ -500,14 +501,14 @@ var xhr = new XMLHttpRequest();
                                     <div className='MakeProgram_Punct_Materials'>
                                         <div className='MakeProgram_Punct_Material'>
                                             <input id={i} onChange={(e ) => presentationSrcHandler(i, e.target.files[0])} accept='.pdf' className='MakeProgram_Punct_Material_input'  type="file"/>
-                                            <label htmlFor={i} className='MakeProgram_Punct_Material_Plus'>+</label>
-                                            <div className='MakeProgram_Punct_Material_Text'>{theme.presentation_src?theme.presentation_title:'Добавить презентацию'}</div>
+                                            <label htmlFor={i} className='MakeProgram_Punct_Material_Plus'>{theme.presentation_src?<img height={'28px'} src={pdf}/>:'+'}</label>
+                                            <div className={`MakeProgram_Punct_Material_Text ${theme.presentation_src? 'blue': ''}`}>{theme.presentation_src?theme.presentation_title:'Добавить презентацию'}</div>
                                         </div>
                                         <div className='MakeProgram_Punct_Material'>
                                             <input id={"lection_" + i} onChange={(e ) => themeLectionHandler(i, e.target.files[0])} accept='.docx' className='MakeProgram_Punct_Material_input'  type="file"/>
                                             
-                                            <label htmlFor={"lection_" + i} className='MakeProgram_Punct_Material_Plus'>{theme.lection_src?<img src={word}/>:'+'}</label>
-                                            <div className='MakeProgram_Punct_Material_Text'>{theme.lection_src?theme.lection_title:'Добавить лекцию'}</div>
+                                            <label htmlFor={"lection_" + i} className='MakeProgram_Punct_Material_Plus'>{theme.lection_src?<img height='28px' src={word}/>:'+'}</label>
+                                            <div className={`MakeProgram_Punct_Material_Text ${theme.lection_src? 'blue': ''}`}>{theme.lection_src?theme.lection_title:'Добавить лекцию'}</div>
                                         </div>
                                         {/* <div className='MakeProgram_Punct_Material'>
                                             <button onClick={() => setShowVideo({show:true, i: i, j: j, remake: theme.video_src})} className='MakeProgram_Punct_Material_input' id={"button" + i + "_" + j} ></button>
@@ -536,28 +537,28 @@ var xhr = new XMLHttpRequest();
                                             <div className='MakeProgram_Punct_Materials'>
                                                 <div className='MakeProgram_Punct_Material'>
                                                     <button onClick={() => setShowVideo({show:true, i: i, j: j, remake: punct.video_src})} className='MakeProgram_Punct_Material_input' id={"button" + i + "_" + j} ></button>
-                                                    <label onContextMenu={() => navigateToUrl(punct.video_src)} htmlFor={"button" + i + "_" + j} className='MakeProgram_Punct_Material_Plus'>{punct.video_src?<img src={video_play}/>:'+'}</label>
-                                                    <div className='MakeProgram_Punct_Material_Text'>{punct.video_src? punct.video_src.slice(8, 18) + "..."  :'Добавить видео'}</div>
+                                                    <label onContextMenu={() => navigateToUrl(punct.video_src)} htmlFor={"button" + i + "_" + j} className='MakeProgram_Punct_Material_Plus'>{punct.video_src?<img height='28px' src={video_play}/>:'+'}</label>
+                                                    <div className={`MakeProgram_Punct_Material_Text ${punct.video_src? 'blue': ''}`}>{punct.video_src? punct.video_src.slice(8, 18) + "..."  :'Добавить видео'}</div>
                                                 </div>
                                                 <div className='MakeProgram_Punct_Material'>
                                                     <input id={i + "_" + j} onChange={(e ) => inputPunctsHandler(i, j, "lection", e.target.files[0])} accept='.docx' className='MakeProgram_Punct_Material_input'  type="file"/>
                                                     
-                                                    <label onContextMenu={() => remakeFileName(process.env.REACT_APP_API_URL + punct.lection_src, punct.lection_title)} htmlFor={i + "_" + j} className='MakeProgram_Punct_Material_Plus'>{punct.lection_src?<img src={word}/>:'+'}</label>
-                                                    <div className='MakeProgram_Punct_Material_Text'>{punct.lection_src?punct.lection_title:'Добавить лекцию'}</div>
+                                                    <label onContextMenu={() => remakeFileName(process.env.REACT_APP_API_URL + punct.lection_src, punct.lection_title)} htmlFor={i + "_" + j} className='MakeProgram_Punct_Material_Plus'>{punct.lection_src?<img height={'28px'} src={word}/>:'+'}</label>
+                                                    <div className={`MakeProgram_Punct_Material_Text ${punct.lection_src? 'blue': ''}`}>{punct.lection_src?punct.lection_title:'Добавить лекцию'}</div>
                                                 </div>
                                                 {
                                                     theme.have_test && !punct.test_id ?
                                                     ''
                                                     :
                                                     <div className='MakeProgram_Punct_Material'>
-                                                        <button onClick={() => showTestClasses(true, i, j, punct.test_id)} className='MakeProgram_Punct_Material_Plus' id={"button_test_" + i + "_" + j} >{punct.test_id?<img src={test_img}/>:'+'}</button>
-                                                        <div className='MakeProgram_Punct_Material_Text'>{punct.test_title? punct.test_title.length>10? punct.test_title.slice(0, 10) + "..." : punct.test_title  : "Создать тест"}</div>
+                                                        <div onClick={() => showTestClasses(true, i, j, punct.test_id)} className='MakeProgram_Punct_Material_Plus' id={"button_test_" + i + "_" + j} >{punct.test_id?<img height={'28px'} src={test_img}/>:'+'}</div>
+                                                        <div className={`MakeProgram_Punct_Material_Text ${punct.test_title? 'blue': ''}`}>{punct.test_title? punct.test_title.length>10? punct.test_title.slice(0, 10) + "..." : punct.test_title  : "Создать тест"}</div>
                                                     </div>
                                                 }
                                                
                                                 <div className='MakeProgram_Punct_Material'>
-                                                    <button onClick={() => setShowPracticalWork({show:true, i: i, j: j, remake: {practical_work: punct.practical_work, practical_work_task: punct.practical_work_task}})} className='MakeProgram_Punct_Material_Plus' id={"button_practic_" + i + "_" + j} >{punct.practical_work?<img width="20px" src={practic_work_img}/>:'+'}</button>
-                                                    <div className='MakeProgram_Punct_Material_Text'>{punct.practical_work? punct.practical_work.slice(0, 10) + "..."  :'Добавить практическую работу'}</div>
+                                                    <div onClick={() => setShowPracticalWork({show:true, i: i, j: j, remake: {practical_work: punct.practical_work, practical_work_task: punct.practical_work_task}})} className='MakeProgram_Punct_Material_Plus' id={"button_practic_" + i + "_" + j} >{punct.practical_work?<img height="28px" src={practic_work_img}/>:'+'}</div>
+                                                    <div className={`MakeProgram_Punct_Material_Text ${punct.practical_work?'blue': ''}`}>{punct.practical_work? punct.practical_work.slice(0, 10) + "..."  :'Добавить практическую работу'}</div>
                                                 </div>
                                             </div>
                                             

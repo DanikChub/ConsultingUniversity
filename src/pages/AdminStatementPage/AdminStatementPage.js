@@ -26,10 +26,12 @@ const AdminStatementPage = () => {
         programId: null,
         themesStatistic: []
     });
+    const [userName, setUserName] = useState('')
 
 
     useEffect(() => {
         getUserById(params.id).then(user => {
+            setUserName(user.name)
             async function getProgram(id) {
                 let program = await getOneProgram(id)
                 setCourseTitle(program.title);
@@ -59,10 +61,11 @@ const AdminStatementPage = () => {
                 
                 <span>Назад</span>
             </div>
-            <h2>Электронная ведомость №{statistic.id}</h2>
-            <h3>Курс: “{courseTitle}”</h3>
-            <div className="block">
-                <div className="block_inner">
+            <h3>Ведомость</h3>
+            <h3>{userName}</h3>
+            <h3 style={{marginTop: '50px'}}>Курс: <span style={{fontWeight: 'normal'}}>“{courseTitle}”</span></h3>
+            <div>
+                <div className='block_table_inner'>
                     <table className='block_table'>
                         <thead>
                             <tr>
@@ -89,7 +92,7 @@ const AdminStatementPage = () => {
                     </table>
                 </div>
             </div>
-            
+            <div style={{marginTop: '20px'}}><b>Выдан</b> Диплом №{statistic.id}</div>
         </div>
     </div>
     );
