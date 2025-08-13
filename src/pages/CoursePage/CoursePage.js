@@ -237,7 +237,7 @@ const CoursePage = observer(() => {
                                         </Link>
                                         }
                                         {test_id && 
-                                        <Link to={!statistic.themesStatistic[i].well?`/user/course/test/${test_id}?user_id=${userId}&program_id=${userProgramId}&theme_id=${statistic.themesStatistic[i].id}&punct_id=${statistic.themesStatistic[i].punctsStatistic[0].id}`:FINISH_TEST_ROUTE + '?look=true'} className="course_item_download">
+                                        <Link to={!statistic.themesStatistic[i].well?`/user/course/test/${test_id}?user_id=${userId}&program_id=${userProgramId}&theme_id=${statistic.themesStatistic[i].id}&punct_id=${statistic.themesStatistic[i].punctsStatistic[0].id}`:FINISH_TEST_ROUTE + '?look=true' + '&user_id=' + userId + '&test_id=' + test_id} className="course_item_download">
                                             <img src={test_src} alt=""/>
                                             <div>Тест</div>
                                         </Link>

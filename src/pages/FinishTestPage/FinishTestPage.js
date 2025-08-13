@@ -6,11 +6,17 @@ import "./FinishTestPage.css"
 import complete from '../../assets/imgs/complete.png';
 import fall from '../../assets/imgs/fall.jpg';
 import { COURSE_ROUTE, TEST_ROUTE } from '../../utils/consts';
+import { getTestStatistic } from '../../http/testAPI';
 
 const FinishTestPage = () => {
     const navigate = useNavigate();
     const [params] = useSearchParams();
 
+    useEffect(() => {
+        getTestStatistic(params.get("user_id"), params.get("test_id")).then(data => {
+            console.log(data)
+        })
+    }, [])
    
     return (
         <div className="content">

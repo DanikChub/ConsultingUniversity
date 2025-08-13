@@ -99,7 +99,7 @@ const TestPage = () => {
            
             
       
-        // updateTestStatistic(queryParams.get("user_id"), test.id, userAnswers)
+        updateTestStatistic(queryParams.get("user_id"), test.id, userAnswers)
         if (correct_answers/test.puncts.length > 0.75) {
             
 

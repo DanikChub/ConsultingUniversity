@@ -7,10 +7,11 @@ import word from "../../assets/imgs/word.png"
 import video_play from "../../assets/imgs/video_play.png"
 import presentation from "../../assets/imgs/presentation.png"
 import check from "../../assets/imgs/check.png"
+import practic_work_img from "../../assets/imgs/practic_work.png"
 import test_src from "../../assets/imgs/test.png"
 import { Context } from '../../index';
 import { getOneProgram } from '../../http/programAPI';
-import { ADMIN_VIEW_VIDEO, TEST_ROUTE, VIDEO_ROUTE, LECTION_ROUTE } from '../../utils/consts';
+import { ADMIN_VIEW_VIDEO, TEST_ROUTE, VIDEO_ROUTE, LECTION_ROUTE, PRACTICAL_WORK_ROUTE, ADMIN_VIEW_PRACTICAL_WORKS_ROUTE } from '../../utils/consts';
 import { setWellPracticalWorks, setWellTest, setWellVideos } from '../../http/userAPI';
 import { observer } from 'mobx-react-lite';
 import { getStatistic, updatePracticalWorks, updateVideos } from '../../http/statisticAPI';
@@ -113,6 +114,16 @@ const ViewProgram = observer(() => {
         )));
     }  
 
+    const makePracticalURL = (practical_work, practical_work_task, courseItems_id, themesStatistic_id, puncts_id) => {
+
+        
+        practical_work = encodeURIComponent(practical_work)
+        practical_work_task = encodeURIComponent(practical_work_task)
+       
+        
+        return `${ADMIN_VIEW_PRACTICAL_WORKS_ROUTE}?title=${practical_work}&task=${practical_work_task}&theme_id=${courseItems_id}&theme_statistic_id=${themesStatistic_id}&punct_id=${puncts_id}`
+    }
+
     const navigate = useNavigate();
     return (
         <div className="content">
@@ -194,7 +205,7 @@ const ViewProgram = observer(() => {
                                     </div>
                                 </div>
                                 <div className="course_item_hide">
-                                    {puncts.map(({title, video_src, lection_src, id, test_id, practical_work}, j) => 
+                                    {puncts.map(({title, video_src, lection_src, id, test_id, practical_work, practical_work_task}, j) => 
                                         <div className="course_item_hide_punct">
                                             <div className="course_item_hide_title">{i+1}.{j+1} {title}</div>
                                             <div className="course_item_hide_materials">
@@ -224,12 +235,12 @@ const ViewProgram = observer(() => {
                                                     <div>Тест</div>
                                                 </Link>
                                                 }
-                                                {/* {practical_work && 
-                                                <Link to={PRACTICAL_WORK_ROUTE + '?title=' + practical_work + '&theme_id=' + courseItems[i].id + '&theme_statistic_id=' + statistic.themesStatistic[i].id + '&punct_id=' + puncts[j].id}  className="course_item_download">
-                                                    <img src={test_src} alt=""/>
-                                                    <div>Практическая работа</div>
-                                                </Link>
-                                                } */}
+                                                {practical_work && 
+                                                    <Link to={makePracticalURL(practical_work, practical_work_task, null, null, null)} className="course_item_download">
+                                                        <img width="20px" src={practic_work_img} alt=""/>
+                                                        <div>Практическая<br></br> работа</div>
+                                                    </Link>
+                                                }
                                             </div>
                                         </div>
                                     )}

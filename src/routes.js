@@ -2,7 +2,7 @@ import MainPage from './pages/MainPage/MainPage'
 import CoursePage from './pages/CoursePage/CoursePage'
 import TestPage from './pages/TestPage/TestPage'
 import UserPage from './pages/UserPage/UserPage'
-import { ADMIN_APPLICATIONS_ROUTE, ADMIN_CHANGE_USER, ADMIN_LISTENERS_ROUTE, ADMIN_PROGRAMS_ROUTE, ADMIN_REGISTRATE_USER, ADMIN_ROUTE, ADMIN_VIEW_PROGRAM, ADMIN_VIEW_TEST, ADMIN_VIEW_VIDEO, ADMIN_VIEW_ЕУЫЕ, AUTH_ROUTE, CHANGE_PROGRAM_ROUTE, COURSE_ROUTE, FINISH_TEST_ROUTE, FORGOT_PASSWORD_ROUTE, MAIN_ROUTE, MAKE_PROGRAM_ROUTE, PRACTICAL_WORK_ROUTE, TEST_ROUTE, USER_ROUTE, VIDEO_ROUTE, LECTION_ROUTE, ADMIN_PRACTICAL_WORKS_ROUTE, STATEMENT_ROUTE, ADMIN_ONE_PRACTICAL_WORKS_ROUTE, ADMIN_VIEW_LECTION, ADMIN_USER_ROUTE, ADMIN_STATEMENT_USER, ADMIN_ADMINISTRATORS_ROUTE, ADMIN_DOCUMENTS_ROUTE } from './utils/consts'
+import { ADMIN_APPLICATIONS_ROUTE, ADMIN_CHANGE_USER, ADMIN_LISTENERS_ROUTE, ADMIN_PROGRAMS_ROUTE, ADMIN_REGISTRATE_USER, ADMIN_ROUTE, ADMIN_VIEW_PROGRAM, ADMIN_VIEW_TEST, ADMIN_VIEW_VIDEO, ADMIN_VIEW_ЕУЫЕ, AUTH_ROUTE, CHANGE_PROGRAM_ROUTE, COURSE_ROUTE, FINISH_TEST_ROUTE, FORGOT_PASSWORD_ROUTE, MAIN_ROUTE, MAKE_PROGRAM_ROUTE, PRACTICAL_WORK_ROUTE, TEST_ROUTE, USER_ROUTE, VIDEO_ROUTE, LECTION_ROUTE, ADMIN_PRACTICAL_WORKS_ROUTE, STATEMENT_ROUTE, ADMIN_ONE_PRACTICAL_WORKS_ROUTE, ADMIN_VIEW_LECTION, ADMIN_USER_ROUTE, ADMIN_STATEMENT_USER, ADMIN_ADMINISTRATORS_ROUTE, ADMIN_DOCUMENTS_ROUTE, ADMIN_VIEW_PRACTICAL_WORKS_ROUTE } from './utils/consts'
 import LoginPage from './pages/LoginPage/LoginPage'
 import AdminPage from './pages/AdminPage/AdminPage'
 import AdminProgramsPage from './pages/AdminProgramsPage/AdminProgramsPage'
@@ -26,6 +26,7 @@ import AdminUserPage from './pages/AdminUserPage/AdminUserPage'
 import AdminStatementPage from './pages/AdminStatementPage/AdminStatementPage'
 import AdministratorsPage from './pages/AdministratorsPage/AdministratorsPage'
 import AdminDocumentsPage from './pages/AdminDocumentsPage/AdminDocumentsPage'
+import ViewPracticalWorkPage from './pages/ViewPracticalWorkPage/ViewPracticalWorkPage'
 
 
 export const authRoutes = [
@@ -101,6 +102,10 @@ export const adminRoutes = [
     {
         path: ADMIN_VIEW_PROGRAM,
         Component: <ViewProgram/>
+    },
+    {
+        path: ADMIN_VIEW_PRACTICAL_WORKS_ROUTE,
+        Component: <ViewPracticalWorkPage/>
     },
     {
         path: ADMIN_VIEW_TEST,
