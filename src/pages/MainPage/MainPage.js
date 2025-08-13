@@ -66,7 +66,29 @@ const MainPage = () => {
                         <div class="top_nav_links">
                             <div class="top_nav_number">Позвонить: 8 800 550 5690</div>
                             
-                            
+                                
+                            {user.isAuth ? 
+                                user.user.role == "ADMIN" ? 
+                                <div style={{display: "flex"}}>
+                                    <Link to={ADMIN_ROUTE} className="top_nav_sign_in">
+                                    
+                             
+                                        <span>Личный кабинет</span>  
+                                    </Link>
+                                    <Link to={MAIN_ROUTE} style={{marginLeft: "10px"}} onClick={handlerClick} className="top_nav_sign_in">Выйти</Link>
+                                </div>
+                                :
+                                    <Link to={USER_ROUTE} className="top_nav_sign_in">
+                                        
+                                    <span>Личный кабинет</span>  
+                                    </Link> 
+                                    
+                                :
+                                <Link to={AUTH_ROUTE} className="top_nav_sign_in">
+                                    
+                                    <span>Войти</span>  
+                                </Link>
+                            }  
                            
                         </div>
                     </div>
