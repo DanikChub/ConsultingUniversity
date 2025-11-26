@@ -1,0 +1,125 @@
+
+
+
+.block {
+    background-color: #D9D9D9;
+    padding: 36px 44px;
+    border-radius: 31px;
+}
+
+.block_inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.block_description {
+    width: 80%;
+}
+.block_title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #2C3E50;
+}
+.block_statistic {
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+}
+.block_statistic_item {
+    font-weight: 300;
+    font-size: 20px;
+    color: #2C3E50;
+}
+.block_statistic_item_value {
+    font-weight: 500;
+}
+.content_program_well_img {
+}
+
+/* COURSE */
+
+
+.course {
+    margin-top: 91px;
+}
+.course_item {
+    border-bottom: 1px solid #AEAEAE;
+    max-height: 66px;
+    overflow: hidden;
+    transition: .3s ease-in-out;
+}
+.course_item.active {
+    max-height: 1000px;
+}
+
+.course_item_main {
+    height: 66px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: .2s linear;
+}
+.course_item:nth-child(1) {
+    border-top: 1px solid #AEAEAE;
+}
+.course_item_main:hover {
+    background-color: rgb(247, 247, 247);
+
+}
+.course_item_description {
+    display: flex;
+    width: 85%;
+}
+.course_item_marker {
+    font-size: 16px;
+    color: #2C3E50;
+    font-weight: 500;
+}
+.course_item_title {
+    margin-left: 5px;
+    font-size: 16px;
+    color: #2C3E50;
+    font-weight: 500;
+}
+.course_item_panel {
+    display: flex;
+    align-items: center;
+    width: 12%;
+    justify-content: space-between;
+}
+.course_item_download {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.course_item_download div {
+    font-size: 10px;
+    font-weight: 300;
+    color: #000;
+}
+.course_item_completed {
+}
+
+
+.course_item_hide {
+    margin-left: 57px;
+}
+.course_item_hide_punct {
+    margin-top: 5px;
+}
+.course_item_hide_title {
+    font-weight: 400;
+    font-size: 16px;
+    color: #2C3E50;
+}
+.course_item_hide_materials {
+    margin-top: 10px;
+    margin-left: 20px;
+    display: flex;
+}
+
+.course_item_hide_materials .course_item_download {
+    margin-left: 15px;
+}

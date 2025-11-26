@@ -1,0 +1,54 @@
+
+
+.login_form {
+    margin: 0 auto;
+    width: 400px;
+    height: max-content;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 2px 2px 10px 2px rgba(0, 0, 0, 0.181);
+    margin-top: 150px;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 150px;
+}
+
+.login_form_input {
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    border-bottom: 1px solid rgb(173, 173, 173);
+}
+
+.login_form_input:nth-child(1) {
+    margin-top: 40px;
+}
+
+.login_form_button {
+    margin: 0 auto;
+    margin-top: 40px;
+    padding: 12px 24px;
+    text-align: center;
+    color: #fff;
+    background-color: #2980B9;
+    border-radius: 4px;
+
+    transition: .2s linear;
+    cursor: pointer;
+}
+
+.login_form_button:hover {
+    background-color: rgb(0, 0, 0);
+}
+
+.login_form_forgot_pass {
+    margin-top: 20px;
+}
+
+
+.login_form_message {
+    margin-top: 20px;
+    color: rgb(251, 68, 68);
+}

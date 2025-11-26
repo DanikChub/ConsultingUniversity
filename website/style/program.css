@@ -1,0 +1,93 @@
+.intro {
+    position: relative;
+    height: 555px;
+    width: 100%;
+    background: url('../imgs/bg/intro_programs.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    overflow: hidden;
+
+}
+
+
+.big_intro_container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+}
+
+.check_text {
+    font-size: 16px;
+}
+
+
+.intro_title {
+    color: #fff;
+    font-weight: 700;
+    font-size: 62px;
+
+}
+
+.intro_subtitle {
+    color: #fff;
+    font-weight: 400;
+    font-size: 56px;
+}
+
+.kit_title {
+    margin-top: 90px;
+    font-weight: 600;
+    font-size: 24px;
+    color: #2C3E50;
+}
+
+.kit_container {
+    margin-top: 50px;
+}
+
+.kit_slider {
+    cursor: -webkit-grab;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+  
+}
+
+.kit_slider_track {
+    overflow: hidden;
+   
+}
+
+.kit_slider_slides {
+    position: relative;
+    width: 100%;
+    list-style: none;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+    -ms-touch-action: pan-Y;
+    touch-action: pan-Y;
+    padding: 0;
+    
+    margin: 0;
+    justify-content: start;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 32px;
+
+    -ms-flex-wrap: nowrap;
+    flex-wrap: wrap;
+    will-change: transform;
+
+}
+
+.kit_slide {
+
+    width: 100%;
+    border: 1px solid #000;
+}

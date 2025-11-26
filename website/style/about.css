@@ -1,0 +1,220 @@
+.intro {
+    position: relative;
+    height: 555px;
+    width: 100%;
+    background: url('../imgs/bg/intro_about.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    overflow: hidden;
+
+}
+
+.big_intro_container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+}
+
+.check_text {
+    font-size: 16px;
+}
+
+
+.intro_title {
+    color: #fff;
+    font-weight: 700;
+    font-size: 62px;
+
+}
+
+.intro_subtitle {
+    color: #fff;
+    font-weight: 400;
+    font-size: 56px;
+}
+
+.about_us {
+    margin-top: 93px;
+}
+
+.about_us_title {
+    text-align: center;
+    font-weight: 800;
+    font-size: 24px;
+    color: #2C3E50;
+}
+.about_us_text {
+    margin-top: 32px;
+    color: #2C3E50;
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+.about_us_text b {
+    font-weight: 600;
+}
+
+.about_us_text .b {
+    font-weight: 800;
+    color: #2980B9;
+}
+
+.about_us_text span {
+    color: #2980B9;
+}
+
+
+.about_project {
+    margin-top: 110px;
+}
+.about_project_products {
+    margin-top: 62px;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+}
+.about_project_product_text {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    font-weight: 600;
+    font-size: 16px;
+    color: #2C3E50;
+    width: 30%;
+    text-align: end;
+}
+.about_project_product {
+    background-color: #D9D9D9;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    padding: 26px;
+    width: 30%;
+}
+.about_project_product_img {
+    width: 125px;
+ 
+}
+.about_project_product_content {
+    margin-left: 30px;
+}
+.about_project_product_content_title {
+    font-weight: 700;
+    font-size: 36px;
+    color: #2980B9;
+}
+.about_project_product_content_subtitle {
+    font-size: 20px;
+    font-weight: 400;
+    color: #2C3E50;
+}
+.about_project_text {
+    margin-top: 75px;
+    color: #2C3E50;
+    font-size: 16px;
+}
+.adventages {
+    margin-top: 62px;
+}
+.adventages_title {
+    font-size: 24px;
+    color: #2C3E50;
+}
+
+.adventages_title b {
+    font-weight: 900;
+    color: #2980B9;
+}
+.adventages_items {
+    margin-top: 52px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 51px;
+}
+.adventages_item {
+    background-color: #D9D9D9;
+    border-radius: 20px;
+    
+    padding: 38px;
+}
+.adventages_item_text {
+    font-size: 16px;
+    color: #2C3E50;
+}
+
+.adventages_item_text b {
+    font-weight: 600;
+    color: #2980B9;
+}
+
+
+.examples {
+    margin-top: 90px;
+}
+.examples_title {
+    font-size: 24px;
+    color: #2C3E50;
+}
+.examples_items {
+}
+.examples_item {
+    margin-top: 31px;
+    padding: 8px 16px;
+    background-color: #D9D9D9B2;
+    display: flex;
+}
+.examples_item_img {
+    max-height: 30px;
+}
+.examples_item_text {
+    font-size: 16px;
+    margin-left: 36px;
+}
+
+.examples_item_text b {
+    font-weight: 700;
+
+}
+
+
+
+.why {
+    background-color: #D9D9D96E;
+    margin-top: 95px;
+}
+.about_us_title.why {
+    margin-top: 150px;
+    background-color: transparent;
+}
+.why_inner {
+    display: flex;
+}
+.why_img_container {
+    position: relative;
+    width: 40%;
+}
+.why_img {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
+.why_content {
+   margin-top: 55px;
+    margin-bottom: 55px;
+   margin-left: 40px;
+}
+.why_text {
+    font-size: 16px;
+    color: #2C3E50;
+}
+
+.why_text b {
+    font-weight: 600;
+}
+.blue_text {
+    color: #2980B9;
+    font-weight: 700;
+}

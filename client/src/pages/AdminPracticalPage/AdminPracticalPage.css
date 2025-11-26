@@ -1,0 +1,39 @@
+.test_button {
+    padding: 5px 10px;
+    color: #fff;
+    background-color: rgb(38, 186, 38);
+    display: inline-block;
+
+    border-radius: 4px;
+}
+
+.test_button.red {
+    background-color: rgb(244, 68, 68);
+}
+
+.test_button.gray {
+    background-color: rgb(123, 123, 123);
+}
+
+.select {
+    outline: none;
+    border: 1px solid rgb(205, 205, 205);
+    padding: 10px 15px;
+}
+
+option:hover {
+    box-shadow: 0 0 10px 100px orange inset;
+}
+
+.update_button {
+    margin-top: 20px;
+    max-height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.update_button span {
+    margin-right: 5px;
+
+}

@@ -1,0 +1,58 @@
+.course_item {
+    margin-top: 24px;
+}
+
+.course_item_puncts {
+    margin-left: 65px;
+    display: none;
+}
+
+.course_item_punct {
+    margin-top: 10px;
+}
+
+.course_title {
+    margin-top: 35px;
+    color: #2C3E50;
+    
+}
+
+.course_title b {
+    margin-right: 15px;
+}
+
+.course_title svg {
+    margin-right: 10px;
+}
+
+.course_item_puncts.open {
+    display: block;
+}
+
+.course_item_punct  {
+    margin-top: 20px;
+}
+
+.course_item_punct b {
+    margin-right: 23px;
+    color: #2C3E50;
+}
+
+.course_item_title {
+    display: flex;
+    align-items: center;
+}
+
+.course_item_title b {
+    margin-right: 23px;
+    color: #2C3E50;
+}
+
+.course_item_title.open svg {
+    transform: rotate(0);
+}
+
+.course_item_title svg {
+    margin-right: 12px;
+    transform: rotate(-90deg);
+}

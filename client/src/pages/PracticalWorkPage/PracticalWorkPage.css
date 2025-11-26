@@ -1,0 +1,35 @@
+.tester {
+    margin-top: 20px;
+    display: inline-block;
+    background-color: rgb(21, 217, 93);
+    padding: 6px 12px;
+    color: #fff;
+    border-radius: 10px;
+}
+
+.failure {
+    margin-top: 20px;
+    margin-left: 20px;
+    display: inline-block;
+    background-color: rgb(218, 21, 21);
+    padding: 6px 12px;
+    color: #fff;
+    border-radius: 10px;
+}
+
+.practical_task_text {
+    font-size: 16px;
+    margin-top: 10px;
+    margin-left: 30px;
+}
+
+.title_practic {
+    margin-top: 30px;
+    font-size: 22px;
+    color: rgb(61, 61, 61);
+}
+
+.checkout_practic {
+    margin-left: 30px;
+    margin-top: 20px;
+}

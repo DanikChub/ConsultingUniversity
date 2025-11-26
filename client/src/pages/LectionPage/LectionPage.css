@@ -1,0 +1,19 @@
+.lection_page table {
+    border-collapse: collapse;
+}
+
+.lection_page td {
+    border: 1px solid #000;
+    padding: 10px;
+}
+
+.nav_panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 50px;
+}
+
+.nav_panel .back_button {
+    margin-bottom: 0;
+}

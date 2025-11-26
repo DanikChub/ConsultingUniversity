@@ -1,0 +1,93 @@
+import { useEffect, useState } from "react";
+import { User, UsersAPIResponse, PaginationItem } from "../types/user";
+import { getAllUsersWithPage, searchUsers, deleteUser } from "../http/userAPI";
+
+export const useAdminListeners = () => {
+    const [users, setUsers] = useState<User[]>([]);
+    const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [countUsers, setCountUsers] = useState<PaginationItem[]>([]);
+    const [searchInput, setSearchInput] = useState<string>('');
+    const [sortType, setSortType] = useState<number>(0);
+    const [sortDown, setSortDown] = useState<boolean>(true);
+    const sortTypeVariations = ["statistic", "name", "createdAt"];
+
+    const generatePagination = (totalCount: number) => {
+        const pages: PaginationItem[] = [];
+        for (let i = 0; i < Math.ceil(totalCount / 10); i++) {
+            pages.push({ number: i + 1, class: i === 0 ? 'active' : '' });
+        }
+        setCountUsers(pages);
+    };
+
+    const fetchUsers = async (page: number = 1, search?: string) => {
+        setLoading(false);
+        let data: UsersAPIResponse;
+        if (search) {
+            data = await searchUsers(page, search);
+        } else {
+            data = await getAllUsersWithPage(page, sortTypeVariations[sortType], sortDown ? 'DESC' : 'ASC');
+        }
+        generatePagination(data.count);
+        const userList = data.rows.filter(u => u.role === "USER");
+        if (search) userList.forEach(u => u.yellow_value = search);
+        setUsers(userList);
+        setFilteredUsers(userList);
+        setLoading(true);
+    };
+
+    const destroyUser = async (id: number) => {
+        setLoading(false);
+        await deleteUser(id);
+        fetchUsers(1);
+    };
+
+    const handleSearchInput = (value: string) => {
+        if (/[^а-яА-Яa-zA-Z0-9\s]/.test(value)) return;
+        setSearchInput(value);
+        fetchUsers(1, value || undefined);
+    };
+
+    const handleSortButton = (type: number) => {
+        setSortType(type);
+        localStorage.setItem('sort_type', type.toString());
+        setSearchInput('');
+        fetchUsers(1);
+    };
+
+    const handleSortDown = () => {
+        setSortDown(prev => !prev);
+        localStorage.setItem('sort_down', Number(!sortDown).toString());
+        setSearchInput('');
+        fetchUsers(1);
+    };
+
+    const handleClickPagination = (pageIndex: number) => {
+        const updated = countUsers.map((item, i) => ({ ...item, class: i === pageIndex ? 'active' : '' }));
+        setCountUsers(updated);
+        fetchUsers(pageIndex + 1);
+    };
+
+    useEffect(() => {
+        const savedSortType = Number(localStorage.getItem('sort_type')) || 0;
+        const savedSortDown = Boolean(Number(localStorage.getItem('sort_down')));
+        setSortType(savedSortType);
+        setSortDown(savedSortDown);
+        fetchUsers(1);
+    }, []);
+
+    return {
+        users,
+        filteredUsers,
+        loading,
+        countUsers,
+        searchInput,
+        sortType,
+        sortDown,
+        handleSearchInput,
+        handleSortButton,
+        handleSortDown,
+        handleClickPagination,
+        destroyUser
+    };
+};

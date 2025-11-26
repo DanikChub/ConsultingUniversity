@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+.notification {
+    position: absolute;
+    right: -100%;
+    top: 250px;
+    width: 200px;
+    height: 50px;
+    background-color: rgb(63, 175, 59);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    transition: .3s ease-in-out;
+    text-align: center;
+}
+
+.notification.active {
+    right: 50px;
+}
+
+.content {
+    min-height: 55vh;
+}
+
+.cotrol_height {
+    min-width: 60vh;
+}

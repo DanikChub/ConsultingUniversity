@@ -1,0 +1,298 @@
+
+
+.background-yellow {
+    background-color: rgb(238, 238, 62);
+}
+.admin_flex {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+}
+
+.admin_flex.start {
+    justify-content: start;
+}
+.admin_between {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+}
+
+.admin_flex div {
+
+    margin-right: 20px;
+}
+
+.admin_table_container {
+    min-height: 464px;
+}
+.admin_table {
+    
+    margin-top: 34px;
+}
+
+
+
+.admin_table tr th {
+    font-weight: 700;
+    font-size: 12px;
+    color: #2C3E50;
+    text-align: left;
+}
+
+
+.admin_table tr td {
+
+    padding: 7px 0;
+}
+
+.admin_table tr td {
+    font-weight: 400;
+    font-size: 14px;
+    color: #2C3E50;
+    
+}
+
+.admin_table tr td a {
+    color: #2C3E50;
+    transition: .2s linear;
+}
+.admin_table tr td a:hover {
+    color: #307cc8;
+}
+
+.admin_table tr td:nth-child(3) {
+    display: flex;
+    align-items: center;
+   
+    width: 90%;
+}
+.admin_table tr td:nth-child(3) span {
+    margin-left: 5px;
+}
+.progress-bar_container {
+    position: relative;
+    border: 1px solid #2980B9;
+    border-radius: 11px;
+    height: 11px;
+    width: 70%;
+}
+.prorgress-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    background-color: #2980B9;
+    height: 100%;
+    border-radius: 11px;
+
+    width: 0;
+
+    transition: .4s ease-in-out;
+}
+
+.admin_path {
+    font-weight: 400;
+    font-size: 16px;
+    color: #2C3E50;
+}
+.admin_button {
+    border: none;
+    margin-top: 20px;
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 5px 10px;
+    color: #525459;
+    background-color: #D9D9D9;
+    max-width: max-content;
+
+    border-radius: 7px;
+    cursor: pointer;
+    transition: .2s linear;
+}
+
+.admin_button.active {
+    background-color: rgb(45, 145, 203);
+    color: #fff;
+}
+
+.admin_button:hover {
+    background-color: rgb(45, 145, 203);
+    color: #fff;
+}
+
+.deleteButton {
+    text-align: center;
+    margin: 0 auto;
+    padding: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: .2s linear;
+
+}
+.deleteButton:hover {
+    background-color: rgb(241, 77, 77);
+    color: #fff;
+}
+
+.remakeButton {
+    text-align: center;
+    margin: 0 auto;
+    padding: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: .2s linear;
+
+}
+.remakeButton:hover {
+    background-color: rgb(241, 178, 77);
+    color: #fff;
+}
+
+/*ADD_INPUTS*/
+
+.add_input_items {
+    margin-top: 30px;
+    width: 100%;
+}
+.add_input_item {
+    padding: 25px;
+    display: flex;
+    width: 100%;
+    border-bottom: 1px solid #C7C7C7;
+}
+.add_input_item:nth-child(1) {
+    border-top: 1px solid #C7C7C7;
+}
+
+.add_input_item_left {
+    display: flex;
+    align-items: center;
+    width: 28%;
+}
+
+.add_input_item_right {
+    margin-left: 50px;
+    display: flex;
+    align-items: center;
+    width: 72%;
+}
+
+.add_input_item_right  input {
+    margin-left: 10px;
+}
+
+.add_input_item_flex {
+    margin-left: 30px;
+    display: flex;
+}
+
+.checkbox_label {
+    color: #878787
+}
+.add_input_label {
+    min-width: 10%;
+    width: 95px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 14px;
+    color: #334557;
+}
+.add_input {
+    margin-left: 30px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    font-weight: 400;
+    width: 80%;
+}
+
+.add_input_button_container {
+    display: flex;
+    justify-content: end;
+}
+
+.add_input_button {
+    margin-right: 20px;
+}
+
+.add_input_button.back:hover {
+    background-color: rgb(228, 85, 85);
+    color: #fff;
+}
+
+
+
+
+
+
+
+
+
+.statement.admin {
+    width: 50%;
+}
+
+.content_program_well.listener_page {
+    width: 50%;
+}
+
+
+.skeleton tr td {
+    padding: 20px;
+    background-color: rgb(210, 210, 210);
+    animation: fade .6s linear infinite alternate;
+    color: #fff;
+}
+
+@keyframes fade {
+    0% {
+        opacity: .4;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.pagination {
+    padding-left: 0;
+    display: flex;
+
+}
+
+.pagination li {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    list-style-type: none;
+    margin-right: 5px;
+    border: 1px solid rgb(200, 200, 200);
+    transition: .2s linear;
+    cursor: pointer;
+}
+
+.pagination li:hover {
+    background-color:#2980B9;
+    color: #fff;
+}
+
+.pagination li.active {
+    background-color:#2980B9;
+    color: #fff;
+}
+
+@media (max-width: 1260px) {
+    .th_orh {
+        display: none;
+    }
+}
+
+
+.admin_table .active td {
+    color: rgb(95, 143, 255)
+}

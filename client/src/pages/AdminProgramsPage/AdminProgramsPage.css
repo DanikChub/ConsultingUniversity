@@ -1,0 +1,77 @@
+
+.admin_program_item_skelet {
+        background-color: rgb(215, 215, 215);
+        border: none;
+}
+
+.admin_program_item_info {
+        display: flex;
+        justify-content: right;
+}
+
+.admin_program_item_info_users {
+        display: flex;
+       margin-right: 40px;
+}
+
+.admin_program_item_info_users {
+        display: flex;
+}
+
+.admin_program_item_info_users img {
+        margin-right: 10px;
+        object-fit: contain;
+}
+
+.admin_program_item_info_users_text {
+        color:  #2C3E50;
+        font-weight: 400;
+        font-size: 16px;
+}
+
+.admin_program_item_info_price {
+        display: flex;
+        margin-right: 40px;
+}
+
+.admin_program_item_info_price img {
+        margin-right: 10px;
+        object-fit: contain;
+}
+
+.admin_program_item_info_price_text {
+        color:  #2C3E50;
+        font-weight: 400;
+        font-size: 16px;
+}
+
+.context_menu {
+        position: absolute;
+       
+        background-color: #e8e8e8;
+   
+        display: none;
+        z-index: 1000;
+}
+
+.context_menu.show {
+        display: block;
+}
+
+.context_menu_item {
+     
+        padding: 10px 20px;
+        border-bottom: 1px solid #000;
+        cursor: pointer;
+        transition: .2s linear;
+}
+
+.context_menu_item:hover {
+        background-color: #2980B9;
+        color: #fff;
+}
+
+.context_menu_item.red:hover {
+        background-color: rgb(255, 91, 91);
+        color: #fff;
+}

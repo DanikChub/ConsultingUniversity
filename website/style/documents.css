@@ -1,0 +1,70 @@
+.intro {
+    position: relative;
+    height: 555px;
+    width: 100%;
+    background: url('../imgs/bg/intro_documents.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    overflow: hidden;
+
+}
+
+.big_intro_container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+}
+
+.check_text {
+    font-size: 16px;
+}
+
+
+.intro_title {
+    color: #fff;
+    font-weight: 700;
+    font-size: 62px;
+
+}
+
+.intro_subtitle {
+    color: #fff;
+    font-weight: 400;
+    font-size: 56px;
+}
+
+
+
+.documents {
+    margin-top: 93px;
+}
+
+.documents_title {
+    font-weight: 600;
+    font-size: 16px;
+    color: #2C3E50;
+}
+.documents_items {
+    margin-top: 52px;
+}
+.documents_item {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.documents_item_img {
+}
+.documents_item_title {
+    margin-left: 37px;
+    color: #2C3E50;
+    font-size: 16px;
+    text-decoration: none;
+    transition: .2s linear;
+}
+
+.documents_item_title:hover {
+    color: rgb(62, 142, 255);
+}

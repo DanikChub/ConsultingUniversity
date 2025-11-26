@@ -1,0 +1,32 @@
+.admin_table tr th {
+    background-color: #D9D9D9B2;
+    
+    padding: 10px;
+}
+.admin_table tr td {
+
+    padding: 10px;
+ 
+}
+.admin_table tr th:nth-child(1) {
+    width: 20%;
+}
+.admin_table tr th:nth-child(2) {
+    width: 10%;
+}
+.admin_table tr th:nth-child(3) {
+    width: 10%;
+}
+.admin_table tr th:nth-child(4) {
+    width: 30%;
+}
+.admin_table tr th:nth-child(4) {
+    width: 30%;
+}
+.admin_table {
+    border-collapse: collapse;
+}
+
+.admin_table.big {
+    width: 100%;
+}
