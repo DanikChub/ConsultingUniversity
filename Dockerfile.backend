@@ -1,0 +1,9 @@
+# -----------------------------
+# Dockerfile.backend
+# -----------------------------
+FROM node:18
+WORKDIR /app
+
+COPY backend .
+EXPOSE 5000
+CMD ["node", "index.js"]
