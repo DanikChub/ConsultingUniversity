@@ -8,6 +8,7 @@ import video_play from "../../assets/imgs/video_play_blue.png"
 import ButtonAdd from '../../components/ButtonAdd/ButtonAdd';
 import { useProgramForm } from '../../hooks/useProgramForm';
 import { useModals } from '../../hooks/useModals';
+import ButtonRemove from '../ui/ButtonRemove';
 
 const PunctItem = ({ punct, i, j, themesArray, setThemesArray, deletePunct, setShowAddTask, openModal }) => {
 
@@ -177,7 +178,9 @@ const PunctItem = ({ punct, i, j, themesArray, setThemesArray, deletePunct, setS
                         ]
                     }
                 )}/>
-                <b>Тема {j+1}:</b>
+
+                <ButtonRemove onClick={() => deletePunct(i, punct.punct_id)}/>
+                <b>{ punct.test_id ? 'Тест:' : `Тема ${j+1}`}</b>
                 <input onChange={(e) => handleTitleChange(e)} value={punct.title} className={`MakeProgramInput ${validate?'red_input':''}`} placeholder='...........................'/>
             </div>
         </div>

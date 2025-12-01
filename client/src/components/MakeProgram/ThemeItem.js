@@ -4,6 +4,7 @@ import ButtonAdd from '../ButtonAdd/ButtonAdd';
 
 import pdf from "../../assets/imgs/pdf.png"
 import Button from '../ui/Button';
+import ButtonRemove from '../ui/ButtonRemove';
 
 const ThemeItem = ({ theme, i, themesArray, setThemesArray, deleteTheme, addPunct, deletePunct, toggleThemeHide, setShowAddTask, openModal, setPresentationCounter, presentationSrcHandler}) => {
 
@@ -52,6 +53,7 @@ const ThemeItem = ({ theme, i, themesArray, setThemesArray, deleteTheme, addPunc
                         ]
                     }
                 )}/>
+                <ButtonRemove onClick={() => deleteTheme(theme.theme_id)}/>
                 <svg onClick={() => toggleThemeHide(i)} width="16" height="11" viewBox="0 0 16 11" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M14.8633 0.952148L8.11989 9.74902" stroke="#898989" stroke-opacity="0.78" stroke-width="2" stroke-linecap="round"/>
                     <path d="M1.04688 1.31543L7.85366 9.63645" stroke="#898989" stroke-opacity="0.78" stroke-width="2" stroke-linecap="round"/>
