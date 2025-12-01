@@ -12,7 +12,7 @@
 /build
 
 # static
-/static/*
+static/
 
 
 # misc
