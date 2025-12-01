@@ -16,6 +16,10 @@ body {
 
 /* UI */
 
+.send_application_bitrix {
+    margin-top: 50px;
+}
+
 .big_container {
     max-width: 1500px;
     padding-left: 40px;
@@ -26,13 +30,20 @@ body {
 }
 
 .container {
-    max-width: 1052px;
+    max-width: 1500px;
     padding-left: 40px;
     padding-right: 40px;
     width: 100%;
     margin: 0 auto;
 }
 
+.footer_container {
+    max-width: 1200px;
+    padding-left: 40px;
+    padding-right: 40px;
+    width: 100%;
+    margin: 0 auto;
+}
 
 .back_button {
     display: flex;
@@ -624,7 +635,9 @@ a:hover {
 }
 
 .docs_img {
-   position: relative;
+   position: absolute;
+   right: 0;
+   top: 0;
    height: 768px;
    z-index: 4;
 }
@@ -649,9 +662,10 @@ a:hover {
 }
 
 .docs_inner {
-    margin-right: 130px;
+    margin-top: 100px;
+    margin-bottom: 100px;
     text-align: right;
-    width: 85%;
+    width: 70%;
     position: relative;
     z-index: 1;
     display: flex;
@@ -668,7 +682,7 @@ a:hover {
     font-size: 18px;
     margin-top: 30px;
     color: #fff;
-    width: 87%;
+    width: 100%;
 }
 .slider {
     margin-top: 40px;
@@ -837,6 +851,8 @@ a:hover {
     }
 }
 
+
+
 /* RETURN_CALL */
 
 
@@ -874,8 +890,10 @@ a:hover {
 }
 .return_call_form {
     margin: 0 auto;
-    margin-top: 173px;
+    margin-top: 80px;
+    margin-bottom: 80px;
     width: 40%;
+    height: 550px;
     position: relative;
     z-index: 1;
 }
@@ -1146,7 +1164,7 @@ a:hover {
 }
 
 .footer_contacts {
-    margin-top: 160px;
+    margin-top: 140px;
     display: flex;
     justify-content: center;
     align-items: center;
