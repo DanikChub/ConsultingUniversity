@@ -306,8 +306,8 @@ class ProgramController {
       if (number_of_test < program.number_of_test) return next(ApiError.badRequest('Нельзя удалять тесты при изменении программы'));
 
       // update program fields
-      program.img = typeof program.img === 'string' && program.img ? program.img : imgSaved || null;
-      console.log(typeof program.img === 'string' && program.img ? program.img : imgSaved || null)
+      program.img = imgSaved || program.img;
+      console.log("#########################", typeof program.img === 'string' && program.img ? program.img : imgSaved || null, program.img, files.img,  "#########################")
       program.title = title;
       program.short_title = short_title;
       program.price = price;
