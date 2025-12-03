@@ -100,8 +100,7 @@ a:hover {
 
 /*HEADER*/
 
-.header {
-}
+
 .top_nav {
     background-color: #2C3E50;
     width: 100%;
@@ -452,6 +451,11 @@ a:hover {
     height: 110px;
     z-index: 100;
 }
+
+.kit_item_title p {
+    width: 86%;
+}
+
 .kit_item_description {
     margin-top: 20px;
     margin: 15px 30px;
@@ -772,8 +776,6 @@ a:hover {
     font-weight: 400;
     font-size: 16px;
 }
-.faq_button {
-}
 
 
 
@@ -822,8 +824,7 @@ a:hover {
     height: 63px;
     margin-right: 55px;
 }
-.step_item_description {
-}
+
 .step_item_title {
     font-size: 16px;
     font-weight: 600;
@@ -886,8 +887,7 @@ a:hover {
 }
 
 
-.container {
-}
+
 .return_call_form {
     margin: 0 auto;
     margin-top: 80px;
@@ -950,10 +950,7 @@ a:hover {
 .questions {
     margin-top: 113px;
 }
-.container {
-}
-.questions_inner {
-}
+
 .questions_title {
     text-align: center;
     font-weight: 800;
@@ -968,9 +965,7 @@ a:hover {
     display: flex;
     width: 100%;
 }
-.questions_item_img {
-  
-}
+
 .questions_item_description {
     margin-left: 65px;
 }
@@ -1062,8 +1057,7 @@ a:hover {
     margin-bottom: 146px;
 }
 
-.programs_inner {
-}
+
 .programs_title {
     text-align: center;
     font-size: 24px;
@@ -1076,11 +1070,7 @@ a:hover {
     grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 40px;
 }
-.programs_item {
-   
-}
-.program_item_img {
-}
+
 .program_item_title {
     margin-top: 38px;
     font-weight: 600;
@@ -1139,9 +1129,7 @@ a:hover {
     width: 78%;
     justify-content: space-between;
 }
-.footer_item {
 
-}
 .footer_item_title {
     font-weight: 800;
     font-size: 24px;
@@ -1170,8 +1158,7 @@ a:hover {
     align-items: center;
     padding-bottom: 83px;
 }
-.footer_contacts_img {
-}
+
 .footer_contacts_text {
     margin-left: 44px;
     color: #fff;
@@ -1202,9 +1189,7 @@ a:hover {
     text-align: center;
 }
 
-.s_405_img {
 
-}
 .s_405_title {
     font-size: 24px;
     font-weight: bold;
