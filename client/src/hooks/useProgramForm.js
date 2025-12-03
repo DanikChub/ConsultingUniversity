@@ -250,7 +250,7 @@ export const useProgramForm = () => {
         programTitle, setProgramTitle,
         programShortTitle, setProgramShortTitle,
         programPrice, setProgramPrice,
-        programImg, handleImg,
+        programImg, handleImg, setProgramImg,
         themesArray, setThemesArray,
         addTheme, deleteTheme,
         addPunct, deletePunct,
