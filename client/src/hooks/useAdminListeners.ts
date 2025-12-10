@@ -10,6 +10,7 @@ export const useAdminListeners = () => {
     const [searchInput, setSearchInput] = useState<string>('');
     const [sortType, setSortType] = useState<number>(0);
     const [sortDown, setSortDown] = useState<boolean>(true);
+    const [activePage, setActivePage]  = useState(0)
     const sortTypeVariations = ["statistic", "name", "createdAt"];
 
     const generatePagination = (totalCount: number) => {
@@ -65,6 +66,7 @@ export const useAdminListeners = () => {
     const handleClickPagination = (pageIndex: number) => {
         const updated = countUsers.map((item, i) => ({ ...item, class: i === pageIndex ? 'active' : '' }));
         setCountUsers(updated);
+        setActivePage(pageIndex);
         fetchUsers(pageIndex + 1);
     };
 
@@ -88,6 +90,7 @@ export const useAdminListeners = () => {
         handleSortButton,
         handleSortDown,
         handleClickPagination,
-        destroyUser
+        destroyUser,
+        activePage
     };
 };

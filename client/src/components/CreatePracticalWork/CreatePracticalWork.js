@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import "./CreatePracticalWork.css"
+import Modal from "../ui/Modal";
 
 const CreatePracticalWork = ({show, setShow, themesArray, setThemesArray, setCounter}) => {
     const [practicalInput, setPracticalInput] = useState('');
@@ -40,18 +41,18 @@ const CreatePracticalWork = ({show, setShow, themesArray, setThemesArray, setCou
     }
 
     return (
-        <div className={show.show?"modal show": "modal"}>
-            <div className='modal_container video'>
-                <button onClick={() => setShow(false)} className='modal_button'>x</button>
-                <input onChange={(e) => setPracticalInput(e.target.value)} value={practicalInput} type="text" placeholder='Тема практической работы' className='modal_input'/>
-                <textarea onChange={(e) => setPracticalTaskInput(e.target.value)} value={practicalTaskInput} type="text" placeholder='Задание...' className='modal_input test' style={{marginTop: '40px'}}></textarea>
-                <div style={{display: 'flex', marginTop: '20px'}}>
-                    <div onClick={handleClickDelete} className='admin_button red'>Удалить</div>
-                    <div onClick={handleClick} className='admin_button'>Сохранить</div>
-                </div>
-            
+        <Modal open={show.show} onClose={() => setShow({ show: false, i: 0, j: 0 })} width="400px">
+            <input onChange={(e) => setPracticalInput(e.target.value)} value={practicalInput} type="text"
+                   placeholder='Тема практической работы' className='modal_input'/>
+            <textarea onChange={(e) => setPracticalTaskInput(e.target.value)} value={practicalTaskInput} type="text"
+                      placeholder='Задание...' className='modal_input test' style={{marginTop: '40px'}}></textarea>
+            <div style={{display: 'flex', marginTop: '20px'}}>
+                <div onClick={handleClickDelete} className='admin_button red'>Удалить</div>
+                <div onClick={handleClick} className='admin_button'>Сохранить</div>
             </div>
-        </div>
+        </Modal>
+
+
     );
 };
 

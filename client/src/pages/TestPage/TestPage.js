@@ -105,7 +105,7 @@ const TestPage = () => {
 
             updateTests(queryParams.get("user_id"), queryParams.get("program_id"), queryParams.get("punct_id"), queryParams.get("theme_id"))
         } 
-        navigate(FINISH_TEST_ROUTE + '?title=' + test.title + '&questions=' + test.puncts.length + '&correct_answers=' + correct_answers);
+        navigate(FINISH_TEST_ROUTE + '?questions=' + test.puncts.length + '&correct_answers=' + correct_answers + '&test_id=' + params.id);
         
     }
 

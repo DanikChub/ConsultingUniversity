@@ -26,7 +26,7 @@ const AdminListeners: React.FC = () => {
         users, filteredUsers, loading, countUsers,
         searchInput,
         handleSearchInput,
-        handleClickPagination, destroyUser
+        handleClickPagination, destroyUser, activePage
     } = useAdminListeners();
     
     const [contextMenu, setContextMenu] = useState<ContextMenuState>({
@@ -81,10 +81,11 @@ const AdminListeners: React.FC = () => {
                 onDelete={destroyUser}
             />
 
-            {/* <Pagination
+            <Pagination
                 pages={countUsers}
                 onClick={handleClickPagination}
-            /> */}
+                activePage={activePage}
+            />
             {contextMenu.visible && (
                 <div
                     style={{ top: contextMenu.y, left: contextMenu.x }}

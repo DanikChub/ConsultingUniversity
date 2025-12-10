@@ -13,7 +13,7 @@ const ProgramHeader = ({ programTitle, setProgramTitle, programShortTitle, setPr
         setPreview(null)
         setProgramImg(null)
     }
-    
+
     return (
         <div className='MakeProgramContainer'>
             <div className='MakeProgramInputs_group'>
@@ -26,14 +26,22 @@ const ProgramHeader = ({ programTitle, setProgramTitle, programShortTitle, setPr
             </div>
             <div className='MakeProgramInputs_group'>
                 <label>Картинка: </label>
-                <input id='add_img' className='MakeProgram_Punct_Material_input' onChange={(e => handleImageChange(e))}  type='file' accept='.png'/>
+                <input id='add_img' className='MakeProgram_Punct_Material_input' onChange={(e => handleImageChange(e))}  type='file' accept='image/*'/>
                 {preview || programImg ? (
                     <div className='relative h-[200px] w-[max-content]'>
-                        <button className='MakeProgramInputs_group_preview_delete' onClick={() => handleImageDelete()}>x</button>
-                        
-                          
-                        <img 
-                            src={preview || `${process.env.REACT_APP_API_URL + programImg}`} 
+                        <button className='bg-red-500 text-white absolute top-[-6px] right-[-6px] rounded-full w-[28px] h-[28px] flex justify-center items-center text-2xl border-none cursor-pointer' onClick={() => handleImageDelete()}>
+                            <svg
+                                className="w-4 h-4"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" strokeWidth="2"/>
+                            </svg>
+                        </button>
+
+
+                        <img
+                            src={preview || `${process.env.REACT_APP_API_URL + programImg}`}
                             alt="preview"
                             className='abolute h-full w-full object-contain'
                         />

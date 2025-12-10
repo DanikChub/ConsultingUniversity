@@ -4,10 +4,8 @@
 
 .datalist {
   
-    position: absolute;
-    top: 100%;
-    left: 120px;
-    background-color: rgb(218, 218, 218);
+    width: 100%;
+
     
 }
 

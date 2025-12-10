@@ -1,7 +1,7 @@
 import Button from "../ui/Button";
 
 const SubmitSection = ({ navigate, createUser, params }: any) => (
-    <div className="flex ">
+    <div className="flex mt-4">
         <Button
             onClick={() => navigate(-1)}
             variant='red'

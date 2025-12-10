@@ -12,6 +12,8 @@ export const useProgramForm = () => {
     const { user } = useContext(Context);
 
     const [loaded, setLoaded] = useState(false);
+    const [saveLoaded, setSaveLoaded] = useState(true)
+
     const [programTitle, setProgramTitle] = useState('');
     const [programShortTitle, setProgramShortTitle] = useState('');
     const [programPrice, setProgramPrice] = useState('');
@@ -30,7 +32,8 @@ export const useProgramForm = () => {
     useEffect(() => {
         const fetchProgram = async () => {
             if (params.id) {
-                const data = await getOneProgram(params.id);
+                const data = await getOneProgram(params.id)
+                    .catch(e => navigate(-1));
                 let themes = data.themes.sort((a, b) => a.theme_id - b.theme_id);
                 let punctArr = [];
 
@@ -61,11 +64,12 @@ export const useProgramForm = () => {
                     lection_src: null,
                     lection_id: null,
                     lection_title: null,
+
                     title: "",
                     hide: false,
                     presentation_src: null,
                     presentation_id: null,
-                    puncts: [{ punct_id: 0, title: "", video_src: null, lection_src: null, lection_id: null, lection_title: null, test_id: null, test_title: null, practical_work: null, practical_work_task: null }]
+                    puncts: [{ punct_id: 0, title: "", video_src: null, lection_src: null, lection_id: null, lection_pdf: null, lection_pdf_id: null, lection_title: null, test_id: null, test_title: null, practical_work: null, practical_work_task: null }]
                 }]);
                 
             }
@@ -91,7 +95,7 @@ export const useProgramForm = () => {
             hide: false,
             presentation_src: null,
             presentation_id: null,
-            puncts: [{ punct_id: 0, title: "", video_src: null, lection_src: null, lection_id: null, lection_title: null, test_id: null, test_title: null, practical_work: null, practical_work_task: null }]
+            puncts: [{ punct_id: 0, title: "", video_src: null, lection_src: null, lection_id: null, lection_pdf: null, lection_pdf_id: null, lection_title: null, test_id: null, test_title: null, practical_work: null, practical_work_task: null }]
         }
         setThemeId(id => id + 1);
         setThemesArray([...themesArray, newTheme]);
@@ -106,7 +110,7 @@ export const useProgramForm = () => {
         const updatedThemes = [...themesArray];
         const theme = updatedThemes[themeIndex];
         const nextPunctId = (punctId[themeIndex] || 0) + 1;
-        const newPunct = { punct_id: nextPunctId, title: "", video_src: null, lection_src: null, lection_id: null, lection_title: null, test_id: null, test_title: null, practical_work: null, practical_work_task: null };
+        const newPunct = { punct_id: nextPunctId, title: "", video_src: null, lection_src: null, lection_id: null, lection_pdf: null, lection_pdf_id: null, lection_title: null, test_id: null, test_title: null, practical_work: null, practical_work_task: null };
         theme.puncts.push(newPunct);
         const newPunctId = [...punctId];
         newPunctId[themeIndex] = nextPunctId;
@@ -127,6 +131,7 @@ export const useProgramForm = () => {
     }
 
     const handleSave = async () => {
+        setSaveLoaded(false)
         let bool = true;
         themesArray.forEach(theme => { 
             theme.puncts.forEach(punct => {
@@ -153,7 +158,9 @@ export const useProgramForm = () => {
 
             let number_of_test = 0;
 
-            let prev_lection_id = 0
+            let prev_lection_id = 0;
+            let prev_lection_pdf_id = 0
+            console.log(themesArray)
             themesArray.forEach(theme => {
                 
                 formData.append("presentation_src", theme.presentation_src)
@@ -162,12 +169,21 @@ export const useProgramForm = () => {
                 
                 theme.puncts.forEach(punct => {
                     formData.append("docs", punct.lection_src)
+                    formData.append("lection_pdfs", punct.lection_pdf)
                     if (punct.lection_src) {
                         punct.lection_id = prev_lection_id
                         prev_lection_id+=1
                     } else {
                         punct.lection_id = null
                     }
+
+                    if (punct.lection_pdf) {
+                        punct.lection_pdf_id = prev_lection_pdf_id
+                        prev_lection_pdf_id+=1
+                    } else {
+                        punct.lection_pdf_id = null
+                    }
+
                     if (punct.test_id || punct.practical_work) {
                         number_of_test++;
                     }
@@ -191,13 +207,14 @@ export const useProgramForm = () => {
                    
                     
                     setNotActive(false);
-                    
-                   
+
+                    setSaveLoaded(true)
                     navigate(ADMIN_PROGRAMS_ROUTE)
                    
                 }).catch(e => {
                     setNotActive(false);
                     setServerMessage(e.response.data.message)
+                    setSaveLoaded(true)
                 })
             } else {
                 setNotActive(true);
@@ -206,13 +223,14 @@ export const useProgramForm = () => {
                 .then(data => {
               
                     setNotActive(false);
-                    
-                    
+
+                    setSaveLoaded(true)
                     navigate(ADMIN_PROGRAMS_ROUTE)
                     
                 })
                 .catch(e => {
                     setNotActive(false);
+                    setSaveLoaded(true)
                     console.error('Ошибка:', e)
                     setServerMessage(e.response?.data?.message)
                 })
@@ -263,6 +281,6 @@ export const useProgramForm = () => {
         serverMessage, setServerMessage,
         validate, setValidate,
         notActive, setNotActive,
-        handleSave, loaded, presentationSrcHandler
+        handleSave, loaded, presentationSrcHandler, saveLoaded
     }
 }

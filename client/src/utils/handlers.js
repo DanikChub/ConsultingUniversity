@@ -14,6 +14,12 @@ export const handleAddTask = ({ makeOpen, i, j, value, themesArray, setThemesArr
             console.log(valueNew)
             setThemesArray(valueNew);
             break;
+        case 'lection_pdf':
+            valueNew[i].puncts[j].lection_pdf = value;
+
+            console.log(valueNew)
+            setThemesArray(valueNew);
+            break;
         case 'video':
             openModal('video', { i, j, remake: value });
             break;

@@ -331,6 +331,7 @@
     font-size: 12px;
     border: none;
     cursor: pointer;
+    z-index: 10000;
 }
 
 .MakeProgram_Punct_Material_delete:hover {
@@ -404,6 +405,7 @@
     align-items: center;
     font-size: 25px;
     background-color: transparent;
+    position: relative;
    
     border-radius: 2px;
     margin-left: 10px;
@@ -411,10 +413,18 @@
     transition: .2s linear;
 }
 
-.MakeProgram_Punct_Material_Plus:hover {
-    background-color: rgb(198, 198, 198);
-    color: #fff;
+.MakeProgram_Punct_Material_Plus img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: auto;
 }
+
+/*.MakeProgram_Punct_Material_Plus:hover {*/
+/*    background-color: rgb(198, 198, 198);*/
+/*    color: #fff;*/
+/*}*/
 
 .MakeProgramFlex {
     display: flex;

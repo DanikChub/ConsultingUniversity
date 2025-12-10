@@ -140,7 +140,7 @@ const ViewProgram = observer(() => {
                         </div>
                         <div className={`course_item_puncts ${open ? 'open' : ''}`}>
                             {puncts.map((punct, j) => 
-                                <div className='course_item_punct'><b>Тема {j+1}:</b> {punct.title}</div>
+                                <div className='course_item_punct'><b>{punct.test_id ? `Тест` : `Тема ${j+1}`}:</b> {punct.title}</div>
                             )}
                         </div>
                         

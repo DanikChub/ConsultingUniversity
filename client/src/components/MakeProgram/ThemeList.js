@@ -23,6 +23,11 @@ const ThemeList = ({ themesArray, setThemesArray, addTheme, deleteTheme, addPunc
                 />
             ))}
             <Button className='mt-4 ml-[57px]' onClick={addTheme}>Добавить модуль</Button>
+            <button command="show-modal" commandfor="dialog"
+                    className="rounded-md bg-white/10 px-2.5 py-1.5 text-sm font-semibold text-white inset-ring inset-ring-white/5 hover:bg-white/20">Open
+                dialog
+            </button>
+
         </div>
     )
 }

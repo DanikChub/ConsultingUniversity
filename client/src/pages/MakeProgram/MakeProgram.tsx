@@ -9,6 +9,7 @@ import ModalsContainer from '../../components/ModalsContainer/ModalsContainer';
 
 import './MakeProgram.css'
 import AppContainer from '../../components/ui/AppContainer';
+import LoadingAlert from "../../components/ui/LoadingAlert";
 
 const MakeProgram = () => {
     const form = useProgramForm();
@@ -18,17 +19,22 @@ const MakeProgram = () => {
     return (
         <AppContainer>
             {
-                form.loaded && 
-                <>
-                    <ProgramHeader {...form} />
-                    <ThemeList {...form} setShowAddTask={(payload) => openModal('addTask', payload)} openModal={openModal} />
-                    <div className='login_form_message'>{form.serverMessage}</div>
-                    <div className='button_container'>
-                        <div onClick={form.handleSave} className='admin_button'>Сохранить</div>
-                    </div>
-                </>
+                form.loaded &&
+                    <>
+                        <ProgramHeader {...form} />
+                        <ThemeList {...form} setShowAddTask={(payload) => openModal('addTask', payload)} openModal={openModal} />
+                        <div className='login_form_message'>{form.serverMessage}</div>
+                        <div className='button_container'>
+                            <div onClick={form.handleSave} className='admin_button'>Сохранить</div>
+
+                        </div>
+
+                    </>
+
+
+
             }
-              
+            <LoadingAlert show={!form.saveLoaded}/>
 
             <ModalsContainer 
                 modals={modals} 

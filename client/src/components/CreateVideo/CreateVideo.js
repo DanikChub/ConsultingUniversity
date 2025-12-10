@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import "./CreateVideo.css"
+import Modal from "../ui/Modal";
 
 const CreateVideo = ({show, setShow, themesArray, setThemesArray, setCounter}) => {
     const [videoInput, setVideoInput] = useState('');
@@ -81,9 +82,7 @@ const CreateVideo = ({show, setShow, themesArray, setThemesArray, setCounter}) =
     }
 
     return (
-        <div className={show.show?"modal show": "modal"}>
-            <div className='modal_container video'>
-                <button onClick={() => {setShow(false);setOid('')}} className='modal_button'>x</button>
+        <Modal open={show.show} onClose={() => setShow({ show: false, i: 0, j: 0 })} width="600px">
                 <input onChange={(e) => handleVideoInput(e.target.value)} value={videoInput} type="text" placeholder='Ссылка на видео' className='modal_input'/>
                 {
                     !correct 
@@ -97,9 +96,7 @@ const CreateVideo = ({show, setShow, themesArray, setThemesArray, setCounter}) =
                     <div onClick={handleClickDelete} className='admin_button red'>Удалить</div>
                     <div onClick={handleClick} className='admin_button'>Сохранить</div>
                 </div>
-            
-            </div>
-        </div>
+        </Modal>
     );
 };
 

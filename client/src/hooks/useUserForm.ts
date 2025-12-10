@@ -90,16 +90,23 @@ export const useUserForm = () => {
     const handleChangeProgram = useCallback((value: string) => {
         setProgramInput(value);
         setDatalistActive(value.length > 0);
+        let filtered;
+        if (value) {
+            filtered = programs
+                .filter(p => p.title.toLowerCase().includes(value.toLowerCase()))
+                .map(p => ({ ...p, yellow_value: value }));
+        } else {
+            filtered = programs
 
-        const filtered = programs
-            .filter(p => p.title.toLowerCase().includes(value.toLowerCase()))
-            .map(p => ({ ...p, yellow_value: value }));
+        }
+
 
         setFilteredPrograms(filtered);
     }, [programs]);
 
     const handleSelectProgram = useCallback((program) => {
         setSelectedPrograms([program]);
+        console.log(programs)
         setUserProgramId([program.id]);
         setDatalistActive(false);
     }, []);

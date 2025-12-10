@@ -21,7 +21,7 @@ const UserTable: React.FC<Props> = ({ users, loading, onEdit, onDelete, handleCo
         date ? new Date(date).toLocaleDateString("ru-RU") : "-";
 
     return (
-        <div className="w-full mt-4">
+        <div className="w-full mt-4 min-h-[410px]">
             {/* Шапка */}
             <div
                 className="
