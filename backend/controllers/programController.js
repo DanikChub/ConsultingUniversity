@@ -76,7 +76,7 @@ function validateParsedThemes(parsedThemes) {
       if (!punct.title) return `Тема "${ti + 1}.${pi + 1}" не имеет названия!`;
       if (punct.test_id) boolCount++;
       if (punct.practical_work) boolCount++;
-      if (!punct.lection_title && !punct.video_src && !punct.test_id && !punct.practical_work) return `Тема "${ti + 1}.${pi + 1}" не может быть пустой`;
+      if (!punct.lection_title && !punct.video_src && !punct.test_id && !punct.practical_work && !punct.lection_pdf) return `Тема "${ti + 1}.${pi + 1}" не может быть пустой`;
     }
     if (boolCount === 0) return `В модуле "${theme.title}" нет теста! (В каждой теме должен быть один тест для подсчета статистики!)`;
     if (boolCount > 1) return `В модуле "${theme.title}" ${boolCount} тестов! (В каждой теме может быть только один тест)`;
@@ -104,6 +104,7 @@ class ProgramController {
       const files = req.files || {};
 
       const docsSaved = await saveFilesArrayOrSingle(files.docs);
+      const lection_pdfsSaved = await saveFilesArrayOrSingle(files.lection_pdfs);
       const presentationsSaved = await saveFilesArrayOrSingle(files.presentation_src);
       const themeLectionSaved = await saveFilesArrayOrSingle(files.theme_lection_src);
       const imgSaved = files.img ? (await saveSingleFile(files.img)) : '';
@@ -135,8 +136,9 @@ class ProgramController {
         // Puncts
         for (const punct_el of theme_el.puncts) {
           const punctLectionSrc = typeof punct_el.lection_src === 'string' && punct_el.lection_src ? punct_el.lection_src : (docsSaved[punct_el.lection_id] || null);
+          const punctLectionPdfSrc = typeof punct_el.lection_pdf === 'string' && punct_el.lection_pdf ? punct_el.lection_pdf : (lection_pdfsSaved[punct_el.lection_pdf_id] || null);
           const punctLectionHtml = await convertDocxToHtmlIfExists(punctLectionSrc);
-
+          console.log('######################', punctLectionPdfSrc, '######################')
           await Punct.create({
             title: punct_el.title,
             themeId: createdTheme.id,
@@ -145,6 +147,8 @@ class ProgramController {
             lection_html: punctLectionHtml,
             lection_title: punct_el.lection_title || null,
             lection_id: punct_el.lection_id,
+            lection_pdf: punctLectionPdfSrc || null,
+            lection_pdf_id: punct_el.lection_pdf_id,
             practical_work: punct_el.practical_work || null,
             practical_work_task: punct_el.practical_work_task || null,
             test_id: punct_el.test_id || null,
@@ -296,7 +300,9 @@ class ProgramController {
 
       const files = req.files || {};
       const docsSaved = await saveFilesArrayOrSingle(files.docs);
+
       const presentationsSaved = await saveFilesArrayOrSingle(files.presentation_src);
+      const lection_pdfsSaved = await saveFilesArrayOrSingle(files.lection_pdfs);
       const themeLectionSaved = await saveFilesArrayOrSingle(files.theme_lection_src);
       const imgSaved = files.img ? (await saveSingleFile(files.img)) : '';
 
@@ -355,6 +361,7 @@ class ProgramController {
 
         for (const punct_el of theme_el.puncts) {
           const punctLectionSrc = typeof punct_el.lection_src === 'string' && punct_el.lection_src ? punct_el.lection_src : (docsSaved[punct_el.lection_id] || null);
+          const punctLectionPdfSrc = typeof punct_el.lection_pdf === 'string' && punct_el.lection_pdf ? punct_el.lection_pdf : (lection_pdfsSaved[punct_el.lection_pdf_id] || null);
           const punctLectionHtml = await convertDocxToHtmlIfExists(punctLectionSrc);
 
           await Punct.create({
@@ -365,6 +372,8 @@ class ProgramController {
             lection_html: punctLectionHtml,
             lection_title: punct_el.lection_title || null,
             lection_id: punct_el.lection_id,
+            lection_pdf: punctLectionPdfSrc || null,
+            lection_pdf_id: punct_el.lection_pdf_id,
             practical_work: punct_el.practical_work || null,
             practical_work_task: punct_el.practical_work_task || null,
             test_id: punct_el.test_id || null,

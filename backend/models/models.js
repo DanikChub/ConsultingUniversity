@@ -86,6 +86,8 @@ const Punct = sequelize.define('punct', {
     lection_title: {type: DataTypes.STRING},
     lection_id: {type: DataTypes.STRING},
     lection_html: {type: DataTypes.TEXT},
+    lection_pdf: {type: DataTypes.STRING},
+    lection_pdf_id: {type: DataTypes.STRING},
     practical_work: {type: DataTypes.STRING},
     practical_work_task: {type: DataTypes.TEXT},
     video_src: {type: DataTypes.STRING},
