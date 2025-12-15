@@ -8,7 +8,7 @@ interface AppContainerProps extends HTMLAttributes<HTMLDivElement> {
 
 const AppContainer: React.FC<AppContainerProps> = ({ children, ...rest }) => {
     return (
-        <div className="min-h-[55vh]" {...rest}>
+        <div className="h-full" {...rest}>
             <div className="w-full max-w-[1536px] m-auto">
                 <div className="flex items-stretch min-h-[635px]">
                     <LeftMenu />

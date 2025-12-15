@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 
 interface LoadingAlertProps {
+
     show: boolean;
+    text?: string;
     duration?: number; // время авто-скрытия
 }
 
-const LoadingAlert: React.FC<LoadingAlertProps> = ({ show, duration = 3000 }) => {
+const LoadingAlert: React.FC<LoadingAlertProps> = ({ show, text="Программа обрабатывается...", duration = 3000 }) => {
     const [visible, setVisible] = useState(show);
 
     useEffect(() => {
@@ -37,7 +39,7 @@ const LoadingAlert: React.FC<LoadingAlertProps> = ({ show, duration = 3000 }) =>
                         d="M4 12a8 8 0 018-8v8H4z"
                     ></path>
                 </svg>
-                <span>Программа обрабатывается...</span>
+                <span>{text}</span>
             </div>
         </div>
     );

@@ -13,6 +13,7 @@ export const useAdminListeners = () => {
     const [activePage, setActivePage]  = useState(0)
     const sortTypeVariations = ["statistic", "name", "createdAt"];
 
+
     const generatePagination = (totalCount: number) => {
         const pages: PaginationItem[] = [];
         for (let i = 0; i < Math.ceil(totalCount / 10); i++) {

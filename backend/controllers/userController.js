@@ -14,10 +14,31 @@ const {
 } = require('../models/models');
 const { Op, fn, Sequelize } = require('sequelize');
 const nodemailer = require('nodemailer');
+const path = require("path");
+const uuid = require("uuid");
+const fs = require("fs");
 
 const generateJwt = (id, email, role) => {
     return jwt.sign({ id, email, role }, process.env.SECRET_KEY, { expiresIn: '24h' });
 };
+
+const STATIC_DIR = path.resolve(__dirname, '..', 'static');
+if (!fs.existsSync(STATIC_DIR)) fs.mkdirSync(STATIC_DIR, { recursive: true });
+
+function safeFilename(originalName) {
+    const ext = originalName && originalName.includes('.') ? '.' + originalName.split('.').pop() : '';
+    return uuid.v4() + ext;
+}
+
+async function saveSingleFile(file) {
+    if (!file) return null;
+    const filename = safeFilename(file.name || 'file');
+    const fullPath = path.join(STATIC_DIR, filename);
+    await new Promise((resolve, reject) => {
+        file.mv(fullPath, (err) => err ? reject(err) : resolve());
+    });
+    return filename;
+}
 
 class UserController {
     // ======================== REGISTRATION ========================
@@ -531,6 +552,25 @@ class UserController {
         } catch (e) {
             console.error('getUsersWithLastMessages error:', e);
             return next(ApiError.internal('Ошибка получения последних сообщений пользователей'));
+        }
+    }
+
+    async setUserProfileImg(req, res, next) {
+        try {
+            const { id } = req.body;
+            const files = req.files || {};
+
+            const imgSaved = await saveSingleFile(files.img)
+
+            const user = await User.findOne({where: {id: id}})
+
+            user.img = imgSaved;
+            user.save();
+
+            return res.json('успешно')
+        } catch (e) {
+            console.error('setUserProfileImg error:', e);
+            return next(ApiError.internal('Ошибка установления фото пользователя'));
         }
     }
 }

@@ -13,6 +13,11 @@ export default class UserStore {
     setUser(user) {
         this._user = user
     }
+    setUserImage(img) {
+        if (this.user) {
+            this.user.img = img;
+        }
+    }
 
     get isAuth() {
         return this._isAuth;

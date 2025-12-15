@@ -25,5 +25,6 @@ router.get('/getAdmins/', checkRole('ADMIN'), userController.getAllAdmins)
 router.get('/getAllUser/:page', checkRole('ADMIN'), userController.getAllUsersWithPage)
 router.get('/search/:page', checkRole('ADMIN'), userController.searchUsers)
 router.post('/setGraduationDate/', userController.setGraduationDate)
+router.post('/setUserProfileImg/', userController.setUserProfileImg)
 
 module.exports = router;

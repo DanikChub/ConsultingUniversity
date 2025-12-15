@@ -14,6 +14,8 @@ const User = sequelize.define('user', {
     organiztion: {type: DataTypes.STRING},
     inn: {type: DataTypes.STRING},
     statistic: {type: DataTypes.INTEGER},
+
+    img: {type: DataTypes.STRING},
     
     graduation_date: {type: DataTypes.DATE},
 

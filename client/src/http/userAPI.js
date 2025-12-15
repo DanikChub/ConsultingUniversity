@@ -121,3 +121,9 @@ export const setGraduationDate = async (id, graduation_date) => {
 
     return data
 }
+
+export const setUserProfileImg = async (formdata) => {
+    const {data} = await $host.post('api/user/setUserProfileImg', formdata)
+
+    return data
+}
