@@ -30,6 +30,7 @@ const UserPage = observer(() => {
     const userContext = useContext(Context);
     const [program, setProgram] = useState({});
     const [loading, setLoading] = useState(false);
+    const [loadingAlert, setLoadingAlert] = useState(false);
     const [statistic, setStatistic] = useState({
         id: 2,
         users_id: 7,
@@ -78,10 +79,10 @@ const UserPage = observer(() => {
 
         userContext.user.setUserImage(localImg)
 
-        setLoading(true)
+        setLoadingAlert(true)
         setUserProfileImg(formdata)
-            .then(() => setLoading(false))
-            .catch((e) => setLoading(false))
+            .then((data) => setLoadingAlert(false))
+            .catch((e) => setLoadingAlert(false))
     }
 
     const imgSrc = userContext.user.user.img
@@ -94,6 +95,7 @@ const UserPage = observer(() => {
     return (
 
         <UserContainer loading={loading}>
+            <LoadingAlert show={loadingAlert} text='Изображение обрабатывается'/>
             <div className="flex items-start justify-between">
                 <div className="flex items-center">
                     <input onChange={(e) => handleProfileImgCLick(e)} className="hidden" id="userProfileImgId" type='file' accept="image/*"/>
