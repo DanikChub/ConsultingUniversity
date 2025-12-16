@@ -5,6 +5,7 @@ import ButtonAdd from '../ButtonAdd/ButtonAdd';
 import pdf from "../../assets/imgs/pdf.png"
 import Button from '../ui/Button';
 import ButtonRemove from '../ui/ButtonRemove';
+import {TaskType} from "../../types/tasks";
 
 const ThemeItem = ({ theme, i, themesArray, setThemesArray, deleteTheme, addPunct, deletePunct, toggleThemeHide, setShowAddTask, openModal, setPresentationCounter, presentationSrcHandler}) => {
 
@@ -44,16 +45,9 @@ const ThemeItem = ({ theme, i, themesArray, setThemesArray, deleteTheme, addPunc
                         i,
                         j:0,
                         value: '',
-                        tasks: [
-                            '',
-                            'presentation',
-                            '',
-                            '',
-                            '',
-
-
-
-                        ]
+                        availableTasks: {
+                            [TaskType.PRESENTATION]: !theme.presentation_src,
+                        },
                     }
                 )}/>
                 <ButtonRemove onClick={() => deleteTheme(theme.theme_id)}/>

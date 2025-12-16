@@ -331,7 +331,7 @@
     font-size: 12px;
     border: none;
     cursor: pointer;
-    z-index: 10000;
+    z-index: 100;
 }
 
 .MakeProgram_Punct_Material_delete:hover {

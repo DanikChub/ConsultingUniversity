@@ -1,4 +1,4 @@
-export const handleAddTask = ({ makeOpen, i, j, value, themesArray, setThemesArray, openModal, closeModal, presentationSrcHandler, showTestClasses }) => {
+export const handleAddTask = ({ makeOpen, i, j, value, themesArray, setThemesArray, openModal, closeModal, presentationSrcHandler }) => {
     const valueNew = [...themesArray];
     
     switch(makeOpen) {

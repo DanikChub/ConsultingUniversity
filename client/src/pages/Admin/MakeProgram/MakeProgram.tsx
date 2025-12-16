@@ -34,7 +34,7 @@ const MakeProgram = () => {
 
 
             }
-            <LoadingAlert show={!form.saveLoaded} text={'Программа обрабатывается...'}/>
+            <LoadingAlert show={!form.saveLoaded} text={'Не выходите из вкладки! Программа обрабатывается...'}/>
 
             <ModalsContainer 
                 modals={modals} 
@@ -43,7 +43,17 @@ const MakeProgram = () => {
                 themesArray={form.themesArray} 
                 setThemesArray={form.setThemesArray} 
                 setCounter={{ video: form.setVideoCounter, test: form.setTestCounter, practicalWork: form.setTestCounter }}
-                allAddHandler={(makeOpen, i, j, value) => handleAddTask({ makeOpen, i, j, value, themesArray: form.themesArray, setThemesArray: form.setThemesArray, openModal, closeModal, presentationSrcHandler: form.presentationSrcHandler })}
+                allAddHandler={(makeOpen, i, j, value) =>
+                    handleAddTask({
+                        makeOpen, i, j,
+                        value,
+                        themesArray: form.themesArray,
+                        setThemesArray: form.setThemesArray,
+                        openModal,
+                        closeModal,
+                        presentationSrcHandler: form.presentationSrcHandler,
+
+                    })}
                 
             />
         </AppContainer>

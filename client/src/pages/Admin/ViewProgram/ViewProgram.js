@@ -131,16 +131,17 @@ const ViewProgram = observer(() => {
             <div className='course_title'><b>Название:</b> {program.title}</div>
             <div className="course">
                 {courseItems.map(({title, puncts, presentation_src, lection_src, id, open}, i) => 
-                    <div key={i}>
-                        <div className={`course_item_title ${open ? 'open' : ''}`} onClick={() => accordeon_item_click(i)}>
-                            <svg width="16" height="11" viewBox="0 0 16 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <div className="mt-[10px]" key={i}>
+                        <div className={`flex items-center ${open ? 'open' : ''}`} onClick={() => accordeon_item_click(i)}>
+                            <svg className={`${open ? '' : '-rotate-90'}`} width="16" height="11" viewBox="0 0 16 11" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M14.8633 0.952148L8.11989 9.74902" stroke="#898989" stroke-opacity="0.78" stroke-width="2" stroke-linecap="round"/>
                             <path d="M1.04688 1.31543L7.85366 9.63645" stroke="#898989" stroke-opacity="0.78" stroke-width="2" stroke-linecap="round"/>
-                            </svg><b>Модуль {i+1}: </b> {title}
+                            </svg>
+                            <b className="text-[#2C3E50] ml-[10px]">Модуль {i+1}: </b> <span className="text-[#2C3E50] ml-[5px]">{title}</span>
                         </div>
-                        <div className={`course_item_puncts ${open ? 'open' : ''}`}>
+                        <div className={`ml-[65px] ${open ? '' : 'hidden'}`}>
                             {puncts.map((punct, j) => 
-                                <div className='course_item_punct'><b>{punct.test_id ? `Тест` : `Тема ${j+1}`}:</b> {punct.title}</div>
+                                <div className='mt-[5px] text-[#2C3E50]'><b>{punct.test_id ? `Тест` : `Тема ${j+1}`}:</b> {punct.title}</div>
                             )}
                         </div>
                         
