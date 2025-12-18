@@ -65,6 +65,90 @@ class ChatController {
 
         return res.json(resMessages)
     }
+
+    async markChatAsRead(req, res, next) {
+        try {
+            const { userId } = req.params;
+            const { viewerRole } = req.query; // USER | ADMIN
+
+            if (!userId || !viewerRole) {
+                return next(ApiError.badRequest('userId и viewerRole обязательны'));
+            }
+
+            // кто открыл чат — тот читает сообщения ОТ противоположной стороны
+            const readFromRole = viewerRole === 'USER'
+                ? 'admin'
+                : 'user';
+
+            await Messages.update(
+                { readAt: new Date() },
+                {
+                    where: {
+                        user_id: userId,
+                        role: readFromRole,
+                        readAt: null
+                    }
+                }
+            );
+
+            return res.json({ success: true });
+
+        } catch (e) {
+            console.error(e);
+            return next(ApiError.internal('Ошибка при отметке сообщений как прочитанных'));
+        }
+    }
+
+    async getUnreadCount(req, res, next) {
+        try {
+            const { userId } = req.params;
+            const { viewerRole } = req.query; // USER | ADMIN
+
+            if (!userId || !viewerRole) {
+                return next(ApiError.badRequest('userId и viewerRole обязательны'));
+            }
+
+            // считаем входящие сообщения
+            const unreadFromRole = viewerRole === 'USER'
+                ? 'admin'
+                : 'user';
+
+            const unreadCount = await Messages.count({
+                where: {
+                    user_id: userId,
+                    role: unreadFromRole,
+                    readAt: null
+                }
+            });
+
+
+            return res.json({ unreadCount });
+
+        } catch (e) {
+            console.error(e);
+            return next(ApiError.internal('Ошибка подсчёта непрочитанных сообщений'));
+        }
+    }
+    async getAllUserUnreadCount(req, res, next) {
+        try {
+
+
+
+            const unreadCount = await Messages.count({
+                where: {
+                    role: 'user',
+                    readAt: null
+                }
+            });
+
+
+            return res.json({ unreadCount });
+
+        } catch (e) {
+            console.error(e);
+            return next(ApiError.internal('Ошибка подсчёта непрочитанных сообщений'));
+        }
+    }
 }
 
 module.exports = new ChatController()

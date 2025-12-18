@@ -535,14 +535,23 @@ class UserController {
             const users = await User.findAll({ where: { role: 'USER' } });
             for (const user of users) {
                 const message = await Messages.findOne({ where: { user_id: user.id }, order: [['createdAt', 'DESC']] });
+                const numberUnReadMessages = await Messages.count({
+                    where: {
+                        user_id: user.id,
+                        role: 'user',
+                        readAt: null
+                    }
+                });
                 if (message) {
                     user.dataValues.message = message.text;
                     user.dataValues.messageDate = message.createdAt;
                     user.dataValues.role = message.role;
+                    user.dataValues.numberUnReadMessages = numberUnReadMessages;
                 } else {
                     user.dataValues.message = 'Пока нет сообщений...';
                     user.dataValues.messageDate = 0;
                     user.dataValues.role = '';
+                    user.dataValues.numberUnReadMessages = null;
                 }
             }
 

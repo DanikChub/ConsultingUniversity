@@ -181,6 +181,8 @@ const Messages = sequelize.define('messeges', {
     text: {type: DataTypes.TEXT},
     user_id: {type: DataTypes.INTEGER},
     role: {type: DataTypes.STRING},
+
+    readAt: {type: DataTypes.DATE, defaultValue: null},
 })
 
 
