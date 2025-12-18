@@ -19,28 +19,17 @@ const LectionPage = () => {
     
     useEffect(() => {
      
-        if (queryParams.get('theme')) {
-            getOneTheme(params.id).then(data => {
-                setPunct(data);
-                window.scrollTo({
-                    top: 0,
-                    left: 0,
-                    behavior: "smooth",
-                  });
+
+        getOnePunct(params.id).then(data => {
+            setPunct(data);
+            console.log(data)
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: "smooth",
             });
-        } else {
-            getOnePunct(params.id).then(data => {
-                setPunct(data);
-                window.scrollTo({
-                    top: 0,
-                    left: 0,
-                    behavior: "smooth",
-                  });
-                  
-            });
-            
-        }
-        
+
+        });
     }, [])
 
     const remakeFileName = (url, new_name) => {

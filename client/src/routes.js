@@ -158,14 +158,7 @@ export const adminRoutes = [
 ]
 
 export const publicRoutes = [
-    // {
-    //     path: MAIN_ROUTE,
-    //     Component: <MainPage/>
-    // },
-    // {
-    //     path: EXPERT_ROUTE,
-    //     Component: <ExpertPage/>
-    // },
+
 
     {
         path: AUTH_ROUTE,

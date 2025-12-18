@@ -10,7 +10,7 @@ import { CHAR_PAGE_ROUTE } from '../../../utils/consts';
 import AppContainer from '../../../components/ui/AppContainer';
 
 function dateToString(date) {
-    
+
     const newDate = new Date(date);
     const dateSrc = newDate.toLocaleString('ru-RU', { year: 'numeric', month: 'numeric', day: 'numeric' });
     if (date) {
@@ -18,7 +18,7 @@ function dateToString(date) {
     } else {
         return '-'
     }
-    
+
 }
 
 const ChatUsersPage = () => {
@@ -30,21 +30,21 @@ const ChatUsersPage = () => {
     const navigate = useNavigate();
     useEffect(() => {
         getUsersWithLastMessages()
-        .then(data => {setUsers(data);setFilteredUsers(data)})
-        .then(data => setLoading(true))
-        .catch(e => alert(e))
+            .then(data => {setUsers(data);setFilteredUsers(data)})
+            .then(data => setLoading(true))
+            .catch(e => alert(e))
         console.log(users)
     }, [])
 
     const handleClickButton = (type) => {
-        
+
         if (buttonActive == type) {
             setButtonActive('')
             setFilteredUsers(users)
         } else {
             setButtonActive(type)
             if (type == 'inbox') {
-            
+
                 let new_arr = users;
                 new_arr = new_arr.filter(el => el.role == 'user')
                 setFilteredUsers(new_arr)
@@ -54,68 +54,78 @@ const ChatUsersPage = () => {
                 setFilteredUsers(new_arr)
             }
         }
-        
+
 
     }
     return (
         <AppContainer>
-          
-                  
-                    
+
+
+
             <input className='SearchInput' placeholder='Поиск'/>
-                  
+
             <div className='mt-4'>
                 <div className='flex start mb-4'>
                     <div onClick={() => handleClickButton('inbox')} className={`admin_button mr-2 ${buttonActive=='inbox'?'active':''}`} style={{display: 'flex', alignItems: 'center'}}>
-                   
+
 
                         <span style={{marginLeft: '12px'}}>Входящие</span></div>
                     <div onClick={() => handleClickButton('outbox')}  className={`admin_button ${buttonActive=='outbox'?'active':''}`}>
-                   
+
 
                         <span style={{marginLeft: '12px'}}>Отправленные</span>
-                        </div>
-                    
+                    </div>
+
                 </div>
-               
-               
+
+
                 {
-                    filteredUsers.map((user, i) => 
-                        
-                    <div
-                        key={user.id}
-                        
-                        className="
-                            grid 
+                    filteredUsers.map((user, i) => {
+                            const row_class = user.numberUnReadMessages ? 'text-sm text-[#2C3E50] font-bold' : 'text-sm text-[#2C3E50]'
+                            return (<div
+                                key={user.id}
+
+                                className={`
+                            grid
                             grid-cols-[max-content_2fr_2fr_3fr_1fr]
-                            gap-[40px] 
-                            items-center 
-                            py-2 
+                            gap-[40px]
+                            items-center
+                            py-2
                             hover:bg-gray-100
                             relative
-                        "
-                    >
-                        <div className="text-sm text-[#2C3E50]"><input type='checkbox'/></div>
-                        <div className="text-sm text-[#2C3E50]">
-                            <Link className='chat_users_link' to={CHAR_PAGE_ROUTE.replace(':id', user.id)}>{user.name}</Link>
-                        </div>
-                        <div className="text-sm text-[#2C3E50]">
-                            {user.organiztion}
-                        </div>
-                        <div className="text-sm text-[#2C3E50]">
-                            {user.message}
-                        </div>
-                        <div className="text-sm text-[#2C3E50]">
-                            {dateToString(user.createdAt)}
-                        </div>
-                
-                    </div>
-                        )
+                            
+                            ${user.numberUnReadMessages ?
+                                    'font-bold'
+                                    :
+                                    ''
+
+                                }
+                        `}
+                            >
+                                <div
+                                    className={row_class}><input type='checkbox'/></div>
+                                <div className={row_class}>
+                                    <Link className='chat_users_link'
+                                          to={CHAR_PAGE_ROUTE.replace(':id', user.id)}>{user.name}</Link>
+                                </div>
+                                <div className={row_class}>
+                                    {user.organiztion}
+                                </div>
+                                <div className={row_class}>
+                                    {user.message.length > 33 ? user.message.slice(0, 33) + '...' : user.message}
+                                </div>
+                                <div className={row_class}>
+                                    {dateToString(user.createdAt)}
+                                </div>
+
+                            </div>)
+                        }
+                    )
                 }
-                        
-                  
+
+
             </div>
-        
+
         </AppContainer>
     );
 };

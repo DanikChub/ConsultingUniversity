@@ -13,6 +13,7 @@ import { getStatistic } from '../../../http/statisticAPI';
 import Spinner from '../../../components/Spinner/Spinner';
 import LeftMenu from '../../../components/LeftMenu/LeftMenu';
 import { ADMIN_STATEMENT_USER } from '../../../utils/consts';
+import AppContainer from "../../../components/ui/AppContainer";
 
 function dateToString(date) {
     
@@ -59,13 +60,9 @@ const AdminUserPage = () => {
     }, []) 
     return (
         
-        <div className="content">
-            
-                <div className="container">
-                        <div className="admin_inner">
-                        <LeftMenu/>  
-                        {!loading ?
-                        <div className='admin_container'>
+        <AppContainer>
+                        {!loading &&
+                        <>
 
                         
                         <div className="back_button">
@@ -158,14 +155,10 @@ const AdminUserPage = () => {
                                
                             </div>
                         </div>
-                        </div>
-                        :
-                        <Spinner/>
+                        </>
+
                             }
-                    </div>
-              
-                </div>
-            </div>
+                    </AppContainer>
         
     );
 };

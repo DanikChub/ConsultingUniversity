@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import FooterNavBar from '../../../components/FooterNavBar/FooterNavBar';
 import NavBar from '../../../components/NavBar/NavBar';
-import {COURSE_ROUTE, STATEMENT_ROUTE} from '../../../utils/consts';
+import {COURSE_ROUTE, STATEMENT_ROUTE, USER_CHAT_ROUTE} from '../../../utils/consts';
 
 
 import statement from "../../../assets/imgs/statement.png"
@@ -10,6 +10,7 @@ import learn from "../../../assets/imgs/learn.png"
 import how from "../../../assets/imgs/how.png"
 import check from "../../../assets/imgs/check.png"
 import user_img from "../../../assets/imgs/user.png"
+import mail_img from "../../../assets/imgs/mail.png"
 
 import "./UserPage.css"
 import {Context} from '../../../index';
@@ -22,6 +23,7 @@ import {getStatistic} from '../../../http/statisticAPI';
 import {observer} from "mobx-react-lite";
 import LoadingAlert from "../../../components/ui/LoadingAlert";
 import UserContainer from "../../../components/ui/UserContainer";
+import {getUnreadCount} from "../../../http/chatAPI";
 
 
 
@@ -45,7 +47,9 @@ const UserPage = observer(() => {
         themesStatistic: []
     });
 
+    const [unreadMessages, setUnreadMessages] = useState(null)
 
+    const [alertLoading, setAlertLoading] = useState(false);
 
 
     useEffect(() => {
@@ -64,6 +68,9 @@ const UserPage = observer(() => {
                 setStatistic(data);
                 setLoading(true)
             })
+            getUnreadCount(userContext.user.user.id, 'USER')
+                .then(data => setUnreadMessages(data.unreadCount))
+                .catch(e => alert(e))
         }
 
     }, [])
@@ -78,10 +85,10 @@ const UserPage = observer(() => {
 
         userContext.user.setUserImage(localImg)
 
-
+        setAlertLoading(true)
         setUserProfileImg(formdata)
-            .then(() => setLoading(false))
-            .catch((e) => setLoading(false))
+            .then(() => setAlertLoading(false))
+            .catch((e) => setAlertLoading(false))
     }
 
     const imgSrc = userContext.user.user.img
@@ -94,7 +101,8 @@ const UserPage = observer(() => {
     return (
 
         <UserContainer loading={loading}>
-            <div className="flex items-start justify-between">
+            <LoadingAlert show={alertLoading} text="Загружаем картинку профиля..." />
+            <div className="flex items-end justify-between">
                 <div className="flex items-center">
                     <input onChange={(e) => handleProfileImgCLick(e)} className="hidden" id="userProfileImgId" type='file' accept="image/*"/>
                     <label
@@ -123,7 +131,7 @@ const UserPage = observer(() => {
                     </label>
                     <div className="ml-[50px]">
                         <div
-                            className="text-3xl font-bold text-[#2C3E50]">{userContext.user.user.name.split(' ')[0]},
+                            className="text-3xl font-bold text-[#2C3E50]">{userContext.user.user.name.split(' ')[1]},
                             привет!
                         </div>
                         <div className="font-light text-[#2C3E50] text-xl mt-[21px]">Сегодня отличный
@@ -133,7 +141,51 @@ const UserPage = observer(() => {
                     </div>
 
                 </div>
-                <div className="statement mt-[20px] flex items-center mr-[50px]">
+                <div className="flex items-start ml-[50px]">
+                    <div className="relative">
+                        <svg width="100" height="69" viewBox="0 0 100 69" fill="none"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <g filter="url(#filter0_d_0_1)">
+                                <rect x="5" y="1" width="90" height="59" rx="10" stroke="#2980B9" stroke-width="2"
+                                      shape-rendering="crispEdges"/>
+                            </g>
+                            <line x1="5.50028" y1="8.13413" x2="50.5003" y2="34.1341" stroke="#2980B9"
+                                  stroke-width="2"/>
+                            <line x1="49.4997" y1="34.1341" x2="94.4997" y2="8.13414" stroke="#2980B9"
+                                  stroke-width="2"/>
+                            <line x1="38.7071" y1="27.7071" x2="8.7071" y2="57.7071" stroke="#2980B9" stroke-width="2"/>
+                            <line x1="62.719" y1="27.305" x2="91.719" y2="57.305" stroke="#2980B9" stroke-width="2"/>
+                            <defs>
+                                <filter id="filter0_d_0_1" x="0" y="0" width="100" height="69"
+                                        filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                    <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+                                    <feColorMatrix in="SourceAlpha" type="matrix"
+                                                   values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                                                   result="hardAlpha"/>
+                                    <feOffset dy="4"/>
+                                    <feGaussianBlur stdDeviation="2"/>
+                                    <feComposite in2="hardAlpha" operator="out"/>
+                                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+                                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_1"/>
+                                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_1"
+                                             result="shape"/>
+                                </filter>
+                            </defs>
+                        </svg>
+                        {unreadMessages != '0' &&
+                            <div
+                                className="absolute right-[-10px] bottom-[-10px] w-[44px] h-[44px] flex justify-center items-center bg-[#FF0000] rounded-full">
+                                <span className="text-[#fff] font-bold text-2xl">{unreadMessages}</span>
+                            </div>
+                        }
+
+                    </div>
+
+
+                    <Link to={USER_CHAT_ROUTE} className="font-medium text-xl text-[#2C3E50] ml-[30px]">Написать<br/>
+                        преподавателю</Link>
+                </div>
+                <div className="flex items-center mr-[50px]">
                     <div className="statement_img">
                         <img width="164px" src={statement} alt=""/>
                     </div>

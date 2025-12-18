@@ -13,7 +13,7 @@ const ProgramSelector = ({
         <label htmlFor="program" className="text-right">Программа</label>
 
 
-        <Dropdown filteredPrograms={filteredPrograms} handleSelectProgram={handleSelectProgram}/>
+        <Dropdown selectedPrograms={selectedPrograms} filteredPrograms={filteredPrograms} handleSelectProgram={handleSelectProgram}/>
 
 
 

@@ -11,12 +11,17 @@ interface Program {
 interface Props {
     filteredPrograms: Program[];
     handleSelectProgram: (program: Program) => void;
+    selectedPrograms: Program[];
 }
 
-export default function Dropdown({ filteredPrograms, handleSelectProgram }: Props) {
+export default function Dropdown({selectedPrograms, filteredPrograms, handleSelectProgram }: Props) {
     const [open, setOpen] = useState<boolean>(false);
     const [selected, setSelected] = useState<Program | null>(null);
     const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        setSelected(selectedPrograms[0])
+    }, [selectedPrograms])
 
     const toggle = () => setOpen((prev) => !prev);
 

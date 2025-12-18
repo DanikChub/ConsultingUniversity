@@ -19,3 +19,23 @@ export const deleteMessages = async (id) => {
 
     return data
 }
+
+
+export const getUnreadCount = async (id, viewerRole) => {
+    const {data} = await $host.get(`api/chat/getUnreadCount/${id}?viewerRole=${viewerRole}`)
+
+    return data
+}
+export const getAllUserUnreadCount = async () => {
+    const {data} = await $host.get(`api/chat/getUnreadCount/`)
+
+    return data
+}
+
+
+export const markChatAsRead = async (id, viewerRole) => {
+    const {data} = await $host.post(`api/chat/markChatAsRead/${id}?viewerRole=${viewerRole}`)
+
+    return data
+}
+

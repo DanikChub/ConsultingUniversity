@@ -49,7 +49,7 @@ const CoursePage = observer(() => {
         getOneProgram(program_id).then(program => {
             program.themes = program.themes.sort((a, b) => a.theme_id-b.theme_id)
             setProgram(program)
-            
+            console.log(program);
             setUserId(userContext.user.user.id)
             setUserProgramId(userContext.user.user.programs_id[0])
             getStatistic(userContext.user.user.id, userContext.user.user.programs_id[0]).then(data => {
@@ -181,7 +181,7 @@ const CoursePage = observer(() => {
                     </div>
                 </div>
                 <div className="course">
-                    {courseItems.map(({title, puncts, lection_src, presentation_src, id}, i) => 
+                    {courseItems.map(({title, puncts, lection_src, presentation_src, id}, i) =>
                         <div className={"course_item " + courseActives[i]}>
                         <div onClick={() => accordeon_item_click(i)} className="course_item_main">
                             <div className="course_item_description">
@@ -203,6 +203,7 @@ const CoursePage = observer(() => {
                                         <div>Лекция</div>
                                     </Link>
                                 }
+
                                 {statistic.themesStatistic[i].well &&
                                     <div className="course_item_completed">
                                         <img src={check} alt=""/>
@@ -218,7 +219,7 @@ const CoursePage = observer(() => {
                             </div>
                         </div>
                         <div className="course_item_hide">
-                            {puncts.map(({title, video_src, lection_src, test_id, id, practical_work, practical_work_task}, j) => 
+                            {puncts.map(({title, video_src, lection_src, lection_pdf, test_id, id, practical_work, practical_work_task}, j) =>
                                 <div className="course_item_hide_punct">
                                     <div className="course_item_hide_title">{i+1}.{j+1} {title}</div>
                                     <div className="course_item_hide_materials">
@@ -229,8 +230,18 @@ const CoursePage = observer(() => {
                                             <div>Лекция</div>
                                         </Link>
                                         }
-                                        {video_src && 
-                                        <Link to={VIDEO_ROUTE + '?oid=' + video_src.match(/-\d\d\d\d\d\d\d\d\d/)[0]+ '&id=' + video_src.match(/_\d\d\d\d\d\d\d\d\d/)[0].slice(1, 10)} className="course_item_download">
+                                        {lection_pdf &&
+                                            <a target="_blank"
+                                               href={process.env.REACT_APP_API_URL + lection_pdf}
+                                               className="course_item_download">
+                                                <img src={presentation} alt=""/>
+                                                <div>Лекция</div>
+                                            </a>
+                                        }
+                                        {video_src &&
+                                            <Link
+                                                to={VIDEO_ROUTE + '?oid=' + video_src.match(/-\d\d\d\d\d\d\d\d\d/)[0] + '&id=' + video_src.match(/_\d\d\d\d\d\d\d\d\d/)[0].slice(1, 10)}
+                                                className="course_item_download">
                                             <img src={video_play} alt=""/>
                                             <div>Видео</div>
                                         </Link>

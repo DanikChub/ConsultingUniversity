@@ -7,6 +7,7 @@ import { getUserById } from '../../../http/userAPI';
 import { Context } from '../../../index';
 
 import './AdminStatementPage.css'
+import AppContainer from "../../../components/ui/AppContainer";
 
 const AdminStatementPage = () => {
     const params = useParams();
@@ -49,8 +50,7 @@ const AdminStatementPage = () => {
          
      }, [])
     return (
-        <div className="content">
-        <div className="container">
+        <AppContainer>
             <div className="back_button">
                 <a onClick={() => navigate(-1)}>
                     <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -92,9 +92,8 @@ const AdminStatementPage = () => {
                     </table>
                 </div>
             </div>
-            <div style={{marginTop: '20px'}}><b>Выдан</b> Диплом №{statistic.id}</div>
-        </div>
-    </div>
+            {/*<div style={{marginTop: '20px'}}><b>Выдан</b> Диплом №{statistic.id}</div>*/}
+            </AppContainer>
     );
 };
 

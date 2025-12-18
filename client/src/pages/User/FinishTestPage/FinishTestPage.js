@@ -60,10 +60,14 @@ const FinishTestPage = () => {
                     <div>
                         <div className="finish_result">{params.get("correct_answers")} / {params.get("questions")}</div>
                         <div className="finish_text">{Number(params.get("correct_answers")) / Number(params.get("questions")) > 0.75 ? 'Вы справились с тестом, можно переходить к следующему уроку.' : 'Вы не прошли тест. Попробуйте еще раз!'}</div>
-                        <div onClick={() => navigate(-1)} className="finish_button">Пройти еще раз</div>
+                        {
+                            Number(params.get("correct_answers")) / Number(params.get("questions")) > 0.75 &&
+                            <div onClick={() => navigate(-1)} className="finish_button">Пройти еще раз</div>
+                        }
+
                     </div>
-                    :
-                    <div>
+                        :
+                        <div>
                         <div className="finish_text">Вы справились с тестом, можно переходить к следующему уроку.</div>
                     </div>
                     

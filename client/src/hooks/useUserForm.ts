@@ -29,6 +29,8 @@ export const useUserForm = () => {
     const [queryParams] = useSearchParams();
     const navigate = useNavigate();
 
+    const [loaded, setLoaded] = useState(true)
+
     // ========== VALIDATION ==========
     const validateEmail = (email: string) =>
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.toLowerCase());
@@ -51,7 +53,9 @@ export const useUserForm = () => {
 
     // ========== LOAD ==========
     useEffect(() => {
+
         (async () => {
+            setLoaded(false)
             try {
                 const all = await getAllPrograms();
                 setPrograms(all);
@@ -72,13 +76,11 @@ export const useUserForm = () => {
                     if (!queryParams.get('admin') && user.programs_id[0]) {
                         const program = await getOneProgram(user.programs_id[0]);
                         setSelectedPrograms([program]);
+
                     }
                 }
+                setLoaded(true)
 
-                // Fill from query params
-                setName(queryParams.get('name') || '');
-                setEmail(queryParams.get('email') || '');
-                setPhone(queryParams.get('number') || '');
 
             } catch (err) {
                 console.error('Load error:', err);
@@ -182,5 +184,6 @@ export const useUserForm = () => {
         validate,
         params,
         navigate,
+        loaded
     };
 };
