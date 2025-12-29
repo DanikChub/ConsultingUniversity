@@ -47,6 +47,15 @@ const PunctItem = ({ punct, i, j, themesArray, setThemesArray, deletePunct, setS
         setThemesArray(valueNew);
     }
 
+    const handleAudioDelete = (i, j) => {
+        const valueNew = [...themesArray];
+        valueNew[i].puncts[j].audio_src = null;
+
+
+
+        setThemesArray(valueNew);
+    }
+
     const handleTestDelete = (i, j) => {
         const prevValue = [...themesArray];
         prevValue[i].have_test = false;
@@ -206,6 +215,33 @@ const PunctItem = ({ punct, i, j, themesArray, setThemesArray, deletePunct, setS
                         </div>
                     }
 
+                    {
+                        punct.audio_src &&
+                        <div className='MakeProgram_Punct_Material'>
+                            <button className='MakeProgram_Punct_Material_delete'
+                                    onClick={() => handleAudioDelete(i, j)}>x
+                            </button>
+
+
+                            <div
+                                onClick={(e) => setShowAddTask({
+                                    show: true,
+                                    i,
+                                    j,
+                                    value: '',
+                                    availableTasks: {
+                                        [TaskType.AUDIO]: true,
+                                    },
+                                })}
+
+                                className='MakeProgram_Punct_Material_Plus'>
+                                А
+                            </div>
+
+                        </div>
+                    }
+
+
                 </div>
 
 
@@ -222,6 +258,7 @@ const PunctItem = ({ punct, i, j, themesArray, setThemesArray, deletePunct, setS
                             [TaskType.LECTION]: !punct.lection_src,
                             [TaskType.VIDEO]: !punct.video_src,
                             [TaskType.LECTION_PDF]: !punct.lection_pdf,
+                            [TaskType.AUDIO]: !punct.audio_src,
                         },
                     }
                 )}/>

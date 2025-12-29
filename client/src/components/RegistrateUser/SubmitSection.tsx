@@ -14,7 +14,7 @@ const SubmitSection = ({ navigate, createUser, params }: any) => (
             onClick={createUser}
             
         >
-            {params.id ? 'Сохранить изменения' : 'Создать пользователя'}
+            {params.id ? 'Сохранить изменения' : 'Создать администратора'}
         </Button>
     </div>
 );

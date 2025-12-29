@@ -5,7 +5,7 @@ import {
     ADMIN_LISTENERS_ROUTE,
     ADMIN_ROUTE,
     ADMIN_DOCUMENTS_ROUTE,
-    CHAT_USERS_PAGE_ROUTE
+    CHAT_USERS_PAGE_ROUTE, ADMIN_ADMINISTRATORS_ROUTE
 } from '../../utils/consts';
 import {getAllUserUnreadCount, getUnreadMessagesCount} from '../../http/chatAPI'; // предположим, есть такой API
 
@@ -23,6 +23,7 @@ const LeftMenu: React.FC = () => {
         { name: 'Сообщения', path: CHAT_USERS_PAGE_ROUTE, unreadCount: unreadMessages },
         { name: 'Программы', path: ADMIN_PROGRAMS_ROUTE },
         { name: 'Выданные документы', path: ADMIN_DOCUMENTS_ROUTE },
+        { name: 'Администраторы', path: ADMIN_ADMINISTRATORS_ROUTE },
     ];
 
     return (

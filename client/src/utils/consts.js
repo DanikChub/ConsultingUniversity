@@ -30,6 +30,7 @@ export const ADMIN_APPLICATIONS_ROUTE = "/admin/applications"
 export const ADMIN_REGISTRATE_USER = "/admin/listeners/new_listener"
 export const ADMIN_USER_ROUTE = "/admin/listeners/:id"
 export const ADMIN_CHANGE_USER= "/admin/listeners/new_listener/:id"
+export const ADMIN_REGISTRATE_ADMIN= "/admin/administrators/new_admin"
 export const ADMIN_STATEMENT_USER= "/admin/listeners/statement/:id"
 export const ADMIN_DOCUMENTS_ROUTE = "/admin/documents/"
 

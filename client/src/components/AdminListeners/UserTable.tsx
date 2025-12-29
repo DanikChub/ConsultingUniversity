@@ -26,7 +26,7 @@ const UserTable: React.FC<Props> = ({ users, loading, onEdit, onDelete, handleCo
             <div
                 className="
                     grid 
-                    grid-cols-[max-content_2fr_2fr_2fr_2fr_1fr_1fr]
+                    grid-cols-[20px_2fr_2fr_2fr_2fr_1fr_1fr]
                     gap-[40px] 
                     items-center
                     font-semibold 
@@ -52,7 +52,7 @@ const UserTable: React.FC<Props> = ({ users, loading, onEdit, onDelete, handleCo
                         onContextMenu={(e) => handleContextMenu(e, user.id, user.program.id)}
                         className="
                             grid 
-                            grid-cols-[max-content_2fr_2fr_2fr_2fr_1fr_1fr]
+                            grid-cols-[20px_2fr_2fr_2fr_2fr_1fr_1fr]
                             gap-[40px] 
                             items-center 
                             py-2 

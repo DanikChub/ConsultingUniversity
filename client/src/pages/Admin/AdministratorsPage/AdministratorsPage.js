@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { deleteUser, getAllAdmins, getAllUsersWithPage,  } from '../../../http/userAPI';
-import { ADMIN_REGISTRATE_USER } from '../../../utils/consts';
+import {ADMIN_REGISTRATE_ADMIN, ADMIN_REGISTRATE_USER} from '../../../utils/consts';
 
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -11,6 +11,8 @@ import LeftMenu from '../../../components/LeftMenu/LeftMenu';
 
 import ListenersSkeleton from '../../../components/ListenersSkeleton/ListenersSkeleton';
 import { Context } from '../../../index';
+import AppContainer from "../../../components/ui/AppContainer";
+import ProgressBar from "../../../components/AdminListeners/ProgressBar";
 
 function dateToString(date) {
     
@@ -31,6 +33,13 @@ const AdministratorsPage = () => {
     const [loading, setLoading] = useState(false);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const navigate = useNavigate();
+
+    const [contextMenu, setContextMenu] = useState({
+        visible: false,
+        x: 0,
+        y: 0,
+        userId: null
+    });
 
     useEffect(() => {
         getAllAdmins().then(users => {
@@ -60,74 +69,110 @@ const AdministratorsPage = () => {
             })
         );
     }
+
+    const handleContextMenu = (e, userId) => {
+        e.preventDefault(); // отключаем стандартное меню
+        setContextMenu({
+            visible: true,
+            x: e.clientX,
+            y: e.pageY,
+            userId
+        });
+    };
+
+    const handleClickOutside = () => {
+        if (contextMenu.visible) {
+            setContextMenu({ visible: false, x: 0, y: 0, userId: null });
+        }
+    };
+
+    const handleEdit = (id) => navigate(`/admin/listeners/new_listener/${id}`);
     
     return (
-        <div className="content">
-            <div className="container">
+        <AppContainer onClick={handleClickOutside}>
+            <Link to={ADMIN_REGISTRATE_ADMIN + '?admin=true'} className="admin_button">Добавить администратора</Link>
 
-                <div className="admin_inner">
-                    <LeftMenu/>
-                    <div className="admin_container">
-                        <div className="admin_path">Главная / <b>Администраторы</b></div>
-                        <Link to={ADMIN_REGISTRATE_USER + '?admin=true'} className="admin_button">Добавить администратора</Link>
-                        
-                        <div className='admin_table_container'>
-                            <table className="admin_table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>ФИО</th>
-                                        <th>EMAIL</th>
-                                        <th>Роль</th>
-                                        <th>Дата создания</th>
-                                        
-                                        <th>Сеанс</th>
-                                        <th>Изменить</th>
-                                        <th>Удалить</th>
+            <div className="w-full mt-4 min-h-[410px]">
+                {/* Шапка */}
+                <div
+                    className="
+                    grid
+                    grid-cols-[1fr_3fr_3fr_3fr_3fr_3fr]
+                    gap-[40px]
+                    items-center
+                    font-semibold
+                    pb-2
+                "
+                >
 
-                                     
-                                    </tr>
-                                </thead>
-                                {
-                                    loading?
-                                
-                                <tbody>
-                                    {
-                                        filteredUsers.map((user, i) => 
-                                            
-                                            <tr className={i==0?'active':''}>
-                                                <td>#{user.id}</td>
-                                                <td><div>{user.name}</div></td>
-                                                <td style={{display: 'table-cell', width: 'auto'}}>{user.email}</td>
-                                                <td>Администратор</td>
-                                                <td>{dateToString(user.createdAt)}</td>
-                                                
-                                                <td>{i==0?`(Текущий)`:''}</td>
-                                                <td className='remakeButton' onClick={() => navigate("/admin/listeners/new_listener/" + user.id + "?admin=true")}><img src={pencil} width="22px"/></td>
-                                                <td className='deleteButton' onClick={() => destroyUser(user.id)}>x</td>
-                                                
-                                            </tr>
-                                            )
-                                    }
-                                    
-                                </tbody>
-                                : <ListenersSkeleton/>
-                                }
-                                
+                    <div className="text-sm text-[#2C3E50] font-semibold">ID</div>
+                    <div className="text-sm text-[#2C3E50] font-semibold">ФИО</div>
+                    <div className="text-sm text-[#2C3E50] font-semibold">EMAIL</div>
+                    <div className="text-sm text-[#2C3E50] font-semibold">Роль</div>
+                    <div className="text-sm text-[#2C3E50] font-semibold">Дата создания</div>
 
-                                
-                            </table>
-                        </div>
-                        
-                        
-                                            
-                        
-                        
-                    </div>
-                    
+                    <div className="text-sm text-[#2C3E50] font-semibold">Сеанс</div>
+
                 </div>
+
+                {/* Строки */}
+                {!loading ? (
+                    <ListenersSkeleton/>
+                ) : (
+                    filteredUsers.map((user, i) => (
+                        <div
+                            key={user.id}
+                            onContextMenu={(e) => handleContextMenu(e, user.id)}
+                            className={`
+                            grid
+                            grid-cols-[1fr_3fr_3fr_3fr_3fr_3fr]
+                            gap-[40px]
+                            items-center
+                            py-2
+                            
+                            relative ${i==0?'bg-green-200':'hover:bg-gray-100'}
+                        `}
+                        >
+                            <div className="text-sm text-[#2C3E50]">{user.id}.</div>
+                            <div className="text-sm text-[#2C3E50]">{user.name}</div>
+                            <div className="text-sm text-[#2C3E50]">{user.email}</div>
+                            <div className="text-sm text-[#2C3E50]">{user.role}</div>
+                            <div className="text-sm text-[#2C3E50]">{dateToString(user.createdAt)}</div>
+                            <div className="text-sm text-[#2C3E50]">{i==0?`(Текущий)`:''}</div>
+                        </div>
+                    ))
+                )}
+
+
             </div>
-        </div>
+            {contextMenu.visible && (
+                <div
+                    style={{ top: contextMenu.y, left: contextMenu.x }}
+                    className="absolute bg-white z-50 w-[220px] rounded-md overflow-hidden"
+                >
+
+                    <button
+                        onClick={() => {
+                            if (contextMenu.userId) handleEdit(contextMenu.userId);
+                            setContextMenu({ visible: false, x: 0, y: 0, userId: null });
+                        }}
+                        className="w-full bg-[#D9D9D9] hover:bg-[#2D91CB] hover:text-white py-2 px-3 transition text-left text-sm"
+                    >
+                        Изменить
+                    </button>
+                    <button
+                        onClick={() => {
+                            if (contextMenu.userId) destroyUser(contextMenu.userId);
+                            setContextMenu({ visible: false, x: 0, y: 0, userId: null });
+                        }}
+
+                        className="w-full bg-[#D9D9D9] hover:bg-red-600 hover:text-white py-2 px-3 transition text-left text-sm"
+                    >
+                        Удалить
+                    </button>
+                </div>
+            )}
+        </AppContainer>
     );
 };
 

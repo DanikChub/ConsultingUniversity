@@ -173,7 +173,7 @@ class TestController {
                     where: { testStatisticId: stat.id }
                 });
             }
-            console.log(punctsStatistic)
+    
             for (const punct of punctsStatistic) {
                 console.log(punct)
                 if (!punct || punct.length === 0) {

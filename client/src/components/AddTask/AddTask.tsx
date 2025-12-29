@@ -50,6 +50,16 @@ const TASK_RENDER_MAP: Record<
         isFile: true,
         accept: ".pdf",
     },
+    [TaskType.LECTION_PDF]: {
+        label: "Добавить лекцию (PDF)",
+        isFile: true,
+        accept: ".pdf",
+    },
+    [TaskType.AUDIO]: {
+        label: "Добавить аудио",
+        isFile: true,
+        accept: ".mp3",
+    },
 };
 
 const AddTask: React.FC<AddTaskProps> = ({ show, setShow, setMakeOpen }) => {

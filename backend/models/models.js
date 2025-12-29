@@ -40,17 +40,6 @@ const Application = sequelize.define('application', {
     
 })
 
-const Admin = sequelize.define('admin', {
-    id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-    email: {type: DataTypes.STRING, unique: true,},
-    number: {type: DataTypes.STRING, unique: true,},
-    name: {type: DataTypes.STRING, allowNull: true},
-    password: {type: DataTypes.STRING},
-    role: {type: DataTypes.STRING, defaultValue: "ADMIN"},
-    programs_id: {type: DataTypes.ARRAY(DataTypes.INTEGER)},
-    users_id: {type: DataTypes.ARRAY(DataTypes.INTEGER)},
-})
-
 const Program = sequelize.define('program', {
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
     title: {type: DataTypes.STRING},
@@ -93,6 +82,7 @@ const Punct = sequelize.define('punct', {
     practical_work: {type: DataTypes.STRING},
     practical_work_task: {type: DataTypes.TEXT},
     video_src: {type: DataTypes.STRING},
+    audio_src: { type: DataTypes.STRING },
     test_id: {type: DataTypes.STRING},
 })
 
@@ -187,8 +177,6 @@ const Messages = sequelize.define('messeges', {
 
 
 
-Admin.hasMany(Program)
-Program.belongsTo(Admin)
 
 Program.hasMany(Theme, { onDelete: 'cascade', hooks: true })
 Theme.belongsTo(Program)
@@ -204,9 +192,6 @@ TestPunct.belongsTo(Test);
 
 TestStatictis.hasMany(TestPunctStatictis, { onDelete: 'cascade', hooks: true })
 TestPunctStatictis.belongsTo(TestStatictis);
-
-Admin.hasMany(User)
-User.belongsTo(Admin)
 
 User.belongsToMany(Program, {through: UserProgram})
 Program.belongsToMany(User, {through: UserProgram})
@@ -230,5 +215,5 @@ PracticalWork.belongsTo(User)
 
 
 module.exports = {
-    Event, Messages, User, Admin, Program, Theme, Punct, Application, Test, TestPunct, Statistic, ThemeStatistic, PunctStatistic, PracticalWork, TestStatictis, TestPunctStatictis
+    Event, Messages, User, Program, Theme, Punct, Application, Test, TestPunct, Statistic, ThemeStatistic, PunctStatistic, PracticalWork, TestStatictis, TestPunctStatictis
 }

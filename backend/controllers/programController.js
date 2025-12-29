@@ -88,7 +88,16 @@ class ProgramController {
   async create(req, res, next) {
     const t = await sequelize.transaction();
     try {
-      const { title, admin_id, number_of_practical_work, number_of_test, number_of_videos, themes, short_title, price } = req.body;
+      const {
+        title,
+        admin_id,
+        number_of_practical_work,
+        number_of_test,
+        number_of_videos,
+        themes,
+        short_title,
+        price
+      } = req.body;
 
       if (!title) return next(ApiError.badRequest('Программа не имеет названия!'));
 
@@ -99,24 +108,36 @@ class ProgramController {
       const validationError = validateParsedThemes(parsedThemes);
       if (validationError) return next(ApiError.badRequest(validationError));
 
-      // Save incoming files (if any) in a predictable structure
-      // req.files might contain: docs, presentation_src, theme_lection_src, img
       const files = req.files || {};
 
       const docsSaved = await saveFilesArrayOrSingle(files.docs);
       const lection_pdfsSaved = await saveFilesArrayOrSingle(files.lection_pdfs);
       const presentationsSaved = await saveFilesArrayOrSingle(files.presentation_src);
       const themeLectionSaved = await saveFilesArrayOrSingle(files.theme_lection_src);
+      const audiosSaved = await saveFilesArrayOrSingle(files.audios);
       const imgSaved = files.img ? (await saveSingleFile(files.img)) : '';
 
-      // Create program
-      const program = await Program.create({ title, admin_id, number_of_practical_work, number_of_test, number_of_videos, short_title, price, img: imgSaved }, { transaction: t });
+      const program = await Program.create({
+        title,
+        admin_id,
+        number_of_practical_work,
+        number_of_test,
+        number_of_videos,
+        short_title,
+        price,
+        img: imgSaved
+      }, { transaction: t });
 
-      // Create themes and puncts in sequence (avoid forEach with async)
       for (const theme_el of parsedThemes) {
-        // Determine presentation/lection filenames (either existing string in theme_el or new saved file by index)
-        const presentation_src = typeof theme_el.presentation_src === 'string' && theme_el.presentation_src ? theme_el.presentation_src : (presentationsSaved[theme_el.presentation_id] || null);
-        const theme_lection_src = typeof theme_el.lection_src === 'string' && theme_el.lection_src ? theme_el.lection_src : (themeLectionSaved[theme_el.lection_id] || null);
+        const presentation_src =
+            typeof theme_el.presentation_src === 'string' && theme_el.presentation_src
+                ? theme_el.presentation_src
+                : (presentationsSaved[theme_el.presentation_id] || null);
+
+        const theme_lection_src =
+            typeof theme_el.lection_src === 'string' && theme_el.lection_src
+                ? theme_el.lection_src
+                : (themeLectionSaved[theme_el.lection_id] || null);
 
         const themeLectionHtml = await convertDocxToHtmlIfExists(theme_lection_src);
 
@@ -124,7 +145,7 @@ class ProgramController {
           title: theme_el.title,
           programId: program.id,
           theme_id: theme_el.theme_id,
-          presentation_src: presentation_src,
+          presentation_src,
           presentation_title: theme_el.presentation_title || null,
           video_src: theme_el.video_src || null,
           lection_src: theme_lection_src || null,
@@ -133,24 +154,43 @@ class ProgramController {
           lection_id: theme_el.lection_id
         }, { transaction: t });
 
-        // Puncts
         for (const punct_el of theme_el.puncts) {
-          const punctLectionSrc = typeof punct_el.lection_src === 'string' && punct_el.lection_src ? punct_el.lection_src : (docsSaved[punct_el.lection_id] || null);
-          const punctLectionPdfSrc = typeof punct_el.lection_pdf === 'string' && punct_el.lection_pdf ? punct_el.lection_pdf : (lection_pdfsSaved[punct_el.lection_pdf_id] || null);
+          const punctLectionSrc =
+              typeof punct_el.lection_src === 'string' && punct_el.lection_src
+                  ? punct_el.lection_src
+                  : (docsSaved[punct_el.lection_id] || null);
+
+          const punctLectionPdfSrc =
+              typeof punct_el.lection_pdf === 'string' && punct_el.lection_pdf
+                  ? punct_el.lection_pdf
+                  : (lection_pdfsSaved[punct_el.lection_pdf_id] || null);
+
+          const punctAudioSrc =
+              typeof punct_el.audio_src === 'string' && punct_el.audio_src
+                  ? punct_el.audio_src
+                  : (audiosSaved[punct_el.audio_id] || null);
+
           const punctLectionHtml = await convertDocxToHtmlIfExists(punctLectionSrc);
-          console.log('######################', punctLectionPdfSrc, '######################')
+
           await Punct.create({
             title: punct_el.title,
             themeId: createdTheme.id,
+
             video_src: punct_el.video_src || null,
+
             lection_src: punctLectionSrc || null,
             lection_html: punctLectionHtml,
             lection_title: punct_el.lection_title || null,
             lection_id: punct_el.lection_id,
+
             lection_pdf: punctLectionPdfSrc || null,
             lection_pdf_id: punct_el.lection_pdf_id,
+
             practical_work: punct_el.practical_work || null,
             practical_work_task: punct_el.practical_work_task || null,
+
+            audio_src: punctAudioSrc,
+
             test_id: punct_el.test_id || null,
             punct_id: punct_el.punct_id
           }, { transaction: t });
@@ -165,6 +205,7 @@ class ProgramController {
       return next(ApiError.internal('Ошибка при создании программы'));
     }
   }
+
 
   async getAll(req, res, next) {
     try {
@@ -289,31 +330,42 @@ class ProgramController {
   async remake(req, res, next) {
     const t = await sequelize.transaction();
     try {
-      const { title, number_of_practical_work, number_of_test, number_of_videos, themes, id, short_title, price } = req.body;
+      const {
+        title,
+        number_of_practical_work,
+        number_of_test,
+        number_of_videos,
+        themes,
+        id,
+        short_title,
+        price
+      } = req.body;
+
       if (!title) return next(ApiError.badRequest('Программа не имеет названия!'));
 
       const parsedThemes = (() => {
         try { return JSON.parse(themes); } catch (e) { return null; }
       })();
+
       const validationError = validateParsedThemes(parsedThemes);
       if (validationError) return next(ApiError.badRequest(validationError));
 
       const files = req.files || {};
-      const docsSaved = await saveFilesArrayOrSingle(files.docs);
 
+      const docsSaved = await saveFilesArrayOrSingle(files.docs);
       const presentationsSaved = await saveFilesArrayOrSingle(files.presentation_src);
       const lection_pdfsSaved = await saveFilesArrayOrSingle(files.lection_pdfs);
       const themeLectionSaved = await saveFilesArrayOrSingle(files.theme_lection_src);
+      const audiosSaved = await saveFilesArrayOrSingle(files.audios);
       const imgSaved = files.img ? (await saveSingleFile(files.img)) : '';
 
       const program = await Program.findOne({ where: { id } });
       if (!program) return next(ApiError.notFound('Программа не найдена'));
 
-      if (number_of_test < program.number_of_test) return next(ApiError.badRequest('Нельзя удалять тесты при изменении программы'));
+      if (number_of_test < program.number_of_test)
+        return next(ApiError.badRequest('Нельзя удалять тесты при изменении программы'));
 
-      // update program fields
       program.img = imgSaved || program.img;
-      console.log("#########################", typeof program.img === 'string' && program.img ? program.img : imgSaved || null, program.img, files.img,  "#########################")
       program.title = title;
       program.short_title = short_title;
       program.price = price;
@@ -322,26 +374,43 @@ class ProgramController {
       program.number_of_videos = number_of_videos;
       await program.save({ transaction: t });
 
-      // Remove old themes & puncts
       await Theme.destroy({ where: { programId: program.id } }, { transaction: t });
 
-      // Update statistics if needed
       const statistics = await Statistic.findAll({ where: { programs_id: program.id } });
       for (const statistic of statistics) {
         for (let i = statistic.max_tests; i < number_of_test; i++) {
-          const themeStatistic = await ThemeStatistic.create({ theme_id: i, well: false, statisticId: statistic.id }, { transaction: t });
-          await PunctStatistic.create({ punct_id: i, lection: false, practical_work: null, video: false, test_bool: false, themeStatisticId: themeStatistic.id }, { transaction: t });
+          const themeStatistic = await ThemeStatistic.create({
+            theme_id: i,
+            well: false,
+            statisticId: statistic.id
+          }, { transaction: t });
+
+          await PunctStatistic.create({
+            punct_id: i,
+            lection: false,
+            practical_work: null,
+            video: false,
+            test_bool: false,
+            themeStatisticId: themeStatistic.id
+          }, { transaction: t });
         }
+
         statistic.max_videos = number_of_videos;
         statistic.max_tests = number_of_test;
         statistic.max_practical_works = number_of_practical_work;
         await statistic.save({ transaction: t });
       }
 
-      // Recreate themes & puncts (similar to create)
       for (const theme_el of parsedThemes) {
-        const presentation_src = typeof theme_el.presentation_src === 'string' && theme_el.presentation_src ? theme_el.presentation_src : (presentationsSaved[theme_el.presentation_id] || null);
-        const theme_lection_src = typeof theme_el.lection_src === 'string' && theme_el.lection_src ? theme_el.lection_src : (themeLectionSaved[theme_el.lection_id] || null);
+        const presentation_src =
+            typeof theme_el.presentation_src === 'string' && theme_el.presentation_src
+                ? theme_el.presentation_src
+                : (presentationsSaved[theme_el.presentation_id] || null);
+
+        const theme_lection_src =
+            typeof theme_el.lection_src === 'string' && theme_el.lection_src
+                ? theme_el.lection_src
+                : (themeLectionSaved[theme_el.lection_id] || null);
 
         const themeLectionHtml = await convertDocxToHtmlIfExists(theme_lection_src);
 
@@ -349,7 +418,7 @@ class ProgramController {
           title: theme_el.title,
           programId: program.id,
           theme_id: theme_el.theme_id,
-          presentation_src: presentation_src,
+          presentation_src,
           presentation_title: theme_el.presentation_title || null,
           presentation_id: theme_el.presentation_id,
           video_src: theme_el.video_src || null,
@@ -360,22 +429,42 @@ class ProgramController {
         }, { transaction: t });
 
         for (const punct_el of theme_el.puncts) {
-          const punctLectionSrc = typeof punct_el.lection_src === 'string' && punct_el.lection_src ? punct_el.lection_src : (docsSaved[punct_el.lection_id] || null);
-          const punctLectionPdfSrc = typeof punct_el.lection_pdf === 'string' && punct_el.lection_pdf ? punct_el.lection_pdf : (lection_pdfsSaved[punct_el.lection_pdf_id] || null);
+          const punctLectionSrc =
+              typeof punct_el.lection_src === 'string' && punct_el.lection_src
+                  ? punct_el.lection_src
+                  : (docsSaved[punct_el.lection_id] || null);
+
+          const punctLectionPdfSrc =
+              typeof punct_el.lection_pdf === 'string' && punct_el.lection_pdf
+                  ? punct_el.lection_pdf
+                  : (lection_pdfsSaved[punct_el.lection_pdf_id] || null);
+
+          const punctAudioSrc =
+              typeof punct_el.audio_src === 'string' && punct_el.audio_src
+                  ? punct_el.audio_src
+                  : (audiosSaved[punct_el.audio_id] || null);
+
           const punctLectionHtml = await convertDocxToHtmlIfExists(punctLectionSrc);
 
           await Punct.create({
             title: punct_el.title,
             themeId: createdTheme.id,
+
             video_src: punct_el.video_src || null,
+
             lection_src: punctLectionSrc || null,
             lection_html: punctLectionHtml,
             lection_title: punct_el.lection_title || null,
             lection_id: punct_el.lection_id,
+
             lection_pdf: punctLectionPdfSrc || null,
             lection_pdf_id: punct_el.lection_pdf_id,
+
             practical_work: punct_el.practical_work || null,
             practical_work_task: punct_el.practical_work_task || null,
+
+            audio_src: punctAudioSrc,
+
             test_id: punct_el.test_id || null,
             punct_id: punct_el.punct_id
           }, { transaction: t });
@@ -390,6 +479,7 @@ class ProgramController {
       return next(ApiError.internal('Ошибка при обновлении программы'));
     }
   }
+
 }
 
 module.exports = new ProgramController();

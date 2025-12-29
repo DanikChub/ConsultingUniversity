@@ -13,7 +13,9 @@ const CUSTOM_LABELS: Record<string, string> = {
   programs: "Программы",
   new_program: "Новая программа",
   chat: "Сообщения",
-  documents: "Выданные документы"
+  documents: "Выданные документы",
+  administrators: "Администраторы",
+  new_admin: "Новый администратор"
   // добавляй сюда другие нужные сегменты
 };
 

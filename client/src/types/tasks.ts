@@ -5,4 +5,5 @@ export enum TaskType {
     LECTION = "lection",
     VIDEO = "video",
     LECTION_PDF = "lection_pdf",
+    AUDIO = "audio"
 }
