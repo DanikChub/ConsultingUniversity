@@ -402,7 +402,13 @@ class UserController {
 
     async getAllAdmins(req, res, next) {
         try {
-            const users = await User.findAll({ where: { role: 'ADMIN' } });
+            const users = await User.findAll({
+                where: {
+                    role: {
+                        [Op.in]: ['ADMIN', 'VIEWER']
+                    }
+                }
+            });
             return res.json(users);
         } catch (e) {
             console.error('getAllAdmins error:', e);
