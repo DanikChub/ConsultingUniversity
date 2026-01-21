@@ -7,6 +7,8 @@ import learn from "../../../assets/imgs/learn.png"
 import word from "../../../assets/imgs/word.png"
 import practic_work_img from "../../../assets/imgs/practic_work.png"
 import video_play from "../../../assets/imgs/video_play.png"
+import audio_img from "../../../assets/imgs/audio.png"
+import audio_blue_img from "../../../assets/imgs/audio_blue.png"
 import presentation from "../../../assets/imgs/presentation.png"
 import check from "../../../assets/imgs/check.png"
 import test_src from "../../../assets/imgs/test.png"
@@ -18,6 +20,7 @@ import { observer } from 'mobx-react-lite';
 import { getStatistic, updatePracticalWorks, updateVideos } from '../../../http/statisticAPI';
 import FinishTestPage from '../FinishTestPage/FinishTestPage';
 import UserContainer from "../../../components/ui/UserContainer";
+import CustomAudioPlayer from "../../../components/CustomAudioPlayer/CustomAudioPlayer";
 
 
 const CoursePage = observer(() => {
@@ -41,6 +44,10 @@ const CoursePage = observer(() => {
         userId: null,
         programId: null
     });
+
+    const [playerActive, setPlayerActive] = useState(false);
+    const [activeTrack, setActiveTrack] = useState({i: null, j: null, active: false})
+    const [playerAudioSrc, setPlayerAudioSrc] = useState(null);
 
     useEffect(() => {
         let program_id = userContext.user.user.programs_id[0]
@@ -137,6 +144,12 @@ const CoursePage = observer(() => {
         return `${PRACTICAL_WORK_ROUTE}?title=${practical_work}&task=${practical_work_task}&theme_id=${courseItems_id}&theme_statistic_id=${themesStatistic_id}&punct_id=${puncts_id}`
     }
 
+    const handleAudioClick = (audioSrc, i, j) => {
+        setPlayerAudioSrc(audioSrc)
+        setPlayerActive(true)
+        setActiveTrack({i: i, j: j, active: true})
+    }
+
     return (
 
         <UserContainer loading={loading}>
@@ -211,7 +224,7 @@ const CoursePage = observer(() => {
                                     
                                 }
                                 
-                                <svg classNameName='course_item_svg' width="17" height="11" viewBox="0 0 17 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg className='course_item_svg' width="17" height="11" viewBox="0 0 17 11" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M14.9854 1L8.24196 9.79687" stroke="#898989" stroke-opacity="0.78" strokeWidth="2" strokeLinecap="round"/>
                                     <path d="M1.16919 1.36328L7.97597 9.6843" stroke="#898989" stroke-opacity="0.78" strokeWidth="2" strokeLinecap="round"/>
                                 </svg>
@@ -259,12 +272,23 @@ const CoursePage = observer(() => {
                                             </Link>
                                         }
                                         {audio_src &&
-                                            <a target="_blank"
-                                               href={process.env.REACT_APP_API_URL + audio_src}
-                                               className="course_item_download">
-                                                А
-                                                <div>аудио</div>
-                                            </a>
+                                            <div onClick={() => handleAudioClick(audio_src, i, j)}
+                                                 className="course_item_download">
+                                                {
+                                                    activeTrack.i == i && activeTrack.j == j && activeTrack.active == true ?
+
+                                                        <>
+                                                            <img src={audio_blue_img} alt=""/>
+                                                            <div className="text-blue-500">аудио</div>
+                                                        </>
+                                                        :
+                                                        <>
+                                                            <img src={audio_img} alt=""/>
+                                                            <div>аудио</div>
+                                                        </>
+                                                }
+
+                                            </div>
                                         }
 
                                     </div>
@@ -277,6 +301,10 @@ const CoursePage = observer(() => {
                     )}
 
                 </div>
+            {
+                playerActive && <CustomAudioPlayer setPlayerActive={setPlayerActive} setActiveTrack={setActiveTrack} audioSrc={playerAudioSrc}/>
+            }
+
         </UserContainer>
 
     );

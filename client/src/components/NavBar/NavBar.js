@@ -26,7 +26,7 @@ const NavBar = observer(() => {
                         <div></div>
                         
                         {user.isAuth ? 
-                            user.user.role == "ADMIN" ? 
+                            user.user.role == "ADMIN" || "VIEWER" ?
                        
                                 
                                 <Link to={MAIN_ROUTE} style={{marginLeft: "10px"}} onClick={handlerClick} className="duration-300 flex items-center bg-[#33CCCC] rounded-md px-[12px] py-[6px] text-base font-medium text-[#fff] cursor-pointer transition hover:text-[#000] hover:bg-[#fff]">Выйти</Link>

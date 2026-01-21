@@ -13,6 +13,7 @@ import ListenersSkeleton from '../../../components/ListenersSkeleton/ListenersSk
 import { Context } from '../../../index';
 import AppContainer from "../../../components/ui/AppContainer";
 import ProgressBar from "../../../components/AdminListeners/ProgressBar";
+import Button from "../../../components/ui/Button";
 
 function dateToString(date) {
     
@@ -42,16 +43,47 @@ const AdministratorsPage = () => {
     });
 
     useEffect(() => {
-        getAllAdmins().then(users => {
-            let you = users.filter(user => user.id == userContext.user.user.id)
-            users = users.filter(user => user.id != userContext.user.user.id)
-            
-            users.unshift(you[0])
+        const fetchAdmins = async () => {
+            setLoading(true);       // включаем спиннер
+                    // сбрасываем ошибки
 
-            setUsers(users);
-            setFilteredUsers(users);
-            setLoading(true);
-        })
+            try {
+                const users = await getAllAdmins();
+
+                // выделяем текущего пользователя
+                const you = users.filter(
+                    user => user.id === userContext.user.user.id
+                );
+                const otherUsers = users.filter(
+                    user => user.id !== userContext.user.user.id
+                );
+
+                // ставим текущего пользователя в начало
+                if (you.length) {
+                    otherUsers.unshift(you[0]);
+                }
+
+                setUsers(otherUsers);
+                setFilteredUsers(otherUsers);
+
+            } catch (error) {
+                console.error('fetchAdmins error:', error);
+
+                const message =
+                    error?.response?.data?.message ||
+                    error?.message ||
+                    'Ошибка получения администраторов';
+
+                alert(message)
+
+            } finally {
+                setLoading(true);  // выключаем спиннер
+            }
+        };
+
+        fetchAdmins();
+
+
         
     }, [])
 
@@ -90,8 +122,8 @@ const AdministratorsPage = () => {
     
     return (
         <AppContainer onClick={handleClickOutside}>
-            <Link to={ADMIN_REGISTRATE_ADMIN + '?admin=true'} className="admin_button">Добавить администратора</Link>
 
+            <Button to={ADMIN_REGISTRATE_ADMIN + '?admin=true'}  checkRole='ADMIN' className="admin_button">Добавить администратора</Button>
             <div className="w-full mt-4 min-h-[410px]">
                 {/* Шапка */}
                 <div

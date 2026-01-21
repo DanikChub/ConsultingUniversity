@@ -57,7 +57,7 @@ const AdminProgramsPage = () => {
                     <a href="#" className='tabs_nav_link'>Черновик (0)</a>
                 </div>
                 
-                <Button to={MAKE_PROGRAM_ROUTE} className='mt-4'>Добавить программу</Button>
+                <Button to={MAKE_PROGRAM_ROUTE} checkRole='ADMIN' className='mt-4'>Добавить программу</Button>
                 <div className="tab active">
                     {loading?
                     

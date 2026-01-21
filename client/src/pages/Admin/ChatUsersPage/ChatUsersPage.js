@@ -31,8 +31,19 @@ const ChatUsersPage = () => {
     useEffect(() => {
         getUsersWithLastMessages()
             .then(data => {setUsers(data);setFilteredUsers(data)})
-            .then(data => setLoading(true))
-            .catch(e => alert(e))
+            .catch(error => {
+                console.error('fetchUsers error:', error);
+
+                // сообщение пользователю
+                const message =
+                    error?.response?.data?.message ||
+                    error?.message ||
+                    'Ошибка загрузки пользователей';
+
+                alert(message)
+            }).finally (data => {
+                setLoading(true);
+            })
         console.log(users)
     }, [])
 

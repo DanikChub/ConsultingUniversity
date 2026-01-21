@@ -23,19 +23,46 @@ export const useAdminListeners = () => {
     };
 
     const fetchUsers = async (page: number = 1, search?: string) => {
-        setLoading(false);
-        let data: UsersAPIResponse;
-        if (search) {
-            data = await searchUsers(page, search);
-        } else {
-            data = await getAllUsersWithPage(page, sortTypeVariations[sortType], sortDown ? 'DESC' : 'ASC');
+        try {
+            setLoading(true);
+
+            let data: UsersAPIResponse;
+
+            if (search) {
+                data = await searchUsers(page, search);
+            } else {
+                data = await getAllUsersWithPage(
+                    page,
+                    sortTypeVariations[sortType],
+                    sortDown ? 'DESC' : 'ASC'
+                );
+            }
+
+            generatePagination(data.count);
+
+            const userList = data.rows.filter(u => u.role === 'USER');
+
+            if (search) {
+                userList.forEach(u => (u.yellow_value = search));
+            }
+
+            setUsers(userList);
+            setFilteredUsers(userList);
+
+        } catch (error: any) {
+            console.error('fetchUsers error:', error);
+
+            // сообщение пользователю
+            const message =
+                error?.response?.data?.message ||
+                error?.message ||
+                'Ошибка загрузки пользователей';
+
+            alert(message)
+
+        } finally {
+            setLoading(true);
         }
-        generatePagination(data.count);
-        const userList = data.rows.filter(u => u.role === "USER");
-        if (search) userList.forEach(u => u.yellow_value = search);
-        setUsers(userList);
-        setFilteredUsers(userList);
-        setLoading(true);
     };
 
     const destroyUser = async (id: number) => {

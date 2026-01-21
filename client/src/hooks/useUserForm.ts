@@ -13,6 +13,7 @@ export const useUserForm = () => {
     const [phone, setPhone] = useState('');
     const [address, setAddress] = useState('');
     const [diplom, setDiplom] = useState(false);
+    const [role, setRole] = useState('ADMIN');
 
     const [programInput, setProgramInput] = useState('');
     const [programs, setPrograms] = useState([]);
@@ -144,7 +145,7 @@ export const useUserForm = () => {
                 }
             } else {
                 if (queryParams.get('admin')) {
-                    await registrateAdmin(email, password, 'ADMIN', name, phone);
+                    await registrateAdmin(email, password, role, name, phone);
                     navigate(ADMIN_ADMINISTRATORS_ROUTE);
                 } else {
                     await registrateUser(email, password, 'USER', name, phone, org, userProgramId, diplom, inn, address);
@@ -158,6 +159,7 @@ export const useUserForm = () => {
 
     return {
         // DATA
+        role, setRole,
         name, setName,
         email, setEmail,
         password, setPassword,

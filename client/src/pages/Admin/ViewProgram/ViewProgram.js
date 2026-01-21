@@ -18,6 +18,7 @@ import './ViewProgram.css'
 import ruble from "../../../assets/imgs/icons/ruble.png"
 import man from "../../../assets/imgs/icons/man.png"
 import AppContainer from '../../../components/ui/AppContainer';
+import Button from "../../../components/ui/Button";
 
 
 const ViewProgram = observer(() => {
@@ -125,8 +126,8 @@ const ViewProgram = observer(() => {
             </div>
             <div className='flex start mt-4'>
             
-                <div className='admin_button' onClick={() => navigate(`${MAKE_PROGRAM_ROUTE}/${program.id}`)} >Редактировать</div>
-                <div className='admin_button red ml-2' onClick={() => deleteProgramClick(program.id)} >Удалить</div>
+                <Button onClick={() => navigate(`${MAKE_PROGRAM_ROUTE}/${program.id}`)} checkRole='ADMIN'>Редактировать</Button>
+                <Button className='admin_button red ml-2' onClick={() => deleteProgramClick(program.id)}  checkRole='ADMIN'>Удалить</Button>
             </div>
             <div className='course_title'><b>Название:</b> {program.title}</div>
             <div className="course">

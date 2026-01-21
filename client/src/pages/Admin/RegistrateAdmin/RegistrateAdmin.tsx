@@ -9,6 +9,7 @@ import SubmitSection from '../../../components/RegistrateUser/SubmitSection';
 
 
 import myGif from '../../../assets/imgs/spinner.gif';
+import UserRoleSelect from "../../../components/RegistrateUser/UserRoleSelect";
 
 const RegistrateUser: React.FC = () => {
     const form = useUserForm();
@@ -19,6 +20,7 @@ const RegistrateUser: React.FC = () => {
                 <div className="mt-[30px] w-full">
 
                     <UserNameInput {...form} />
+                    <UserRoleSelect {...form}/>
                     <UserEmailInput {...form} />
                     <UserPasswordInput {...form} />
                     <PhoneInput {...form} />

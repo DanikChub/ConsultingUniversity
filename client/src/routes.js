@@ -200,6 +200,99 @@ export const adminRoutes = [
     }
 ]
 
+export const viewerRoutes = [
+    {
+        path: ADMIN_ROUTE,
+        Component: <AdminPage/>
+    },
+    {
+        path: ADMIN_PROGRAMS_ROUTE,
+        Component: <AdminProgramsPage/>
+    },
+    {
+        path: MAKE_PROGRAM_ROUTE,
+        Component: <MakeProgram/>
+    },
+    {
+        path: CHANGE_PROGRAM_ROUTE,
+        Component: <MakeProgram/>
+    },
+    {
+        path: ADMIN_LISTENERS_ROUTE,
+        Component: <AdminListeners/>
+    },
+    {
+        path: ADMIN_USER_ROUTE,
+        Component: <AdminUserPage/>
+    },
+    {
+        path: ADMIN_REGISTRATE_USER,
+        Component: <RegistrateUser/>
+    },
+    {
+        path: ADMIN_CHANGE_USER,
+        Component: <RegistrateUser/>
+    },
+    {
+        path: ADMIN_APPLICATIONS_ROUTE,
+        Component: <ApplicationPage/>
+    },
+    {
+        path: ADMIN_VIEW_PROGRAM,
+        Component: <ViewProgram/>
+    },
+    {
+        path: ADMIN_VIEW_PRACTICAL_WORKS_ROUTE,
+        Component: <ViewPracticalWorkPage/>
+    },
+    {
+        path: ADMIN_VIEW_TEST,
+        Component: <ViewTest/>
+    },
+    {
+        path: ADMIN_VIEW_VIDEO,
+        Component: <ViewVideo/>
+    },
+    {
+        path: ADMIN_VIEW_LECTION,
+        Component: <ViewLection/>
+    },
+    {
+        path: ADMIN_PRACTICAL_WORKS_ROUTE,
+        Component: <AdminPracticalPage/>
+    },
+    {
+        path: ADMIN_ONE_PRACTICAL_WORKS_ROUTE,
+        Component: <AdminOnePracticalPage/>
+    },
+    {
+        path: ADMIN_STATEMENT_USER,
+        Component: <AdminStatementPage/>
+    },
+    {
+        path: ADMIN_ADMINISTRATORS_ROUTE,
+        Component: <AdministratorsPage/>
+    },
+    {
+        path: ADMIN_DOCUMENTS_ROUTE,
+        Component: <AdminDocumentsPage/>
+    },
+    {
+        path: CHAR_PAGE_ROUTE,
+        Component: <ChatPage/>
+    }
+    ,
+    {
+        path: CHAT_USERS_PAGE_ROUTE,
+        Component: <ChatUsersPage/>
+    }
+    ,
+    {
+        path: ADMIN_REGISTRATE_ADMIN,
+        Component: <RegistrateAdmin/>
+    }
+]
+
 export const publicRoutes = [
 
 

@@ -52,13 +52,26 @@ const AdminDocumentsPage = () => {
         setSortClasses(prev_value);
         setSortType(sort_type);
       
-        getAllUsersGraduation(1, sort_type_variations[sort_type], sort_down?'DESC':'ASC').then(users => {
-            
-            
-            setUsers(users);
-            setFilteredUsers(users);
-            setLoading(true);
-        })
+        getAllUsersGraduation(1, sort_type_variations[sort_type], sort_down?'DESC':'ASC')
+            .then(users => {
+                setUsers(users);
+                setFilteredUsers(users);
+                setLoading(true);
+            })
+            .catch(error => {
+                console.error('fetchUsers error:', error);
+
+                // сообщение пользователю
+                const message =
+                    error?.response?.data?.message ||
+                    error?.message ||
+                    'Ошибка загрузки пользователей';
+
+                alert(message)
+            }).finally (data => {
+                setLoading(true);
+            })
+
         
     }, [])
 
