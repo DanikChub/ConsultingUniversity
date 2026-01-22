@@ -19,7 +19,7 @@ const PunctItem = ({ punct, i, j, themesArray, setThemesArray, deletePunct, setS
 
 
     useEffect(() => {
-        console.log(punct)
+
     }, [])
 
     const handleTitleChange = (e) => {
@@ -67,8 +67,8 @@ const PunctItem = ({ punct, i, j, themesArray, setThemesArray, deletePunct, setS
 
     const handlePracticalDelete  = (i, j) => {
         const valueNew = [...themesArray];
-        valueNew[i].puncts[j].lection_src = null; 
-        valueNew[i].puncts[j].lection_title = ''; 
+        valueNew[i].puncts[j].practical_work = null;
+
         
         
       
@@ -200,7 +200,7 @@ const PunctItem = ({ punct, i, j, themesArray, setThemesArray, deletePunct, setS
 
                     {
                         punct.practical_work &&
-                        <div className='MakeProgram_Punct_Material'>
+                        <div className='MakeProgram_Punct_Material' onClick={() => handlePracticalDelete(i, j)}>
                             <button className='MakeProgram_Punct_Material_delete'>x</button>
                             <div onClick={() => openModal('practicalWork', {
                                 i: i,

@@ -69,7 +69,7 @@ export const useProgramForm = () => {
                     hide: false,
                     presentation_src: null,
                     presentation_id: null,
-                    puncts: [{ punct_id: 0, title: "", video_src: null, lection_src: null, lection_id: null, lection_pdf: null, lection_pdf_id: null, lection_title: null, audio_src: null, audio_id: null, test_id: null, test_title: null, practical_work: null, practical_work_task: null }]
+                    puncts: [{ punct_id: 0, title: "", video_src: null, lection_src: null, lection_id: null, lection_pdf: null, lection_pdf_title: null, lection_pdf_id: null, lection_title: null, audio_src: null, audio_id: null, test_id: null, test_title: null, practical_work: null, practical_work_task: null }]
                 }]);
                 
             }
@@ -95,7 +95,7 @@ export const useProgramForm = () => {
             hide: false,
             presentation_src: null,
             presentation_id: null,
-            puncts: [{ punct_id: 0, title: "", video_src: null, lection_src: null, lection_id: null, lection_pdf: null, lection_pdf_id: null, lection_title: null, test_id: null, test_title: null, practical_work: null, practical_work_task: null }]
+            puncts: [{ punct_id: 0, title: "", video_src: null, lection_src: null, lection_id: null, lection_pdf: null, lection_pdf_title: null, lection_pdf_id: null, lection_title: null, test_id: null, test_title: null, practical_work: null, practical_work_task: null }]
         }
         setThemeId(id => id + 1);
         setThemesArray([...themesArray, newTheme]);
@@ -110,7 +110,7 @@ export const useProgramForm = () => {
         const updatedThemes = [...themesArray];
         const theme = updatedThemes[themeIndex];
         const nextPunctId = (punctId[themeIndex] || 0) + 1;
-        const newPunct = { punct_id: nextPunctId, title: "", video_src: null, lection_src: null, lection_id: null, lection_pdf: null, lection_pdf_id: null, lection_title: null, audio_src: null, audio_id: null, test_id: null, test_title: null, practical_work: null, practical_work_task: null };
+        const newPunct = { punct_id: nextPunctId, title: "", video_src: null, lection_src: null, lection_id: null, lection_pdf: null, lection_pdf_title: null, lection_pdf_id: null, lection_title: null, audio_src: null, audio_id: null, test_id: null, test_title: null, practical_work: null, practical_work_task: null };
         theme.puncts.push(newPunct);
         const newPunctId = [...punctId];
         newPunctId[themeIndex] = nextPunctId;
@@ -172,21 +172,22 @@ export const useProgramForm = () => {
                     formData.append("docs", punct.lection_src)
                     formData.append("lection_pdfs", punct.lection_pdf)
                     formData.append("audios", punct.audio_src)
-                    if (punct.lection_src) {
+
+                    if (typeof punct.lection_src == 'object' && punct.lection_src != null) {
                         punct.lection_id = prev_lection_id
                         prev_lection_id+=1
                     } else {
                         punct.lection_id = null
                     }
 
-                    if (punct.lection_pdf) {
+                    if (typeof punct.lection_pdf == 'object' && punct.lection_pdf != null) {
                         punct.lection_pdf_id = prev_lection_pdf_id
                         prev_lection_pdf_id+=1
                     } else {
                         punct.lection_pdf_id = null
                     }
 
-                    if (punct.audio_src) {
+                    if (typeof punct.audio_src == 'object' && punct.audio_src != null) {
                         punct.audio_id = prev_audio_id
                         prev_audio_id+=1
                     } else {
@@ -212,19 +213,20 @@ export const useProgramForm = () => {
                 
                 setNotActive(true);
                 remakeProgram(formData).then(data => {
-                 
-                   
-                    
+
+
+
                     setNotActive(false);
 
                     setSaveLoaded(true)
                     navigate(ADMIN_PROGRAMS_ROUTE)
-                   
+
                 }).catch(e => {
                     setNotActive(false);
                     setServerMessage(e.response.data.message)
                     setSaveLoaded(true)
                 })
+
             } else {
                 setNotActive(true);
 

@@ -24,6 +24,7 @@ const TestPage = () => {
         getOneTest(params.id).then(data => {
             data.puncts = shuffle(data.puncts);
             setTest(data);
+            console.log(data)
             setSecForEnd(data.time_limit);
         });
     }, []);
@@ -103,11 +104,11 @@ const TestPage = () => {
                 <h1 className="text-3xl font-bold mb-1">Тест</h1>
                 <p className="text-gray-500 mb-6">{test.title}</p>
 
-                {secForEnd && (
+                {secForEnd ? (
                     <div className="mb-6">
                         <CountDown seconds={secForEnd} checkAllAnswers={finishTest}/>
                     </div>
-                )}
+                ) : ''}
 
                 {/* Навигация по вопросам */}
                 <div className="flex flex-wrap gap-2 mb-8">

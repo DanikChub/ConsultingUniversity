@@ -232,7 +232,7 @@ const CoursePage = observer(() => {
                             </div>
                         </div>
                         <div className="course_item_hide">
-                            {puncts.map(({title, video_src, lection_src, lection_pdf, test_id, id, practical_work, practical_work_task, audio_src}, j) =>
+                            {puncts.map(({title, video_src, lection_src, lection_pdf, lection_pdf_title, test_id, id, practical_work, practical_work_task, audio_src}, j) =>
                                 <div className="course_item_hide_punct">
                                     <div className="course_item_hide_title">{i+1}.{j+1} {title}</div>
                                     <div className="course_item_hide_materials">
@@ -248,7 +248,7 @@ const CoursePage = observer(() => {
                                                href={process.env.REACT_APP_API_URL + lection_pdf}
                                                className="course_item_download">
                                                 <img src={presentation} alt=""/>
-                                                <div>Лекция</div>
+                                                <div>{lection_pdf_title}</div>
                                             </a>
                                         }
                                         {video_src &&

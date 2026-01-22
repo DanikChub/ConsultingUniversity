@@ -16,7 +16,7 @@ export const handleAddTask = ({ makeOpen, i, j, value, themesArray, setThemesArr
             break;
         case 'lection_pdf':
             valueNew[i].puncts[j].lection_pdf = value;
-
+            valueNew[i].puncts[j].lection_pdf_title = value.name;
             console.log(valueNew)
             setThemesArray(valueNew);
             break;

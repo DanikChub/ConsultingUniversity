@@ -14,7 +14,7 @@ const FinishTestPage = () => {
     const navigate = useNavigate();
     const [params] = useSearchParams();
     const [test, setTest] = useState(null);
-    const [testStatistic, setTestStatistic] = useState([]);
+    const [testStatistic, setTestStatistic] = useState();
     const userContext = useContext(Context);
 
 
@@ -24,6 +24,7 @@ const FinishTestPage = () => {
         getTestStatistic(userContext.user.user.id, params.get("test_id")).then(data => {
             console.log(data)
             setTestStatistic(data)
+            console.log(data)
         })
         getOneTest(params.get("test_id")).then(data => {
             console.log(data)
@@ -49,7 +50,7 @@ const FinishTestPage = () => {
                 <b>Тест.</b><span> {params.get("title")}</span>
             </div>
             
-            <div className="finish_test">
+            <div className="flex flex-col items-center">
                 {(Number(params.get("correct_answers")) / Number(params.get("questions")) > 0.75) || params.get("look") ?
                     <img className="finish_img" src={complete} alt=""/>
                 :
@@ -57,12 +58,32 @@ const FinishTestPage = () => {
                 }
                 {
                     !params.get("look") ?
-                    <div>
-                        <div className="finish_result">{params.get("correct_answers")} / {params.get("questions")}</div>
-                        <div className="finish_text">{Number(params.get("correct_answers")) / Number(params.get("questions")) > 0.75 ? 'Вы справились с тестом, можно переходить к следующему уроку.' : 'Вы не прошли тест. Попробуйте еще раз!'}</div>
+                    <div className="text-center">
+                        <div className="text-xl font-semibold">{params.get("correct_answers")} / {params.get("questions")}</div>
+                        <div className="text-xl font-semibold">{Number(params.get("correct_answers")) / Number(params.get("questions")) > 0.75 ? 'Вы справились с тестом, можно переходить к следующему уроку.' : 'Вы не прошли тест. Попробуйте еще раз!'}</div>
                         {
-                            Number(params.get("correct_answers")) / Number(params.get("questions")) > 0.75 &&
-                            <div onClick={() => navigate(-1)} className="finish_button">Пройти еще раз</div>
+                            Number(params.get("correct_answers")) / Number(params.get("questions")) < 0.75 &&
+                            <button
+                                onClick={() => navigate(-1)}
+                                className="
+                                  mt-6
+                                  w-full
+                                  flex items-center justify-center
+                                  gap-2
+                                  rounded-lg
+                                  border border-blue-400
+                                  px-6 py-3
+                                  text-blue-600
+                                  font-medium
+                                  transition
+                                  hover:bg-blue-50
+                                  hover:border-blue-500
+                                  hover:text-blue-700
+                                  active:scale-[0.98]
+                                "
+                            >
+                                Попробовать ещё раз
+                            </button>
                         }
 
                     </div>
@@ -72,37 +93,90 @@ const FinishTestPage = () => {
                     </div>
                     
                 }
-                { test ?
-                    test.puncts.map((punct, i) => 
-                        <div className='mt-[40px] w-full p-4 border-b border-gray-600'>
-                            <h2 className='text-left font-bold border-b border-gray-600'>{punct.question}</h2>
-                            <ul className='mt-[10px]'>
-                                {
-                                    punct.answers.map((answer, j) => 
-                                        <li className={`flex justify-between items-center mt-[4px] p-[8px] ${
-                                            punct.correct_answer[0] == j || punct.correct_answer[j] && punct.correct_answer[j] == j ? 
-                                            'bg-green-100' : 
-                                            
-                                            testStatistic.punctsStatistic[i].user_answer[0] == j ?
-                                            'bg-red-300':
-                                            'bg-white'
-                                            }
-                                        `}
-                                        >
-                                            <div className='w-[80%]'>{answer}</div>
-                                            {testStatistic.punctsStatistic[i].user_answer[0] == j &&
-                                            <div >Ваш ответ</div>}
-                                            { punct.correct_answer[0] == j &&
-                                                <div >Правильный ответ</div>}
-                                        </li>
-                                    )
-                                }
-                                
-                            </ul>
-                        </div>
-                    )
-                    :
-                    ''
+                {test &&
+                    test.puncts.map((punct, i) => {
+                        const userAnswer = testStatistic?.punctsStatistic[i]?.user_answer?.[0];
+
+                        const isCorrect = (j) =>
+                            punct.correct_answer?.[0] === j ||
+                            punct.correct_answer?.[j] === j;
+
+                        return (
+                            <div
+                                key={i}
+                                className="mt-10 w-full rounded-xl border border-gray-300 bg-white p-5 shadow-sm"
+                            >
+                                {/* Вопрос */}
+                                <h2 className="mb-4 text-left text-lg font-semibold border-b pb-2">
+                                    {punct.question}
+                                </h2>
+
+                                {/* Ответы */}
+                                <ul className="space-y-2">
+                                    {punct.answers.map((answer, j) => {
+                                        const correct = isCorrect(j);
+                                        const isUser = userAnswer === j;
+
+                                        let styles =
+                                            "flex items-center justify-between rounded-lg border p-3 transition";
+
+                                        if (correct && isUser) {
+                                            styles +=
+                                                " bg-green-200 border-green-600 ring-2 ring-green-400";
+                                        } else if (correct) {
+                                            styles += " bg-green-100 border-green-400";
+                                        } else if (isUser) {
+                                            styles += " bg-red-100 border-red-400";
+                                        } else {
+                                            styles += " bg-white border-gray-200 hover:bg-gray-50";
+                                        }
+
+                                        return (
+                                            <li key={j} className={styles}>
+                                                <span className="w-[80%]">{answer}</span>
+
+                                                {/* Метки */}
+                                                <div className="ml-4 text-sm font-medium">
+                                                    {isUser && correct && (
+                                                        <span className="text-green-700">✔ Ваш ответ</span>
+                                                    )}
+                                                    {isUser && !correct && (
+                                                        <span className="text-red-600">✖ Ваш ответ</span>
+                                                    )}
+                                                    {!isUser && correct && (
+                                                        <span className="text-green-600">Правильный</span>
+                                                    )}
+                                                </div>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </div>
+                        );
+                    })}
+                {
+                    Number(params.get("correct_answers")) / Number(params.get("questions")) < 0.75 &&
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="
+                                  mt-6
+                                  w-full
+                                  flex items-center justify-center
+                                  gap-2
+                                  rounded-lg
+                                  border border-blue-400
+                                  px-6 py-3
+                                  text-blue-600
+                                  font-medium
+                                  transition
+                                  hover:bg-blue-50
+                                  hover:border-blue-500
+                                  hover:text-blue-700
+                                  active:scale-[0.98]
+                                "
+                    >
+                        Попробовать ещё раз
+                    </button>
                 }
             </div>
             
