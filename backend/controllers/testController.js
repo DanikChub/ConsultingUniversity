@@ -36,11 +36,13 @@ class TestController {
                     return next(ApiError.internal('Заполните правильные ответы!'));
                 }
 
+
+
                 await TestPunct.create({
                     question: punct.question,
                     answers: punct.answers,
                     correct_answer: punct.correct_answer,
-                    several_answers: punct.several_answers,
+                    several_answers: punct.correct_answer.length > 1,
                     testId: test.id
                 });
             }
@@ -115,7 +117,7 @@ class TestController {
                     question: punct.question,
                     answers: punct.answers,
                     correct_answer: punct.correct_answer,
-                    several_answers: punct.several_answers,
+                    several_answers: punct.correct_answer.length > 1,
                     testId: id
                 });
             }

@@ -76,7 +76,7 @@ function validateParsedThemes(parsedThemes) {
       if (!punct.title) return `Тема "${ti + 1}.${pi + 1}" не имеет названия!`;
       if (punct.test_id) boolCount++;
       if (punct.practical_work) boolCount++;
-      if (!punct.lection_title && !punct.video_src && !punct.test_id && !punct.practical_work && !punct.lection_pdf) return `Тема "${ti + 1}.${pi + 1}" не может быть пустой`;
+      if (!punct.lection_title && !punct.video_src && !punct.test_id && !punct.practical_work && !punct.lection_pdf && !punct.audio_src) return `Тема "${ti + 1}.${pi + 1}" не может быть пустой`;
     }
     if (boolCount === 0) return `В модуле "${theme.title}" нет теста! (В каждой теме должен быть один тест для подсчета статистики!)`;
     if (boolCount > 1) return `В модуле "${theme.title}" ${boolCount} тестов! (В каждой теме может быть только один тест)`;
@@ -185,6 +185,7 @@ class ProgramController {
 
             lection_pdf: punctLectionPdfSrc || null,
             lection_pdf_id: punct_el.lection_pdf_id,
+            lection_pdf_title: punct_el.lection_pdf_title  || null,
 
             practical_work: punct_el.practical_work || null,
             practical_work_task: punct_el.practical_work_task || null,
@@ -352,7 +353,10 @@ class ProgramController {
 
       const files = req.files || {};
 
+
+
       const docsSaved = await saveFilesArrayOrSingle(files.docs);
+      console.log(docsSaved)
       const presentationsSaved = await saveFilesArrayOrSingle(files.presentation_src);
       const lection_pdfsSaved = await saveFilesArrayOrSingle(files.lection_pdfs);
       const themeLectionSaved = await saveFilesArrayOrSingle(files.theme_lection_src);
@@ -459,6 +463,7 @@ class ProgramController {
 
             lection_pdf: punctLectionPdfSrc || null,
             lection_pdf_id: punct_el.lection_pdf_id,
+            lection_pdf_title: punct_el.lection_pdf_title  || null,
 
             practical_work: punct_el.practical_work || null,
             practical_work_task: punct_el.practical_work_task || null,
