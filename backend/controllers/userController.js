@@ -419,34 +419,56 @@ class UserController {
     // ======================== PAGINATION ========================
     async getAllUsersWithPage(req, res, next) {
         try {
-            const page = parseInt(req.params.page) || 1;
-            const sort_type = req.query.sort_type || 'id';
-            const sort_down = req.query.sort_down === 'true' ? 'DESC' : 'ASC';
+            const page = Number(req.params.page) || 1;
+            const sortType = req.query.sort_type || 'id';
+            const sortDirection = req.query.sort_down === 'true' ? 'DESC' : 'ASC';
 
             const users = await User.findAndCountAll({
                 offset: (page - 1) * 10,
                 limit: 10,
                 where: { role: 'USER' },
-                order: [[sort_type, sort_down]]
+                order: [[sortType, sortDirection]],
+                include: [
+                    {
+                        model: Program,
+                        attributes: ['id', 'title', 'short_title'],
+                        through: {
+                            where: { status: 'active' }, // активная программа пользователя
+                            attributes: [],
+                        },
+                        required: false,
+                    },
+                ],
             });
 
-            // Добавляем статистику для пользователей
+            // Добавляем статистику по первой активной программе (как было по смыслу)
             for (const user of users.rows) {
-                if (user.role !== 'ADMIN') {
-                    const statistic = await Statistic.findOne({ where: { [Op.and]: [{ users_id: user.id, programs_id: user.programs_id[0] }] } });
-                    if (statistic) user.dataValues.statistic = Math.round((statistic.well_tests / statistic.max_tests) * 100);
+                const program = user.programs?.[0];
+                if (!program) continue;
+
+                const statistic = await Statistic.findOne({
+                    where: {
+                        userId: user.id,
+                        programId: program.id,
+                    },
+                });
+
+                if (statistic) {
+                    user.dataValues.statistic = Math.round(
+                        (statistic.well_tests / statistic.max_tests) * 100
+                    );
                 }
-                const program = await Program.findOne({ where: { id: user.programs_id[0] } });
-                if (program) user.dataValues.program = program;
+
+                user.dataValues.program = program;
             }
 
             return res.json(users);
-
         } catch (e) {
             console.error('getAllUsersWithPage error:', e);
             return next(ApiError.internal('Ошибка получения пользователей с пагинацией'));
         }
     }
+
 
     async searchUsers(req, res, next) {
         try {

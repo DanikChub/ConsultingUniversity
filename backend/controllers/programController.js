@@ -1,11 +1,27 @@
-const { Program, Theme, Punct, Test, User, Statistic, ThemeStatistic, PunctStatistic } = require("../models/models");
+const { Program,
+  Theme,
+  Punct,
+  Test,
+  User,
+  Statistic,
+  ThemeStatistic,
+  PunctStatistic,
+  File, FileAsset
+} = require("../models/models");
 const sequelize = require('../db'); 
 const ApiError = require('../error/ApiError')
 const { Op } = require('sequelize');
 const uuid = require('uuid');
 const path = require('path');
 const fs = require('fs');
+
 const mammoth = require('mammoth');
+const util = require('node:util');
+
+const yauzl = require('yauzl');
+
+const writeFileAsync = util.promisify(fs.writeFile);
+const unlinkAsync = util.promisify(fs.unlink);
 
 // Utility helpers
 const STATIC_DIR = path.resolve(__dirname, '..', 'static');
@@ -85,143 +101,683 @@ function validateParsedThemes(parsedThemes) {
 }
 
 class ProgramController {
-  async create(req, res, next) {
-    const t = await sequelize.transaction();
+
+
+  async importProgramZip(req, res, next) {
     try {
-      const {
-        title,
-        admin_id,
-        number_of_practical_work,
-        number_of_test,
-        number_of_videos,
-        themes,
-        short_title,
-        price
-      } = req.body;
-
-      if (!title) return next(ApiError.badRequest('Программа не имеет названия!'));
-
-      const parsedThemes = (() => {
-        try { return JSON.parse(themes); } catch (e) { return null; }
-      })();
-
-      const validationError = validateParsedThemes(parsedThemes);
-      if (validationError) return next(ApiError.badRequest(validationError));
-
-      const files = req.files || {};
-
-      const docsSaved = await saveFilesArrayOrSingle(files.docs);
-      const lection_pdfsSaved = await saveFilesArrayOrSingle(files.lection_pdfs);
-      const presentationsSaved = await saveFilesArrayOrSingle(files.presentation_src);
-      const themeLectionSaved = await saveFilesArrayOrSingle(files.theme_lection_src);
-      const audiosSaved = await saveFilesArrayOrSingle(files.audios);
-      const imgSaved = files.img ? (await saveSingleFile(files.img)) : '';
-
-      const program = await Program.create({
-        title,
-        admin_id,
-        number_of_practical_work,
-        number_of_test,
-        number_of_videos,
-        short_title,
-        price,
-        img: imgSaved
-      }, { transaction: t });
-
-      for (const theme_el of parsedThemes) {
-        const presentation_src =
-            typeof theme_el.presentation_src === 'string' && theme_el.presentation_src
-                ? theme_el.presentation_src
-                : (presentationsSaved[theme_el.presentation_id] || null);
-
-        const theme_lection_src =
-            typeof theme_el.lection_src === 'string' && theme_el.lection_src
-                ? theme_el.lection_src
-                : (themeLectionSaved[theme_el.lection_id] || null);
-
-        const themeLectionHtml = await convertDocxToHtmlIfExists(theme_lection_src);
-
-        const createdTheme = await Theme.create({
-          title: theme_el.title,
-          programId: program.id,
-          theme_id: theme_el.theme_id,
-          presentation_src,
-          presentation_title: theme_el.presentation_title || null,
-          video_src: theme_el.video_src || null,
-          lection_src: theme_lection_src || null,
-          lection_html: themeLectionHtml,
-          lection_title: theme_el.lection_title || null,
-          lection_id: theme_el.lection_id
-        }, { transaction: t });
-
-        for (const punct_el of theme_el.puncts) {
-          const punctLectionSrc =
-              typeof punct_el.lection_src === 'string' && punct_el.lection_src
-                  ? punct_el.lection_src
-                  : (docsSaved[punct_el.lection_id] || null);
-
-          const punctLectionPdfSrc =
-              typeof punct_el.lection_pdf === 'string' && punct_el.lection_pdf
-                  ? punct_el.lection_pdf
-                  : (lection_pdfsSaved[punct_el.lection_pdf_id] || null);
-
-          const punctAudioSrc =
-              typeof punct_el.audio_src === 'string' && punct_el.audio_src
-                  ? punct_el.audio_src
-                  : (audiosSaved[punct_el.audio_id] || null);
-
-          const punctLectionHtml = await convertDocxToHtmlIfExists(punctLectionSrc);
-
-          await Punct.create({
-            title: punct_el.title,
-            themeId: createdTheme.id,
-
-            video_src: punct_el.video_src || null,
-
-            lection_src: punctLectionSrc || null,
-            lection_html: punctLectionHtml,
-            lection_title: punct_el.lection_title || null,
-            lection_id: punct_el.lection_id,
-
-            lection_pdf: punctLectionPdfSrc || null,
-            lection_pdf_id: punct_el.lection_pdf_id,
-            lection_pdf_title: punct_el.lection_pdf_title  || null,
-
-            practical_work: punct_el.practical_work || null,
-            practical_work_task: punct_el.practical_work_task || null,
-
-            audio_src: punctAudioSrc,
-
-            test_id: punct_el.test_id || null,
-            punct_id: punct_el.punct_id
-          }, { transaction: t });
-        }
+      const { id } = req.params; // programId
+      const zipFile = req.files?.zip;
+      const resetProgram = req.body.resetProgram === 'true';
+      if (!zipFile) {
+        return res.status(400).json({ error: 'No zip uploaded' });
       }
 
-      await t.commit();
+      const tmpDir = path.join(__dirname, '../../tmp');
+      if (!fs.existsSync(tmpDir)) {
+        fs.mkdirSync(tmpDir, { recursive: true });
+      }
+
+      const tmpPath = path.join(tmpDir, zipFile.name);
+      await zipFile.mv(tmpPath);
+
+      const themeMap = new Map(); // themeName -> themeId
+      const punctMap = new Map(); // themeId-punctName -> punctId
+
+      const getOrCreateTheme = async (themeName) => {
+        if (themeMap.has(themeName)) {
+          return themeMap.get(themeName);
+        }
+
+        const maxOrder = await Theme.max('order_index', {
+          where: { programId: id },
+        });
+
+        const theme = await Theme.create({
+          programId: id,
+          title: themeName,
+          order_index: (maxOrder || 0) + 1,
+        });
+
+        themeMap.set(themeName, theme.id);
+        return theme.id;
+      };
+
+      const getOrCreatePunct = async (themeId, punctName) => {
+        const key = `${themeId}-${punctName}`;
+        if (punctMap.has(key)) {
+          return punctMap.get(key);
+        }
+
+        const maxOrder = await Punct.max('order_index', {
+          where: { themeId },
+        });
+
+        const punct = await Punct.create({
+          themeId,
+          title: punctName,
+          order_index: (maxOrder || 0) + 1,
+        });
+
+        punctMap.set(key, punct.id);
+        return punct.id;
+      };
+
+      if (resetProgram) {
+        await sequelize.transaction(async (t) => {
+          await Theme.destroy({ where: { programId: id }, transaction: t });
+          // не трогаем файлы/пункты, cascade удалит всё автоматически
+        });
+      }
+
+      const processEntry = (zip, entry) => {
+        return new Promise((resolve, reject) => {
+          if (/\/$/.test(entry.fileName)) {
+            return resolve(); // директория
+          }
+
+          const parts = entry.fileName.split('/').filter(Boolean);
+
+          // Минимум: Program/Theme/file
+          if (parts.length < 3) {
+            return resolve();
+          }
+
+          const themeName = parts[1];
+          const fileName = parts[parts.length - 1];
+          const storedName = safeFilename(fileName);
+          const fullPath = path.join(STATIC_DIR, storedName);
+
+          const isThemeFile = parts.length === 3;
+          const isPunctFile = parts.length >= 4;
+          const punctName = isPunctFile ? parts[2] : null;
+
+          zip.openReadStream(entry, async (err, readStream) => {
+            if (err) return reject(err);
+
+            try {
+              const themeId = await getOrCreateTheme(themeName);
+              let punctId = null;
+
+              if (isPunctFile && punctName) {
+                punctId = await getOrCreatePunct(themeId, punctName);
+              }
+
+              const chunks = [];
+              readStream.on('data', (chunk) => chunks.push(chunk));
+
+              readStream.on('end', async () => {
+                try {
+                  const buffer = Buffer.concat(chunks);
+                  await writeFileAsync(fullPath, buffer);
+
+                  const ext = fileName.split('.').pop()?.toLowerCase();
+                  let type = null;
+                  if (['docx'].includes(ext)) type = 'docx';
+                  else if (['pdf'].includes(ext)) type = 'pdf';
+                  else if (['mp3', 'wav', 'ogg'].includes(ext)) type = 'audio';
+
+                  const whereOrder = isPunctFile
+                      ? { punctId }
+                      : { themeId, punctId: null };
+
+                  const maxOrder = await File.max('order_index', {
+                    where: whereOrder,
+                  });
+
+                  const order_index = isNaN(maxOrder) ? 0 : maxOrder + 1;
+
+                  const fileRecord = await File.create({
+                    original_name: fileName,
+                    stored_name: storedName,
+                    mime_type: 'application/octet-stream',
+                    size: buffer.length,
+                    storage: 'local',
+                    type,
+                    themeId: isThemeFile ? themeId : null,
+                    punctId: isPunctFile ? punctId : null,
+                    order_index,
+                    status: 'idle',
+                  });
+
+                  if (type === 'docx') {
+                    const html = await convertDocxToHtmlIfExists(storedName);
+                    if (html) {
+                      await FileAsset.create({
+                        fileId: fileRecord.id,
+                        type: 'html',
+                        content: html,
+                      });
+                    }
+                  }
+
+                  resolve();
+                } catch (e) {
+                  reject(e);
+                }
+              });
+            } catch (e) {
+              reject(e);
+            }
+          });
+        });
+      };
+
+      await new Promise((resolve, reject) => {
+        yauzl.open(tmpPath, { lazyEntries: true }, (err, zip) => {
+          if (err) return reject(err);
+
+          zip.readEntry();
+
+          zip.on('entry', async (entry) => {
+            try {
+              await processEntry(zip, entry);
+              zip.readEntry(); // ← ключевая строка
+            } catch (e) {
+              zip.close();
+              reject(e);
+            }
+          });
+
+          zip.on('end', resolve);
+          zip.on('error', reject);
+        });
+      });
+
+
+      await unlinkAsync(tmpPath);
+
+      const program = await Program.findOne({
+        where: { id },
+        include: [
+          {
+            model: Theme,
+            separate: true,
+            order: [['order_index', 'ASC']],
+            include: [
+              {
+                model: Punct,
+                separate: true,
+                order: [['order_index', 'ASC']],
+                include: [
+                  {
+                    model: File,
+                    separate: true,
+                    order: [['order_index', 'ASC']],
+                    include: [FileAsset],
+                  },
+                ],
+              },
+              {
+                model: File,
+                separate: true,
+                where: { punctId: null },
+                required: false,
+                order: [['order_index', 'ASC']],
+              },
+            ],
+          },
+        ],
+      });
+
+      if (!program) {
+        return next(ApiError.notFound('Программа не найдена'));
+      }
+
       return res.json(program);
-    } catch (e) {
-      await t.rollback();
-      console.error('Create program failed', e.stack || e.message || e);
-      return next(ApiError.internal('Ошибка при создании программы'));
+
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Failed to import zip' });
     }
   }
 
 
+
+  async create(req, res, next) {
+    try {
+      const { admin_id } = req.body;
+      console.log(req.body)
+      if (!admin_id) {
+        return next(ApiError.badRequest('admin_id обязателен'));
+      }
+
+      const program = await Program.create({
+        admin_id,
+        title: null,
+        short_title: null,
+        price: null,
+        img: null,
+        number_of_practical_work: 0,
+        number_of_test: 0,
+        number_of_videos: 0,
+        status: 'draft'
+      });
+
+      return res.json(program);
+    } catch (e) {
+      console.error(e);
+      return next(ApiError.internal('Ошибка создания программы'));
+    }
+  }
+
+  async updatePartial(req, res, next) {
+    const t = await sequelize.transaction();
+    try {
+      const { id } = req.params;
+      const program = await Program.findOne({ where: { id } });
+      if (!program) return next(ApiError.notFound('Программа не найдена'));
+
+      const body = req.body || {};
+
+      // Обновляем поля текста
+      if (body.title !== undefined) program.title = body.title;
+      if (body.short_title !== undefined) program.short_title = body.short_title;
+      if (body.price !== undefined) program.price = body.price;
+
+      // Обновляем количество элементов, если пришло
+      if (body.number_of_videos !== undefined) program.number_of_videos = body.number_of_videos;
+      if (body.number_of_test !== undefined) program.number_of_test = body.number_of_test;
+      if (body.number_of_practical_work !== undefined) program.number_of_practical_work = body.number_of_practical_work;
+
+      // ----------------- Обновляем картинку -----------------
+
+      program.status = 'draft'
+      await program.save({ transaction: t });
+      await t.commit();
+
+      return res.json(program);
+    } catch (e) {
+      await t.rollback();
+      console.error(e);
+      return next(ApiError.internal('Ошибка обновления программы'));
+    }
+  }
+
+  // Обновление картинки
+  async updateImage(req, res, next) {
+    try {
+      const { id } = req.params;
+      const program = await Program.findByPk(id);
+      const file = req.files?.img;
+      if (!program) return next(ApiError.notFound('Программа не найдена'));
+
+      if (!file) return next(ApiError.badRequest('Файл не передан'));
+
+      // Сохраняем новый файл
+      const imgSaved = await saveSingleFile(file);
+
+      // Удаляем старый файл, если есть
+      if (program.img) {
+        const oldImgPath = path.join(STATIC_DIR, program.img);
+        try {
+          if (fs.existsSync(oldImgPath)) {
+            await fs.promises.unlink(oldImgPath);
+            console.log('🗑 Old program image deleted:', oldImgPath);
+          }
+        } catch (err) {
+          console.warn('Не удалось удалить старую картинку:', oldImgPath, err);
+        }
+      }
+
+      // Обновляем поле в базе
+      program.status = 'draft'
+      program.img = imgSaved;
+      await program.save();
+
+      return res.json({ img: program.img, message: 'Картинка обновлена' });
+    } catch (e) {
+      console.error(e);
+      return next(ApiError.internal('Ошибка обновления картинки'));
+    }
+  }
+
+  // Удаление картинки
+  async destroyImage(req, res, next) {
+    try {
+      const { id } = req.params;
+      const program = await Program.findByPk(id);
+      if (!program) return next(ApiError.notFound('Программа не найдена'));
+
+      if (program.img) {
+        const oldImgPath = path.join(STATIC_DIR, program.img);
+        try {
+          if (fs.existsSync(oldImgPath)) {
+            await fs.promises.unlink(oldImgPath);
+            console.log('🗑 Old program image deleted:', oldImgPath);
+          }
+        } catch (err) {
+          console.warn('Не удалось удалить старую картинку:', oldImgPath, err);
+        }
+      }
+      program.status = 'draft'
+      program.img = null;
+      await program.save();
+
+      return res.json({ img: null, message: 'Картинка удалена' });
+    } catch (e) {
+      console.error(e);
+      return next(ApiError.internal('Ошибка удаления картинки'));
+    }
+  }
+
+  async createTheme(req, res, next) {
+    try {
+      const { id } = req.params;
+      if (!id) return res.status(400).json({ message: 'programId обязателен' });
+
+      // Определяем order_index: берем максимальный существующий и +1
+      const maxOrder = await Theme.max('order_index', { where: { programId: id } });
+      const order_index = (maxOrder || 0) + 1;
+
+      const theme = await Theme.create({
+        programId: id,
+        order_index,
+        title: '', // пустое название
+
+      });
+
+      return res.json(theme);
+    } catch (e) {
+      console.error(e);
+      return next(e);
+    }
+  }
+
+  async updateThemeTitle(req, res, next) {
+    try {
+      const { title } = req.body;
+      const { id } = req.params;
+      if (!id) return res.status(400).json({ message: 'themeId обязателен' });
+      if (typeof title !== 'string') return res.status(400).json({ message: 'title обязателен' });
+
+      const theme = await Theme.findByPk(id);
+      if (!theme) return res.status(404).json({ message: 'Пункт не найден' });
+
+      theme.title = title;
+      await theme.save();
+
+      return res.json({ id: theme.id, title: theme.title });
+    } catch (e) {
+      console.error(e);
+      return next(e);
+    }
+  }
+
+
+  async createPunct(req, res, next) {
+    try {
+      const { id } = req.params;
+      if (!id) return res.status(400).json({ message: 'themeId обязателен' });
+
+      // Определяем order_index: берем максимальный существующий и +1
+      const maxOrder = await Punct.max('order_index', { where: { themeId: id } });
+      const order_index = (maxOrder || 0) + 1;
+
+      const punct = await Punct.create({
+        themeId: id,
+        order_index,
+        title: '' // пустое название
+      });
+
+      return res.json(punct);
+    } catch (e) {
+      console.error(e);
+      return next(e);
+    }
+  }
+
+  // Обновление title пункта
+
+  async updatePunctTitle(req, res, next) {
+    try {
+      const { title } = req.body;
+      const { id } = req.params;
+      if (!id) return res.status(400).json({ message: 'punctId обязателен' });
+      if (typeof title !== 'string') return res.status(400).json({ message: 'title обязателен' });
+
+      const punct = await Punct.findByPk(id);
+      if (!punct) return res.status(404).json({ message: 'Пункт не найден' });
+
+      punct.title = title;
+      await punct.save();
+
+      return res.json({ id: punct.id, title: punct.title });
+    } catch (e) {
+      console.error(e);
+      return next(e);
+    }
+  }
+
+  async addFileToPunctOrTheme(req, res, next) {
+    try {
+      const { targetType, targetId, type } = req.body;
+      const files = req.files;
+      console.log("################################################################################")
+      console.log(targetType, targetId, type)
+      if (!targetType || !targetId) {
+        return res.status(400).json({ error: 'targetType and targetId are required' });
+      }
+
+      if (!['theme', 'punct'].includes(targetType)) {
+        return res.status(400).json({ error: 'Invalid targetType' });
+      }
+
+      if (!files || Object.keys(files).length === 0) {
+        return res.status(400).json({ error: 'No files uploaded' });
+      }
+
+      if (!['docx', 'pdf', 'audio'].includes(type)) {
+        return res.status(400).json({ error: 'Invalid type' });
+      }
+
+      const fileKey = Object.keys(files)[0];
+      const file = files[fileKey];
+
+      // ----------------- Проверка расширения -----------------
+      const ext = file.name.split('.').pop().toLowerCase();
+
+      const typeExtensions = {
+        docx: ['docx'],
+        pdf: ['pdf'],
+        audio: ['mp3', 'wav', 'ogg'],
+      };
+
+      if (!typeExtensions[type].includes(ext)) {
+        return res.status(400).json({
+          error: `File extension .${ext} does not match type ${type}`,
+        });
+      }
+
+      // ----------------- order_index -----------------
+      const orderWhere =
+          targetType === 'punct'
+              ? { punctId: targetId }
+              : { themeId: targetId };
+
+      const maxOrder = await File.max('order_index', { where: orderWhere });
+      const order_index = isNaN(maxOrder) ? 0 : maxOrder + 1;
+
+      // ----------------- Создаём файл (uploading) -----------------
+      const originalName = Buffer.from(file.name, 'latin1').toString('utf8');
+
+      const tempFileRecord = await File.create({
+        original_name: originalName,
+        stored_name: '',
+        mime_type: file.mimetype,
+        size: file.size,
+        storage: 'local',
+        type,
+
+        themeId: targetType === 'theme' ? targetId : null,
+        punctId: targetType === 'punct' ? targetId : null,
+
+        order_index,
+        status: 'uploading',
+      });
+
+      // ----------------- Сохраняем файл -----------------
+      const storedName = safeFilename(file.name);
+      const fullPath = path.join(STATIC_DIR, storedName);
+
+      try {
+        await new Promise((resolve, reject) => {
+          file.mv(fullPath, (err) => (err ? reject(err) : resolve()));
+        });
+
+        await tempFileRecord.update({
+          stored_name: storedName,
+          status: 'idle',
+        });
+      } catch (err) {
+        console.error('File save failed:', err);
+        await tempFileRecord.update({ status: 'error' });
+        return res.status(500).json({ error: 'File save failed' });
+      }
+
+      // ----------------- DOCX → HTML -----------------
+      let fileAsset = null;
+      if (type === 'docx') {
+        const htmlContent = await convertDocxToHtmlIfExists(storedName);
+        if (htmlContent) {
+          fileAsset = await FileAsset.create({
+            fileId: tempFileRecord.id,
+            type: 'html',
+            content: htmlContent,
+          });
+        }
+      }
+
+      const fullFile = await File.findByPk(tempFileRecord.id, {
+        separate: true, // отдельный запрос для файлов
+        order: [['order_index', 'ASC']],
+        include: [
+          {
+            model: FileAsset,
+          },
+        ],
+      });
+
+
+      return res.json({
+        success: true,
+        file: fullFile,
+      });
+
+    } catch (err) {
+      console.error('Add file failed:', err);
+      return res.status(500).json({ error: 'File upload failed' });
+    }
+  }
+
+  async updateFileName (req, res, next) {
+
+    try {
+      const fileId = req.params.id;
+      const { original_name } = req.body;
+
+      if (!original_name) {
+        return res.status(400).json({ error: 'original_name is required' });
+      }
+
+      // Находим файл
+      const file = await File.findByPk(fileId);
+      if (!file) {
+        return res.status(404).json({ error: 'File not found' });
+      }
+
+      // Обновляем
+      file.original_name = original_name;
+      await file.save();
+
+      return res.json({ file });
+    } catch (err) {
+      console.error('Error updating file name:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+
+
   async getAll(req, res, next) {
     try {
-      const programs = await Program.findAll();
-      // Count users for each program
-      const results = [];
-      for (const program of programs) {
-        const usersCount = await User.count({ where: { programs_id: [program.id] } });
-        program.dataValues["users_quantity"] = usersCount;
-        results.push(program);
-      }
-      return res.json(results);
+      const programs = await Program.findAll({
+        attributes: {
+          include: [
+            [
+              sequelize.fn('COUNT', sequelize.col('users.id')),
+              'users_quantity',
+            ],
+          ],
+        },
+        include: [
+          {
+            model: User,
+            attributes: [],
+            through: {
+              where: { status: 'active' },
+              attributes: [],
+            },
+            required: false, // чтобы программы без пользователей тоже вернулись
+          },
+        ],
+        group: ['program.id'],
+      });
+
+      return res.json(programs);
     } catch (e) {
       console.error(e);
       return next(ApiError.internal('Ошибка получения программ'));
+    }
+  }
+
+  async getAllPublishedPrograms(req, res, next) {
+    try {
+      const programs = await Program.findAll({
+        where: {
+          status: 'published',
+        },
+        order: [['id', 'DESC']],
+        attributes: [
+          'id',
+          'title',
+          'short_title',
+          'price',
+          'img',
+          [
+            sequelize.fn('COUNT', sequelize.col('users.id')),
+            'users_quantity',
+          ],
+        ],
+        include: [
+          {
+            model: User,
+            attributes: [],
+            through: {
+              where: { status: 'active' }, // считаем только активных
+              attributes: [],
+            },
+            required: false,
+          },
+        ],
+        group: ['program.id'],
+      });
+
+      return res.json(programs);
+    } catch (e) {
+      console.error(e);
+      return next(ApiError.internal('Ошибка получения программ'));
+    }
+  }
+
+  async getAllDraftPrograms(req, res, next) {
+    try {
+      const programs = await Program.findAll({
+        where: { status: 'draft' },
+        order: [['id', 'DESC']]
+      });
+
+      return res.json(programs);
+    } catch (e) {
+      return next(ApiError.internal('Ошибка получения черновиков'));
     }
   }
 
@@ -252,26 +808,63 @@ class ProgramController {
   async getOne(req, res, next) {
     try {
       const { id } = req.params;
-      const program = await Program.findOne({ where: { id } });
+
+      const program = await Program.findOne({
+        where: { id },
+        include: [
+          {
+            model: Theme,
+            separate: true, // отдельный запрос для тем
+            order: [['order_index', 'ASC']],
+            include: [
+              {
+                model: Punct,
+                separate: true, // отдельный запрос для пунктов
+                order: [['order_index', 'ASC']],
+                include: [
+                  {
+                    model: File,
+                    separate: true, // отдельный запрос для файлов
+                    order: [['order_index', 'ASC']],
+                    include: [
+                      {
+                        model: FileAsset,
+                        // можно добавить order, если FileAsset тоже имеет order_index
+                        // order: [['order_index', 'ASC']]
+                      }
+                    ]
+                  },
+                  {
+                    model: Test,
+                    separate: true, // отдельный запрос для файлов
+                    order: [['order_index', 'ASC']],
+
+                  }
+                ]
+              },
+              {
+                model: File,
+                separate: true, // отдельный запрос для файлов
+                order: [['order_index', 'ASC']],
+                include: [
+                  {
+                    model: FileAsset,
+                    // можно добавить order, если FileAsset тоже имеет order_index
+                    // order: [['order_index', 'ASC']]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      });
+
       if (!program) return next(ApiError.notFound('Программа не найдена'));
 
-      const users = await User.count({ where: { programs_id: [program.id] } });
-      program.dataValues['users_quantity'] = users;
+      // Считаем пользователей, как раньше
 
-      const themes = await Theme.findAll({ where: { programId: program.id }, order: [['theme_id', 'ASC']] });
-      const themeIds = themes.map(t => t.id);
-
-      const puncts = await Punct.findAll({ where: { themeId: { [Op.or]: themeIds } } });
-
-      // attach puncts
-      for (const theme of themes) {
-        const related = puncts.filter(p => p.themeId === theme.id);
-        related.sort((a, b) => a.punct_id - b.punct_id);
-        theme.dataValues['puncts'] = related;
-      }
-
-      program.dataValues['themes'] = themes;
       return res.json(program);
+
     } catch (e) {
       console.error(e);
       return next(ApiError.internal('Ошибка получения программы'));
@@ -279,56 +872,295 @@ class ProgramController {
   }
 
   async deleteProgram(req, res, next) {
-    const t = await sequelize.transaction();
     try {
-      const { id } = req.body;
+      const { id } = req.params;
 
-      const program = await Program.findOne({ where: { id } });
-      if (!program) return next(ApiError.notFound('Программа для удаления не найдена'));
-
-      const users = await User.findAll({ where: { programs_id: [program.id] } });
-      if (users.length > 0) return next(ApiError.badRequest(`Программу уже проходят ${users.length} пользователей и ее удаление невозможно!`));
-
-      const themes = await Theme.findAll({ where: { programId: program.id } });
-      for (const theme of themes) {
-        // try to remove files if they exist (presentation, lection)
-        try {
-          if (theme.presentation_src) {
-            const p = path.join(STATIC_DIR, theme.presentation_src);
-            if (fs.existsSync(p)) fs.unlinkSync(p);
-          }
-          if (theme.lection_src) {
-            const l = path.join(STATIC_DIR, theme.lection_src);
-            if (fs.existsSync(l)) fs.unlinkSync(l);
-          }
-        } catch (e) {
-          console.warn('File delete warning for theme', theme.id, e.message || e);
-        }
-
-        const puncts = await Punct.findAll({ where: { themeId: theme.id } });
-        for (const punct of puncts) {
-          try {
-            if (punct.lection_src) {
-              const lp = path.join(STATIC_DIR, punct.lection_src);
-              if (fs.existsSync(lp)) fs.unlinkSync(lp);
-            }
-          } catch (e) {
-            console.warn('File delete warning for punct', punct.id, e.message || e);
-          }
-        }
+      const program = await Program.findByPk(id);
+      if (!program) {
+        return res.status(404).json({ message: 'Программа не найдена' });
       }
 
-      await Program.destroy({ where: { id } }, { transaction: t });
-      await t.commit();
-      return res.json({ message: 'Program deleted' });
+      await program.destroy();
+
+      return res.json({ message: 'Программа успешно удалена' });
     } catch (e) {
-      await t.rollback();
       console.error(e);
       return next(ApiError.internal('Ошибка удаления программы'));
     }
   }
 
-  async remake(req, res, next) {
+  async deleteTheme(req, res, next) {
+    try {
+      const { id } = req.params; // themeId
+      const theme = await Theme.findByPk(id);
+      if (!theme) return next(ApiError.notFound('Тема не найдена'));
+
+      // destroy автоматически удалит все File, FileAsset и Punct (если есть каскады)
+      await theme.destroy();
+
+      return res.json({ success: true, message: 'Тема успешно удалена' });
+    } catch (e) {
+      console.error('Delete theme failed:', e);
+      return next(ApiError.internal('Не удалось удалить тему'));
+    }
+  }
+
+  async deletePunct(req, res, next) {
+    try {
+      const { id } = req.params; // punctId
+      const punct = await Punct.findByPk(id);
+      if (!punct) return next(ApiError.notFound('Пункт не найден'));
+
+      // destroy автоматически удалит все File, FileAsset и связанные с пунктом лекции (если каскады)
+      await punct.destroy();
+
+      return res.json({ success: true, message: 'Пункт успешно удалён' });
+    } catch (e) {
+      console.error('Delete punct failed:', e);
+      return next(ApiError.internal('Не удалось удалить пункт'));
+    }
+  }
+
+  // Перемещение пункта в теме
+  async movePunct(req, res, next) {
+    try {
+      const { newIndex, themeId } = req.body;
+      const { id } = req.params;
+      console.log(newIndex, themeId, id)
+      if (!id || typeof newIndex == undefined || !themeId) {
+        return res.status(400).json({ error: 'id, newIndex, targetType and targetId are required' });
+      }
+
+      // получаем все пункты темы отсортированные по order_index
+
+
+      const puncts = await Punct.findAll({ where: { themeId }, order: [['order_index', 'ASC']] });
+
+      const number_id = Number(req.params.id);
+      if (isNaN(number_id)) return res.status(400).json({ error: 'Invalid punct id' });
+
+      const index = puncts.findIndex(p => p.id === number_id);
+      if (index === -1) return res.status(404).json({ error: 'Punct not found' });
+
+      // оптимистично меняем порядок
+      const [moved] = puncts.splice(index, 1);
+      puncts.splice(newIndex, 0, moved);
+
+      // пересчитываем order_index
+      for (let i = 0; i < puncts.length; i++) {
+        await puncts[i].update({ order_index: i });
+      }
+
+      res.json({ success: true });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to move punct' });
+    }
+  }
+
+  async deleteFile(req, res, next) {
+    try {
+      const { id } = req.params; // fileId
+      const file = await File.findByPk(id);
+
+      if (!file) return next(ApiError.notFound('Файл не найден'));
+
+      // destroy сработает с хуками:
+      // - удалит сам файл из базы
+      // - удалит файл с диска (хуки)
+      // - удалит FileAsset (каскад)
+      await file.destroy();
+
+      return res.json({ success: true, message: 'Файл успешно удалён' });
+    } catch (e) {
+      console.error('Delete file failed:', e);
+      return next(ApiError.internal('Не удалось удалить файл'));
+    }
+  }
+
+  async publishProgram(req, res, next) {
+    try {
+      const { id } = req.params;
+      const program = await Program.findOne({
+        where: { id },
+        include: [
+          {
+            model: Theme,
+            separate: true, // отдельный запрос для тем
+            order: [['order_index', 'ASC']],
+            include: [
+              {
+                model: Punct,
+                separate: true, // отдельный запрос для пунктов
+                order: [['order_index', 'ASC']],
+                include: [
+                  {
+                    model: File,
+                    separate: true, // отдельный запрос для файлов
+                    order: [['order_index', 'ASC']],
+                    include: [
+                      {
+                        model: FileAsset,
+                        // можно добавить order, если FileAsset тоже имеет order_index
+                        // order: [['order_index', 'ASC']]
+                      }
+                    ]
+                  },
+                  {
+                    model: Test,
+                    separate: true, // отдельный запрос для файлов
+                    order: [['order_index', 'ASC']],
+
+                  }
+                ]
+              },
+              {
+                model: File,
+                separate: true, // отдельный запрос для файлов
+                order: [['order_index', 'ASC']],
+                include: [
+                  {
+                    model: FileAsset,
+                    // можно добавить order, если FileAsset тоже имеет order_index
+                    // order: [['order_index', 'ASC']]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      });
+
+      if (!program) return next(ApiError.notFound('Программа не найдена'));
+
+      // ----------------- Проверяем поля программы -----------------
+      const requiredProgramFields = ['title', 'short_title', 'img', 'price'];
+      const translatePole = {
+        title: 'Полное название',
+        short_title: 'Короткое название',
+        img: 'Изображение',
+        price: 'Цена'
+      }
+      for (const field of requiredProgramFields) {
+        if (!program[field]) {
+          return res.status(400).json({
+            error: `Программа не может быть опубликована: поле "${translatePole[field]}" не заполнено`
+          });
+        }
+      }
+
+      // ----------------- Проверяем темы и пункты -----------------
+      for (const theme of program.themes) {
+        if (!theme.title) {
+          return res.status(400).json({
+            error: `Модуль с номером ${theme.order_index}  не имеет названия`
+          });
+        }
+        for (const punct of theme.puncts) {
+          if (!punct.title) {
+            return res.status(400).json({
+              error: `Тема с номером ${punct.order_index} в теме "${theme.title}" не имеет названия`
+            });
+          }
+          if (!punct.files || punct.files.length === 0) {
+            return res.status(400).json({
+              error: `Пункт "${punct.title}" не содержит ни одного файла`
+            });
+          }
+        }
+      }
+
+      let hasPublishedTest = false;
+      for (const theme of program.themes) {
+        for (const punct of theme.puncts) {
+          if (punct.tests && punct.tests.some((test) => test.status === 'published')) {
+            hasPublishedTest = true;
+            break;
+          }
+        }
+        if (hasPublishedTest) break;
+      }
+
+      if (!hasPublishedTest) {
+        return res.status(400).json({
+          error: 'Программа не содержит ни одного опубликованного теста'
+        });
+      }
+
+      // ----------------- Все проверки пройдены, публикуем программу -----------------
+      program.status = 'published';
+      await program.save();
+
+      return res.json({ success: true, message: 'Программа успешно опубликована', program });
+
+    } catch (e) {
+      console.error('Publish program failed:', e);
+      return next(ApiError.internal('Не удалось опубликовать программу'));
+    }
+  }
+
+  async moveFile(req, res, next) {
+    try {
+
+      const { newIndex, targetType, targetId } = req.body;
+      const { id } = req.params;
+
+      if (!id || newIndex === undefined || !targetType || !targetId) {
+        return res.status(400).json({ error: 'id, newIndex, targetType and targetId are required' });
+      }
+
+      // Получаем файл
+      const file = await File.findByPk(id);
+      console.log(file)
+      if (!file) return res.status(404).json({ error: 'File not found' });
+
+      // Определяем где пересчитывать order_index
+      const where = {};
+      if (targetType === 'punct') where.punctId = targetId;
+      else if (targetType === 'theme') where.themeId = targetId;
+      else return res.status(400).json({ error: 'Invalid targetType' });
+
+      const currentIndex = file.order_index;
+      if (currentIndex === newIndex) return res.json({ success: true, file });
+
+      // Сдвигаем другие файлы
+      if (newIndex > currentIndex) {
+        // элемент вниз
+        await File.update(
+            { order_index: sequelize.literal('order_index - 1') },
+            {
+              where: {
+                ...where,
+                order_index: { [Op.gt]: currentIndex, [Op.lte]: newIndex },
+              },
+            }
+        );
+      } else {
+        // элемент вверх
+        await File.update(
+            { order_index: sequelize.literal('order_index + 1') },
+            {
+              where: {
+                ...where,
+                order_index: { [Op.gte]: newIndex, [Op.lt]: currentIndex },
+              },
+            }
+        );
+      }
+
+      // Ставим файл на новое место
+      file.order_index = newIndex;
+      await file.save();
+
+      // Возвращаем обновлённый файл
+      return res.json({ success: true, file });
+    } catch (err) {
+      console.error('Move file failed:', err);
+      return res.status(500).json({ error: 'Failed to move file' });
+    }
+  }
+
+  /*async remake(req, res, next) {
     const t = await sequelize.transaction();
     try {
       const {
@@ -483,7 +1315,7 @@ class ProgramController {
       console.error('Remake failed', e.stack || e.message || e);
       return next(ApiError.internal('Ошибка при обновлении программы'));
     }
-  }
+  }*/
 
 }
 

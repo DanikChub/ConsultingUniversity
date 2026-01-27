@@ -1,5 +1,22 @@
 const sequelize = require('../db');
-const {DataTypes} = require('sequelize');
+const {DataTypes, Op} = require('sequelize');
+const path = require('path');
+const fs = require('fs');
+
+const STATIC_DIR = path.resolve(__dirname, '..', 'static');
+if (!fs.existsSync(STATIC_DIR)) fs.mkdirSync(STATIC_DIR, { recursive: true });
+
+async function reorderAfterDelete(Model, parentId, parentKey, deletedIndex) {
+    if (!parentId || deletedIndex === undefined) return;
+
+    await Model.decrement('order_index', {
+        by: 1,
+        where: {
+            [parentKey]: parentId,
+            order_index: { [Op.gt]: deletedIndex }
+        }
+    });
+}
 
 const User = sequelize.define('user', {
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
@@ -8,7 +25,6 @@ const User = sequelize.define('user', {
     name: {type: DataTypes.STRING, allowNull: false},
     password: {type: DataTypes.STRING},
     role: {type: DataTypes.STRING, defaultValue: "USER"},
-    programs_id: {type: DataTypes.ARRAY(DataTypes.INTEGER), allowNull: false},
     diplom: {type: DataTypes.BOOLEAN},
     address: {type: DataTypes.STRING},
     organiztion: {type: DataTypes.STRING},
@@ -16,7 +32,7 @@ const User = sequelize.define('user', {
     statistic: {type: DataTypes.INTEGER},
 
     img: {type: DataTypes.STRING},
-    
+
     graduation_date: {type: DataTypes.DATE},
 
     forgot_pass_code: {type: DataTypes.STRING},
@@ -37,76 +53,140 @@ const Application = sequelize.define('application', {
     email: {type: DataTypes.STRING, unique: true, allowNull: false},
     number: {type: DataTypes.STRING, unique: true, allowNull: false},
     name: {type: DataTypes.STRING, allowNull: false},
-    
+
 })
 
 const Program = sequelize.define('program', {
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
     title: {type: DataTypes.STRING},
     admin_id: {type: DataTypes.INTEGER},
-    theme_id: {type: DataTypes.ARRAY(DataTypes.INTEGER)},
     number_of_practical_work: {type: DataTypes.INTEGER, allowNull: false},
     number_of_test: {type: DataTypes.INTEGER, allowNull: false},
     number_of_videos: {type: DataTypes.INTEGER, allowNull: false},
     img: {type: DataTypes.STRING},
     price: {type: DataTypes.STRING},
     short_title: {type: DataTypes.STRING},
+
+    status: {
+        type: DataTypes.ENUM('draft', 'published', 'archived'),
+        defaultValue: 'draft',
+        allowNull: false
+    },
 })
+
+Program.addHook('beforeDestroy', async (program) => {
+    try {
+        // Если есть картинка программы на диске
+        if (program.img) {
+            const fullPath = path.join(STATIC_DIR, program.img);
+            if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+        }
+    } catch (err) {
+        console.warn('Failed to delete program image:', err.message || err);
+    }
+});
 
 const Theme = sequelize.define('theme', {
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
     title: {type: DataTypes.STRING},
-    admin_id: {type: DataTypes.INTEGER},
-    theme_id: {type: DataTypes.INTEGER},
-    presentation_src: {type: DataTypes.STRING},
-    presentation_title: {type: DataTypes.STRING},
-    presentation_id: {type: DataTypes.INTEGER},
-    lection_src: {type: DataTypes.STRING},
-    lection_title: {type: DataTypes.STRING},
-    lection_id: {type: DataTypes.STRING},
-    lection_html: {type: DataTypes.TEXT},
-    video_src: {type: DataTypes.STRING},
+    order_index: { type: DataTypes.INTEGER },
 })
+
+Theme.addHook('afterDestroy', async (theme, options) => {
+    await reorderAfterDelete(Theme, theme.programId, 'programId', theme.order_index);
+});
 
 const Punct = sequelize.define('punct', {
-    id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-    punct_id: {type: DataTypes.INTEGER},
-    title: {type: DataTypes.STRING},
-    admin_id: {type: DataTypes.INTEGER},
-    lection_src: {type: DataTypes.STRING},
-    lection_title: {type: DataTypes.STRING},
-    lection_id: {type: DataTypes.STRING},
-    lection_html: {type: DataTypes.TEXT},
-    lection_pdf: {type: DataTypes.STRING},
-    lection_pdf_title: {type: DataTypes.STRING},
-    lection_pdf_id: {type: DataTypes.STRING},
-    practical_work: {type: DataTypes.STRING},
-    practical_work_task: {type: DataTypes.TEXT},
-    video_src: {type: DataTypes.STRING},
-    audio_src: { type: DataTypes.STRING },
-    test_id: {type: DataTypes.STRING},
-})
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    title: { type: DataTypes.STRING },
+    order_index: { type: DataTypes.INTEGER },
+});
+
+Punct.addHook('afterDestroy', async (punct, options) => {
+    await reorderAfterDelete(Punct, punct.themeId, 'themeId', punct.order_index);
+});
+
+
+const File = sequelize.define('file', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+
+    original_name: { type: DataTypes.STRING, allowNull: false },
+    stored_name: { type: DataTypes.STRING, allowNull: false },
+    mime_type: { type: DataTypes.STRING, allowNull: false },
+    type: { type: DataTypes.ENUM('docx', 'pdf', 'audio')},
+    size: { type: DataTypes.INTEGER },
+    order_index: {type: DataTypes.INTEGER},
+    status: { type: DataTypes.ENUM('uploading','idle','error'), defaultValue: 'uploading' },
+    storage: {
+        type: DataTypes.ENUM('local', 's3'),
+        defaultValue: 'local'
+    },
+}, {
+    tableName: 'files'
+});
+
+File.addHook('beforeDestroy', async (file) => {
+    try {
+        if (file.stored_name) {
+            const fullPath = path.join(STATIC_DIR, file.stored_name);
+            if (fs.existsSync(fullPath)) {
+                fs.unlinkSync(fullPath);
+                console.log('🗑 Deleted file from disk:', fullPath);
+            }
+        }
+    } catch (err) {
+        console.warn('Failed to delete file:', err.message || err);
+    }
+});
+
+File.addHook('afterDestroy', async (file, options) => {
+    const parentId = file.punctId || file.themeId; // если файл может быть у пункта или темы
+    const parentKey = file.punctId ? 'punctId' : 'themeId';
+    await reorderAfterDelete(File, parentId, parentKey, file.order_index);
+});
+
+const FileAsset = sequelize.define('file_asset', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    type: { type: DataTypes.ENUM('html'), allowNull: false },
+    content: { type: DataTypes.TEXT },
+});
+
 
 const Test = sequelize.define('test', {
-    id: {type: DataTypes.DOUBLE, primaryKey: true},
-    title: {type: DataTypes.STRING},
-    admin_id: {type: DataTypes.INTEGER},
-    time_limit: {type: DataTypes.INTEGER},
-})
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, allowNull: false },
+    title: { type: DataTypes.STRING },
+    description: { type: DataTypes.TEXT },
+    time_limit: { type: DataTypes.INTEGER }, // в секундах
+    status: {
+        type: DataTypes.ENUM('draft', 'published', 'archived'),
+        defaultValue: 'draft',
+        allowNull: false
+    },
+    order_index: { type: DataTypes.INTEGER },
+});
 
-const TestPunct = sequelize.define('test_punct', {
-    id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-    question: {type: DataTypes.TEXT},
-    answers: {type: DataTypes.ARRAY(DataTypes.TEXT)},
-    correct_answer: {type: DataTypes.ARRAY(DataTypes.INTEGER)},
-    several_answers: {type: DataTypes.BOOLEAN},
-})
+const Question = sequelize.define('question', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    text: { type: DataTypes.TEXT },
+    type: {
+        type: DataTypes.ENUM('single', 'multiple', 'text'),
+        allowNull: false,
+    },
+    order_index: { type: DataTypes.INTEGER },
+});
+const Answer = sequelize.define('answer', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    text: { type: DataTypes.TEXT },
+    is_correct: { type: DataTypes.BOOLEAN, defaultValue: false },
+    order_index: { type: DataTypes.INTEGER },
+});
+
 
 const TestStatictis = sequelize.define('test_statistic', {
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
     user_id: {type: DataTypes.INTEGER},
     test_id: {type: DataTypes.INTEGER},
-   
+
 })
 
 const TestPunctStatictis = sequelize.define('test_punct_statistic', {
@@ -115,10 +195,26 @@ const TestPunctStatictis = sequelize.define('test_punct_statistic', {
 })
 
 
-const UserProgram = sequelize.define('user_program', {
-    id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-    
-})
+const Enrollment = sequelize.define('enrollment', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+
+    programId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+
+    // 👇 полезные поля
+    status: {
+        type: DataTypes.ENUM('active', 'paused', 'completed'),
+        defaultValue: 'active',
+    },
+
+});
 
 const Statistic = sequelize.define('statistic', {
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
@@ -182,20 +278,32 @@ const Messages = sequelize.define('messeges', {
 Program.hasMany(Theme, { onDelete: 'cascade', hooks: true })
 Theme.belongsTo(Program)
 
+Theme.hasMany(File, { onDelete: 'cascade', hooks: true  })
+File.belongsTo(Theme)
+
 Theme.hasMany(Punct, { onDelete: 'cascade', hooks: true })
 Punct.belongsTo(Theme)
 
-Punct.hasOne(Test, { onDelete: 'cascade', hooks: true })
+Punct.hasMany(File, { onDelete: 'cascade', hooks: true  })
+File.belongsTo(Punct)
+
+File.hasOne(FileAsset, { onDelete: 'cascade', hooks: true  })
+FileAsset.belongsTo(File, { onDelete: 'cascade' })
+
+Punct.hasMany(Test, { onDelete: 'cascade', hooks: true })
 Test.belongsTo(Punct)
 
-Test.hasMany(TestPunct, { onDelete: 'cascade', hooks: true })
-TestPunct.belongsTo(Test);
+Test.hasMany(Question, { onDelete: 'cascade', hooks: true });
+Question.belongsTo(Test);
+
+Question.hasMany(Answer, { onDelete: 'cascade', hooks: true });
+Answer.belongsTo(Question);
 
 TestStatictis.hasMany(TestPunctStatictis, { onDelete: 'cascade', hooks: true })
 TestPunctStatictis.belongsTo(TestStatictis);
 
-User.belongsToMany(Program, {through: UserProgram})
-Program.belongsToMany(User, {through: UserProgram})
+User.belongsToMany(Program, {through: Enrollment})
+Program.belongsToMany(User, {through: Enrollment})
 
 User.hasMany(Statistic)
 Statistic.belongsTo(User)
@@ -209,12 +317,126 @@ PunctStatistic.belongsTo(ThemeStatistic)
 Program.hasOne(Statistic)
 Statistic.belongsTo(Program)
 
-
 User.hasMany(PracticalWork)
 PracticalWork.belongsTo(User)
 
 
+const updateProgramStatusToDraft = async (programId) => {
+    const program = await Program.findByPk(programId);
+    if (!program) return;
+
+    if (program.status === 'published') {
+        program.status = 'draft';
+        await program.save();
+    }
+};
+
+
+// Для Theme (есть programId)
+Theme.addHook('afterCreate', async (theme) => {
+    if (theme.programId) {
+        await updateProgramStatusToDraft(theme.programId);
+    }
+});
+Theme.addHook('afterSave', async (theme) => {
+    if (theme.programId) {
+        await updateProgramStatusToDraft(theme.programId);
+    }
+});
+
+Theme.addHook('afterDestroy', async (theme) => {
+    if (theme.programId) {
+        await updateProgramStatusToDraft(theme.programId);
+    }
+});
+
+// Для Punct
+Punct.addHook('afterCreate', async (punct) => {
+    const theme = await Theme.findByPk(punct.themeId); // themeId есть
+    if (theme?.programId) {
+        await updateProgramStatusToDraft(theme.programId);
+    }
+});
+Punct.addHook('afterSave', async (punct) => {
+    const theme = await Theme.findByPk(punct.themeId); // themeId есть
+    if (theme?.programId) {
+        await updateProgramStatusToDraft(theme.programId);
+    }
+});
+
+Punct.addHook('afterDestroy', async (punct) => {
+    const theme = await Theme.findByPk(punct.themeId);
+    if (theme?.programId) {
+        await updateProgramStatusToDraft(theme.programId);
+    }
+});
+
+// Для File
+File.addHook('afterCreate', async (file) => {
+    const punct = await Punct.findByPk(file.punctId);
+    const theme = punct ? await Theme.findByPk(punct.themeId) : null;
+    if (theme?.programId) {
+        await updateProgramStatusToDraft(theme.programId);
+    }
+});
+File.addHook('afterSave', async (file) => {
+    const punct = await Punct.findByPk(file.punctId);
+    const theme = punct ? await Theme.findByPk(punct.themeId) : null;
+    if (theme?.programId) {
+        await updateProgramStatusToDraft(theme.programId);
+    }
+});
+
+File.addHook('afterDestroy', async (file) => {
+    const punct = await Punct.findByPk(file.punctId);
+    const theme = punct ? await Theme.findByPk(punct.themeId) : null;
+    if (theme?.programId) {
+        await updateProgramStatusToDraft(theme.programId);
+    }
+});
+
+// Для Test
+Test.addHook('afterCreate', async (test) => {
+    const punct = await Punct.findByPk(test.punctId);
+    const theme = punct ? await Theme.findByPk(punct.themeId) : null;
+    if (theme?.programId) {
+        await updateProgramStatusToDraft(theme.programId);
+    }
+});
+Test.addHook('afterSave', async (test) => {
+    const punct = await Punct.findByPk(test.punctId);
+    const theme = punct ? await Theme.findByPk(punct.themeId) : null;
+    if (theme?.programId) {
+        await updateProgramStatusToDraft(theme.programId);
+    }
+});
+
+Test.addHook('afterDestroy', async (test) => {
+    const punct = await Punct.findByPk(test.punctId);
+    const theme = punct ? await Theme.findByPk(punct.themeId) : null;
+    if (theme?.programId) {
+        await updateProgramStatusToDraft(theme.programId);
+    }
+});
+
 
 module.exports = {
-    Event, Messages, User, Program, Theme, Punct, Application, Test, TestPunct, Statistic, ThemeStatistic, PunctStatistic, PracticalWork, TestStatictis, TestPunctStatictis
+    Event,
+    Messages,
+    User,
+    Program,
+    Theme,
+    Punct,
+    File,
+    FileAsset,
+    Application,
+    Test,
+    Question,
+    Answer,
+    Statistic,
+    ThemeStatistic,
+    PunctStatistic,
+    PracticalWork,
+    TestStatictis,
+    TestPunctStatictis
 }
