@@ -17,17 +17,23 @@ const LeftMenu: React.FC = () => {
         getAllUserUnreadCount().then(data => setUnreadMessages(data.unreadCount));
     }, []);
 
-    const menuItems = [
+    /*const menuItems = [
         { name: 'Главная', path: ADMIN_ROUTE, end: true },
         { name: 'Слушатели', path: ADMIN_LISTENERS_ROUTE },
         { name: 'Сообщения', path: CHAT_USERS_PAGE_ROUTE, unreadCount: unreadMessages },
         { name: 'Программы', path: ADMIN_PROGRAMS_ROUTE },
         { name: 'Выданные документы', path: ADMIN_DOCUMENTS_ROUTE },
         { name: 'Администраторы', path: ADMIN_ADMINISTRATORS_ROUTE },
+    ];*/
+
+    const menuItems = [
+        { name: 'Главная', path: ADMIN_ROUTE, end: true },
+        { name: 'Программы', path: ADMIN_PROGRAMS_ROUTE },
+
     ];
 
     return (
-        <div className="pt-8 pb-24 bg-[#D9D9D9] w-52 flex flex-col">
+        <div className="sticky top-0 self-start pt-8 pb-24 bg-[#D9D9D9] w-52 flex flex-col">
             {menuItems.map((item, index) => (
                 <NavLink
                     key={index}
@@ -40,11 +46,12 @@ const LeftMenu: React.FC = () => {
           `}
                 >
                     <span>{item.name}</span>
-                    {item.unreadCount && item.unreadCount != '0' ? (
-                        <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                          {item.unreadCount}
-                        </span>
-                    ): ''}
+                    {/*{item.unreadCount && item.unreadCount != '0' ? (*/}
+                    {/*    <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">*/}
+                    {/*      {item.unreadCount}*/}
+                    {/*    </span>*/}
+                    {/*): ''}*/}
+
                 </NavLink>
             ))}
         </div>

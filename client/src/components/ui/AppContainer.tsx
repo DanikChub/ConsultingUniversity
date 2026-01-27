@@ -8,12 +8,19 @@ interface AppContainerProps extends HTMLAttributes<HTMLDivElement> {
 
 const AppContainer: React.FC<AppContainerProps> = ({ children, ...rest }) => {
     return (
-        <div className="h-full" {...rest}>
+
+        <div {...rest}>
             <div className="w-full max-w-[1536px] m-auto">
-                <div className="flex items-stretch min-h-[635px] w-full">
-                    <LeftMenu />
-                    <div className="mt-[35px] ml-[70px] mb-[30px] w-[80%]">
-                        <AdminPath />
+                <div className="flex items-start w-full relative">
+
+                    <div className="absolute left-0 top-0 h-full bg-[#D9D9D9] w-52 z-0"/>
+
+                    <aside className="sticky top-0 self-start">
+                        <LeftMenu/>
+                    </aside>
+
+                    <div className="mt-[35px] ml-[70px] mb-[30px] w-[80%] min-h-[650px]">
+                        <AdminPath/>
                         {children}
                     </div>
                 </div>

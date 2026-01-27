@@ -74,7 +74,7 @@ export const useUserForm = () => {
                     setAddress(user.address || '');
                     setUserProgramId(user.programs_id);
 
-                    if (!queryParams.get('admin') && user.programs_id[0]) {
+                    if (!queryParams.get('admin')) {
                         const program = await getOneProgram(user.programs_id[0]);
                         setSelectedPrograms([program]);
 

@@ -21,7 +21,7 @@ export interface User {
     // дополнительные поля, которые фронт может ожидать
     yellow_value?: string; // используется в поиске подсветки
     createdAt?:string;
-    program?:Program
+    programs?:Program[]
   }
 
 

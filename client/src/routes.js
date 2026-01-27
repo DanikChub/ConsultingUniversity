@@ -14,7 +14,6 @@ import {
     ADMIN_VIEW_VIDEO,
     ADMIN_VIEW_ЕУЫЕ,
     AUTH_ROUTE,
-    CHANGE_PROGRAM_ROUTE,
     COURSE_ROUTE,
     FINISH_TEST_ROUTE,
     FORGOT_PASSWORD_ROUTE,
@@ -121,10 +120,6 @@ export const adminRoutes = [
         Component: <MakeProgram/>
     },
     {
-        path: CHANGE_PROGRAM_ROUTE,
-        Component: <MakeProgram/>
-    },
-    {
         path: ADMIN_LISTENERS_ROUTE,
         Component: <AdminListeners/>
     },
@@ -211,10 +206,6 @@ export const viewerRoutes = [
     },
     {
         path: MAKE_PROGRAM_ROUTE,
-        Component: <MakeProgram/>
-    },
-    {
-        path: CHANGE_PROGRAM_ROUTE,
         Component: <MakeProgram/>
     },
     {

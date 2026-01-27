@@ -4,14 +4,7 @@ import { createTest, getOneTest, remakeTest } from "../../http/testAPI";
 import { CreateTestProps, TestPunct } from "../../types/test";
 import Button from "../ui/Button";
 
-const CreateTest: React.FC<CreateTestProps> = ({
-                                                   show,
-                                                   setShow,
-                                                   themesArray,
-                                                   setThemesArray,
-                                                   counter,
-                                                   setCounter,
-                                               }) => {
+const CreateTest: React.FC<CreateTestProps> = ({}) => {
     const [testTitle, setTestTitle] = useState("");
     const [testPuncts, setTestPuncts] = useState<TestPunct[]>([
         {

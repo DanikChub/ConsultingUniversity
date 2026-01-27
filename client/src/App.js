@@ -10,6 +10,7 @@ import { check, getUserById } from "./http/userAPI";
 import Spinner from "./components/Spinner/Spinner";
 
 import "./App.css"
+import {ModalProvider} from "./providers/ModalProvider";
 
 
 const App = observer(() => {
@@ -36,16 +37,18 @@ const App = observer(() => {
 
   return (
     <BrowserRouter>
-      <NavBar/>
-      {
-        loading ?
-        <Spinner/>
-        :
-        <AppRouter/>
-      }
-  
-      
-      <FooterNavBar/>
+      <ModalProvider>
+        <NavBar/>
+        {
+          loading ?
+          <Spinner/>
+          :
+          <AppRouter/>
+        }
+
+
+        <FooterNavBar/>
+      </ModalProvider>
     </BrowserRouter>
   );
 })

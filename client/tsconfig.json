@@ -42,6 +42,12 @@
     "skipLibCheck": true,
     "allowJs": true,
     "checkJs": false,
-    
+
+    "compilerOptions": {
+      "jsx": "react-jsx",
+      "lib": ["dom", "dom.iterable", "esnext"],
+      "types": ["react", "react-dom"]
+    },
+    "include": ["src/types/react-icons.d.ts"]
   }
 }

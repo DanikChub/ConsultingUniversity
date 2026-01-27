@@ -1,3 +1,4 @@
+/*
 // hooks/useProgramForm.js
 import { useState, useEffect, useContext } from 'react';
 import { Context } from '../index';
@@ -248,6 +249,7 @@ export const useProgramForm = () => {
             }
         } else {
             setValidate(true);
+            setSaveLoaded(true)
             setServerMessage('Заполните все названия пунктов и тем!')
         }
         
@@ -295,3 +297,4 @@ export const useProgramForm = () => {
         handleSave, loaded, presentationSrcHandler, saveLoaded
     }
 }
+*/

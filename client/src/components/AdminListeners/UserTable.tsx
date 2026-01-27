@@ -45,45 +45,79 @@ const UserTable: React.FC<Props> = ({ users, loading, onEdit, onDelete, handleCo
             {/* Строки */}
             {!loading ? (
                 <ListenersSkeleton />
-            ) : (
-                users.map((user) => (
-                    <div
-                        key={user.id}
-                        onContextMenu={(e) => handleContextMenu(e, user.id, user.program.id)}
-                        className="
-                            grid 
-                            grid-cols-[20px_2fr_2fr_2fr_2fr_1fr_1fr]
-                            gap-[40px] 
-                            items-center 
-                            py-2 
-                            hover:bg-gray-100
-                            relative
-                        "
-                    >
-                        <div className="text-sm text-[#2C3E50]">{user.id}.</div>
-                        <div className="text-sm text-[#2C3E50]">
-                            <Link className="hover:text-blue-700" to={`/admin/listeners/${user.id}`}>
-                                {user.name}
-                            </Link>
+            ) : <>
+                {users.map((user) => {
+                    const program = user.programs?.[0];
+
+                    return (
+                        <div
+                            key={user.id}
+                            onContextMenu={(e) =>
+                                handleContextMenu(e, user.id, program?.id)
+                            }
+                            className="
+                                grid
+                                grid-cols-[20px_2fr_2fr_2fr_2fr_1fr_1fr]
+                                gap-[40px]
+                                items-center
+                                py-2
+                                hover:bg-gray-100
+                                relative
+                              "
+                        >
+                            <div className="text-sm text-[#2C3E50]">{user.id}.</div>
+
+                            <div className="text-sm text-[#2C3E50]">
+                                <Link className="hover:text-blue-700" to={`/admin/listeners/${user.id}`}>
+                                    {user.name}
+                                </Link>
+                            </div>
+
+                            <div className="text-sm text-[#2C3E50]">
+                                {user.organiztion.length > 21
+                                    ? `${user.organiztion.slice(0, 21)}...`
+                                    : user.organiztion}
+                            </div>
+
+                            <div className="text-sm text-[#2C3E50]">
+                                {program ? (
+                                    <Link
+                                        className="hover:text-blue-700"
+                                        to={`/admin/programs/${program.id}`}
+                                    >
+                                        {program.short_title}
+                                    </Link>
+                                ) : (
+                                    <span className="text-gray-400 italic">Нет программы</span>
+                                )}
+                            </div>
+
+                            <div className="text-sm text-[#2C3E50]">
+                                {user.statistic != null ? (
+                                    <ProgressBar value={user.statistic} />
+                                ) : (
+                                    <span className="text-gray-400">—</span>
+                                )}
+                            </div>
+
+                            <div className="text-sm text-[#2C3E50]">
+                                {dateToString(user.createdAt)}
+                            </div>
+
+                            <div className="text-sm text-[#2C3E50]">
+                                {user.graduation_date
+                                    ? dateToString(user.graduation_date)
+                                    : '—'}
+                            </div>
                         </div>
-                        <div className="text-sm text-[#2C3E50]">
-                            {user.organiztion.length > 21
-                                ? `${user.organiztion.slice(0, 21)}...`
-                                : user.organiztion}
-                        </div>
-                        <div className="text-sm text-[#2C3E50]">
-                            <Link className="hover:text-blue-700" to={`/admin/programs/${user.program.id}`}>
-                                {user.program.short_title}
-                            </Link>
-                        </div>
-                        <div className="text-sm text-[#2C3E50]">
-                            <ProgressBar value={user.statistic} />
-                        </div>
-                        <div className="text-sm text-[#2C3E50]">{dateToString(user.createdAt)}</div>
-                        <div className="text-sm text-[#2C3E50]">{dateToString(user.graduation_date)}</div>
-                    </div>
-                ))
-            )}
+                    );
+                })}
+
+
+            </>
+
+
+            }
 
             
         </div>
