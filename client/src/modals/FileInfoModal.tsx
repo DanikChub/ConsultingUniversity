@@ -29,7 +29,7 @@ const FileInfoModal: FC<Props> = ({ file, onClose, onDelete, onDownload, onRenam
 
     const handleDelete = async () => {
         if (!onDelete) return;
-        const ok = confirm('Удалить файл?');
+        const ok = window.confirm('Удалить файл?');
         if (!ok) return;
 
         await onDelete(file.id);

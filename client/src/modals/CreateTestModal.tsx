@@ -69,7 +69,7 @@ const CreateTestModal: React.FC<Props> = ({
 
     const handleDelete = async () => {
         if (!onDelete) return;
-        const ok = confirm('Удалить тест?');
+        const ok = window.confirm('Удалить тест?');
         if (!ok) return;
 
 

@@ -8,7 +8,7 @@ const ButtonRemove = ({onClick, message}) => {
 
     const handleClick = (e) => {
         e.stopPropagation()
-        const ok = confirm(message)
+        const ok = window.confirm(message)
 
         if (!ok) return;
 
