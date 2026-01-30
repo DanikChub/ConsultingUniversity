@@ -3,16 +3,13 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const {
     User,
-    Statistic,
-    Program,
-    Theme,
-    Punct,
-    ThemeStatistic,
-    PunctStatistic,
     Messages,
+    Enrollment,
+    Program,
     Event
 } = require('../models/models');
 const { Op, fn, Sequelize } = require('sequelize');
+const sequelize = require('../db');
 const nodemailer = require('nodemailer');
 const path = require("path");
 const uuid = require("uuid");
@@ -43,69 +40,87 @@ async function saveSingleFile(file) {
 class UserController {
     // ======================== REGISTRATION ========================
     async registration(req, res, next) {
-        try {
-            const { email, password, role, name, number, organiztion, programs_id, diplom, inn, address } = req.body;
+        const t = await sequelize.transaction();
 
+        try {
+            const {
+                email,
+                password,
+                role,
+                name,
+                number,
+                organization,
+                programs_id,
+                diplom,
+                inn,
+                address
+            } = req.body;
+
+            // --- валидация ---
             if (!email) return next(ApiError.badRequest('Некорректный email'));
             if (!password) return next(ApiError.badRequest('Некорректный пароль'));
             if (!number) return next(ApiError.badRequest('Некорректный номер'));
-            if (!Array.isArray(programs_id) || !programs_id[0]) return next(ApiError.badRequest('Отсутствует программа у пользователя'));
+            if (!Array.isArray(programs_id) || programs_id.length === 0)
+                return next(ApiError.badRequest('Отсутствует программа у пользователя'));
 
-            const candidate = await User.findOne({ where: { email } });
-            if (candidate) return next(ApiError.badRequest('Пользователь с таким email уже существует'));
+            const [emailExists, phoneExists] = await Promise.all([
+                User.findOne({ where: { email } }),
+                User.findOne({ where: { number } }),
+            ]);
 
-            const candidate2 = await User.findOne({ where: { number } });
-            if (candidate2) return next(ApiError.badRequest('Пользователь с таким телефоном уже существует'));
+            if (emailExists)
+                return next(ApiError.badRequest('Пользователь с таким email уже существует'));
+            if (phoneExists)
+                return next(ApiError.badRequest('Пользователь с таким телефоном уже существует'));
 
+            // --- создаём пользователя ---
             const hashPassword = await bcrypt.hash(password, 5);
-            const user = await User.create({ email, role, password: hashPassword, name, number, organiztion, programs_id, diplom, inn, address });
 
-            const program = await Program.findOne({ where: { id: programs_id[0] } });
-            if (!program) return next(ApiError.badRequest('Программа не найдена'));
+            const user = await User.create({
+                email,
+                role,
+                password: hashPassword,
+                name,
+                number,
+                organization,
+                diplom,
+                inn,
+                address,
+            }, { transaction: t });
 
-            const statistic = await Statistic.create({
-                users_id: user.id,
-                programs_id: program.id,
-                max_videos: program.number_of_videos,
-                max_tests: program.number_of_test,
-                max_practical_works: program.number_of_practical_work
-            });
+            // --- создаём enrollment'ы ---
+            const enrollments = programs_id.map(programId => ({
+                userId: user.id,
+                programId,
+                status: 'active',
+            }));
 
-            const themes = await Theme.findAll({ where: { programId: program.id } });
-            const arrOfThemeId = themes.map(t => t.id);
+            console.log(enrollments, Enrollment)
 
-            const puncts = await Punct.findAll({ where: { themeId: { [Op.or]: arrOfThemeId } } });
+            await Enrollment.bulkCreate(enrollments, { transaction: t });
 
-            for (const theme of themes) {
-                const themeStat = await ThemeStatistic.create({ theme_id: theme.id, well: false, statisticId: statistic.id });
-                for (const punct of puncts) {
-                    if (theme.id === punct.themeId) {
-                        await PunctStatistic.create({
-                            punct_id: punct.id,
-                            lection: false,
-                            practical_work: null,
-                            video: false,
-                            test_bool: false,
-                            themeStatisticId: themeStat.id
-                        });
-                    }
-                }
-            }
+            await Event.create({
+                event_text: 'Добавлен новый слушатель',
+                name,
+                organization,
+            }, { transaction: t });
 
-            await Event.create({ event_text: 'Добавлен новый слушатель', name, organiztion });
+            await t.commit();
 
             const token = generateJwt(user.id, user.email, user.role);
             return res.json({ token });
 
         } catch (e) {
+            await t.rollback();
             console.error('Registration error:', e);
             return next(ApiError.internal('Ошибка при регистрации'));
         }
     }
 
+
     async registrationAdmin(req, res, next) {
         try {
-            const { email, password, role, name, number, organiztion, programs_id, diplom, inn, address } = req.body;
+            const { email, password, role, name, number, organization, programs_id, diplom, inn, address } = req.body;
 
             if (!email) return next(ApiError.badRequest('Некорректный email'));
             if (!password) return next(ApiError.badRequest('Некорректный пароль'));
@@ -125,8 +140,7 @@ class UserController {
                 password: hashPassword,
                 name,
                 number,
-                organiztion,
-                programs_id: programs_id || [-1],
+                organization,
                 diplom,
                 inn,
                 address
@@ -182,76 +196,106 @@ class UserController {
 
     // ======================== REMAKE USER ========================
     async remakeUser(req, res, next) {
-        try {
-            const { id, email, password, role, name, number, organiztion, programs_id, diplom, inn, address } = req.body;
+        const t = await sequelize.transaction();
 
-            const user = await User.findOne({ where: { id } });
+        try {
+            const {
+                id,
+                email,
+                password,
+                role,
+                name,
+                number,
+                organization,
+                programs_id,
+                diplom,
+                inn,
+                address,
+            } = req.body;
+
+            const user = await User.findByPk(id, { transaction: t });
             if (!user) return next(ApiError.badRequest('Пользователь не найден'));
+
             if (!email) return next(ApiError.badRequest('Некорректный email'));
             if (!number) return next(ApiError.badRequest('Некорректный номер'));
-            if (!Array.isArray(programs_id) || !programs_id[0]) return next(ApiError.badRequest('Отсутствует программа у пользователя'));
+            if (!Array.isArray(programs_id))
+                return next(ApiError.badRequest('programs_id должен быть массивом'));
 
-            const candidate = await User.findOne({ where: { email } });
-            if (candidate && candidate.id !== user.id) return next(ApiError.badRequest('Пользователь с таким email уже существует'));
+            // уникальность
+            const [emailExists, phoneExists] = await Promise.all([
+                User.findOne({ where: { email }, transaction: t }),
+                User.findOne({ where: { number }, transaction: t }),
+            ]);
 
-            const candidate2 = await User.findOne({ where: { number } });
-            if (candidate2 && candidate2.id !== user.id) return next(ApiError.badRequest('Пользователь с таким телефоном уже существует'));
+            if (emailExists && emailExists.id !== user.id)
+                return next(ApiError.badRequest('Пользователь с таким email уже существует'));
+            if (phoneExists && phoneExists.id !== user.id)
+                return next(ApiError.badRequest('Пользователь с таким телефоном уже существует'));
 
+            // обновляем пользователя
             user.email = email;
             if (password) user.password = await bcrypt.hash(password, 5);
             user.role = role;
             user.name = name;
             user.number = number;
-            user.organiztion = organiztion;
+            user.organization = organization;
             user.inn = inn;
             user.address = address;
+            user.diplom = diplom;
 
-            // Если меняется программа, пересоздаем статистику
-            if (user.programs_id[0] !== programs_id[0]) {
-                await Statistic.destroy({ where: { [Op.and]: [{ users_id: id, programs_id: user.programs_id[0] }] } });
+            await user.save({ transaction: t });
 
-                const program = await Program.findOne({ where: { id: programs_id[0] } });
-                if (!program) return next(ApiError.badRequest('Программа не найдена'));
+            // --- Enrollment логика ---
 
-                const statistic = await Statistic.create({
-                    users_id: user.id,
-                    programs_id: program.id,
-                    max_videos: program.number_of_videos,
-                    max_tests: program.number_of_test,
-                    max_practical_works: program.number_of_practical_work
-                });
+            const existingEnrollments = await Enrollment.findAll({
+                where: { userId: user.id },
+                transaction: t,
+            });
 
-                const themes = await Theme.findAll({ where: { programId: program.id } });
-                const arrOfThemeId = themes.map(t => t.id);
-                const puncts = await Punct.findAll({ where: { themeId: { [Op.or]: arrOfThemeId } } });
+            const existingProgramIds = existingEnrollments.map(e => e.programId);
+            const newProgramIds = programs_id;
 
-                for (const theme of themes) {
-                    const themeStat = await ThemeStatistic.create({ theme_id: theme.id, well: false, statisticId: statistic.id });
-                    for (const punct of puncts) {
-                        if (theme.id === punct.themeId) {
-                            await PunctStatistic.create({
-                                punct_id: punct.id,
-                                lection: false,
-                                practical_work: null,
-                                video: false,
-                                test_bool: false,
-                                themeStatisticId: themeStat.id
-                            });
-                        }
-                    }
-                }
+            // ➕ добавить
+            const toAdd = newProgramIds.filter(
+                pid => !existingProgramIds.includes(pid)
+            );
+
+            // ➖ архивировать
+            const toArchive = existingEnrollments.filter(
+                e => !newProgramIds.includes(e.programId)
+            );
+
+            if (toAdd.length) {
+                await Enrollment.bulkCreate(
+                    toAdd.map(programId => ({
+                        userId: user.id,
+                        programId,
+                        status: 'active',
+                    })),
+                    { transaction: t }
+                );
             }
 
-            user.programs_id = programs_id;
-            user.diplom = diplom;
-            await user.save();
+            if (toArchive.length) {
+                await Enrollment.update(
+                    { status: 'archived' },
+                    {
+                        where: { id: toArchive.map(e => e.id) },
+                        transaction: t,
+                    }
+                );
+            }
+
+            await t.commit();
             return res.json({ user });
 
         } catch (e) {
+            await t.rollback();
             console.error('remakeUser error:', e);
             return next(ApiError.internal('Ошибка при обновлении пользователя'));
         }
     }
+
 
     // ======================== REMAKE ADMIN ========================
     async remakeAdmin(req, res, next) {
@@ -369,15 +413,35 @@ class UserController {
     async getUserById(req, res, next) {
         try {
             const { id } = req.params;
-            const user = await User.findOne({ where: { id } });
-            if (!user) return next(ApiError.badRequest('Пользователь не найден'));
+
+            const user = await User.findByPk(id, {
+                include: [
+                    {
+                        model: Program,
+                        attributes: ['id', 'title', 'short_title', 'price', 'img'],
+                        through: {
+                            attributes: [
+                                'status',
+                                'progress_percent',
+                                'started_at',
+                                'completed_at',
+                            ],
+                        },
+                        required: false,
+                    },
+                ],
+            });
+
+            if (!user) {
+                return next(ApiError.badRequest('Пользователь не найден'));
+            }
+
             return res.json(user);
         } catch (e) {
             console.error('getUserById error:', e);
             return next(ApiError.internal('Ошибка получения пользователя'));
         }
     }
-
     async getAllUsers(req, res, next) {
         try {
             const users = await User.findAll({ where: { role: 'USER' } });
@@ -420,12 +484,16 @@ class UserController {
     async getAllUsersWithPage(req, res, next) {
         try {
             const page = Number(req.params.page) || 1;
-            const sortType = req.query.sort_type || 'id';
+            const limit = 10;
+
+            // Разрешённые поля для сортировки
+            const allowedSortFields = ['id', 'name', 'email', 'createdAt', 'updatedAt'];
+            const sortType = allowedSortFields.includes(req.query.sort_type) ? req.query.sort_type : 'id';
             const sortDirection = req.query.sort_down === 'true' ? 'DESC' : 'ASC';
 
             const users = await User.findAndCountAll({
-                offset: (page - 1) * 10,
-                limit: 10,
+                offset: (page - 1) * limit,
+                limit,
                 where: { role: 'USER' },
                 order: [[sortType, sortDirection]],
                 include: [
@@ -433,41 +501,45 @@ class UserController {
                         model: Program,
                         attributes: ['id', 'title', 'short_title'],
                         through: {
-                            where: { status: 'active' }, // активная программа пользователя
-                            attributes: [],
+                            where: { status: 'active' }, // только активные Enrollment
+                            attributes: ['progress_percent'], // подтягиваем процент прохождения
                         },
                         required: false,
                     },
                 ],
             });
 
-            // Добавляем статистику по первой активной программе (как было по смыслу)
-            for (const user of users.rows) {
-                const program = user.programs?.[0];
-                if (!program) continue;
+            // Мапим JSON, чтобы прогресс был прямо внутри программы
+            const result = users.rows.map(user => ({
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                number: user.number,
+                organization: user.organization,
+                role: user.role,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                programs: user.programs.map(p => ({
+                    id: p.id,
+                    title: p.title,
+                    short_title: p.short_title,
+                    progress: p.enrollment ? p.enrollment.progress_percent : null,
+                })),
+            }));
 
-                const statistic = await Statistic.findOne({
-                    where: {
-                        userId: user.id,
-                        programId: program.id,
-                    },
-                });
+            return res.json({
+                count: users.count,
+                page,
+                totalPages: Math.ceil(users.count / limit),
+                rows: result,
+            });
 
-                if (statistic) {
-                    user.dataValues.statistic = Math.round(
-                        (statistic.well_tests / statistic.max_tests) * 100
-                    );
-                }
-
-                user.dataValues.program = program;
-            }
-
-            return res.json(users);
         } catch (e) {
             console.error('getAllUsersWithPage error:', e);
             return next(ApiError.internal('Ошибка получения пользователей с пагинацией'));
         }
     }
+
 
 
     async searchUsers(req, res, next) {
@@ -482,7 +554,7 @@ class UserController {
                     role: 'USER',
                     [Op.or]: [
                         Sequelize.where(fn('LOWER', Sequelize.col('name')), { [Op.like]: `%${q.toLowerCase()}%` }),
-                        Sequelize.where(fn('LOWER', Sequelize.col('organiztion')), { [Op.like]: `%${q.toLowerCase()}%` })
+                        Sequelize.where(fn('LOWER', Sequelize.col('organization')), { [Op.like]: `%${q.toLowerCase()}%` })
                     ]
                 }
             });
@@ -514,48 +586,6 @@ class UserController {
         }
     }
 
-    // ======================== INCREMENT STATS ========================
-    async setWellTests(req, res, next) {
-        try {
-            const { id } = req.body;
-            const user = await User.findOne({ where: { id } });
-            if (!user) return next(ApiError.badRequest('Пользователь не найден'));
-            user.well_tests += 1;
-            await user.save();
-            return res.json(user);
-        } catch (e) {
-            console.error('setWellTests error:', e);
-            return next(ApiError.internal('Ошибка обновления тестов'));
-        }
-    }
-
-    async setWellVideos(req, res, next) {
-        try {
-            const { id } = req.body;
-            const user = await User.findOne({ where: { id } });
-            if (!user) return next(ApiError.badRequest('Пользователь не найден'));
-            user.well_videos += 1;
-            await user.save();
-            return res.json(user);
-        } catch (e) {
-            console.error('setWellVideos error:', e);
-            return next(ApiError.internal('Ошибка обновления видео'));
-        }
-    }
-
-    async setWellPracticalWorks(req, res, next) {
-        try {
-            const { id } = req.body;
-            const user = await User.findOne({ where: { id } });
-            if (!user) return next(ApiError.badRequest('Пользователь не найден'));
-            user.well_practical_works += 1;
-            await user.save();
-            return res.json(user);
-        } catch (e) {
-            console.error('setWellPracticalWorks error:', e);
-            return next(ApiError.internal('Ошибка обновления практических работ'));
-        }
-    }
 
     // ======================== LAST MESSAGES ========================
     async getUsersWithLastMessages(req, res, next) {

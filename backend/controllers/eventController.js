@@ -32,9 +32,9 @@ class ChatController {
     }
 
     async create(req, res, next) {
-        const {event_text, organiztion, name } = req.body;
+        const {event_text, organization, name } = req.body;
         
-        const event = await Event.create({event_text, organiztion, name})
+        const event = await Event.create({event_text, organization, name})
 
 
         return res.json(event)

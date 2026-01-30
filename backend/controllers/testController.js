@@ -371,8 +371,8 @@ class TestController {
             if (!test) return res.status(404).json({ message: 'Test not found' });
 
             // 1. Проверяем основные поля теста
-            if (!test.title || !test.description) {
-                return res.status(400).json({ message: 'Не все поля теста заполнены' });
+            if (!test.title) {
+                return res.status(400).json({ message: 'Название - обязательное поле' });
             }
 
             // 2. Проверяем вопросы

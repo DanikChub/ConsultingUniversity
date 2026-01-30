@@ -27,23 +27,22 @@ const User = sequelize.define('user', {
     role: {type: DataTypes.STRING, defaultValue: "USER"},
     diplom: {type: DataTypes.BOOLEAN},
     address: {type: DataTypes.STRING},
-    organiztion: {type: DataTypes.STRING},
+    organization: {type: DataTypes.STRING},
     inn: {type: DataTypes.STRING},
-    statistic: {type: DataTypes.INTEGER},
 
     img: {type: DataTypes.STRING},
 
     graduation_date: {type: DataTypes.DATE},
 
-    forgot_pass_code: {type: DataTypes.STRING},
-    well_videos: {type: DataTypes.INTEGER, defaultValue: 0},
-    well_tests: {type: DataTypes.INTEGER, defaultValue: 0},
-    well_practical_works: {type: DataTypes.INTEGER, defaultValue: 0},
+    password_reset_token: { type: DataTypes.STRING },
+    password_reset_expires: { type: DataTypes.DATE },
+
+    last_login_at: { type: DataTypes.DATE },
 })
 
 const Event = sequelize.define('event', {
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-    organiztion: {type: DataTypes.STRING},
+    organization: {type: DataTypes.STRING},
     name: {type: DataTypes.STRING},
     event_text: {type: DataTypes.STRING},
 })
@@ -198,54 +197,70 @@ const TestPunctStatictis = sequelize.define('test_punct_statistic', {
 const Enrollment = sequelize.define('enrollment', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 
-    userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
+    userId: { type: DataTypes.INTEGER, allowNull: false },
+    programId: { type: DataTypes.INTEGER, allowNull: false },
 
-    programId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-
-    // 👇 полезные поля
     status: {
-        type: DataTypes.ENUM('active', 'paused', 'completed'),
+        type: DataTypes.ENUM('active', 'paused', 'completed', 'archived'),
         defaultValue: 'active',
     },
 
+    progress_percent: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+    },
+
+    started_at: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+    },
+
+    completed_at: {
+        type: DataTypes.DATE,
+    },
 });
 
-const Statistic = sequelize.define('statistic', {
-    id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-    users_id: {type: DataTypes.INTEGER},
-    programs_id: {type: DataTypes.INTEGER},
+const UserContentProgress = sequelize.define('user_content_progress', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 
-    well_videos: {type: DataTypes.INTEGER, defaultValue: 0},
-    well_tests: {type: DataTypes.INTEGER, defaultValue: 0},
-    well_practical_works: {type: DataTypes.INTEGER, defaultValue: 0},
+    enrollmentId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
 
-    max_videos: {type: DataTypes.INTEGER, defaultValue: 0},
-    max_tests: {type: DataTypes.INTEGER, defaultValue: 0},
-    max_practical_works: {type: DataTypes.INTEGER, defaultValue: 0},
-})
+    contentType: {
+        type: DataTypes.ENUM(
+            'file',
+            'test',
 
-const ThemeStatistic = sequelize.define('theme_statistic', {
-    id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-    theme_id: {type: DataTypes.INTEGER},
-    admin_id: {type: DataTypes.INTEGER},
-    well: {type: DataTypes.BOOLEAN},
-})
+        ),
+        allowNull: false,
+    },
 
-const PunctStatistic = sequelize.define('punct_statistic', {
-    id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-    punct_id: {type: DataTypes.INTEGER},
-    admin_id: {type: DataTypes.INTEGER},
-    lection: {type: DataTypes.BOOLEAN},
-    practical_work: {type: DataTypes.STRING},
-    video: {type: DataTypes.BOOLEAN},
-    test_bool: {type: DataTypes.BOOLEAN},
-})
+    contentId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+
+    status: {
+        type: DataTypes.ENUM(
+            'not_started',
+            'in_progress',
+            'completed',
+            'failed'
+        ),
+        defaultValue: 'not_started',
+    },
+
+    score: {
+        type: DataTypes.INTEGER, // % для тестов
+        allowNull: true,
+    },
+
+    completedAt: {
+        type: DataTypes.DATE,
+    },
+});
 
 const PracticalWork = sequelize.define('practical_work', {
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
@@ -305,17 +320,7 @@ TestPunctStatictis.belongsTo(TestStatictis);
 User.belongsToMany(Program, {through: Enrollment})
 Program.belongsToMany(User, {through: Enrollment})
 
-User.hasMany(Statistic)
-Statistic.belongsTo(User)
 
-Statistic.hasMany(ThemeStatistic, { onDelete: 'cascade', hooks: true })
-ThemeStatistic.belongsTo(Statistic)
-
-ThemeStatistic.hasMany(PunctStatistic, { onDelete: 'cascade', hooks: true })
-PunctStatistic.belongsTo(ThemeStatistic)
-
-Program.hasOne(Statistic)
-Statistic.belongsTo(Program)
 
 User.hasMany(PracticalWork)
 PracticalWork.belongsTo(User)
@@ -433,9 +438,7 @@ module.exports = {
     Test,
     Question,
     Answer,
-    Statistic,
-    ThemeStatistic,
-    PunctStatistic,
+    Enrollment,
     PracticalWork,
     TestStatictis,
     TestPunctStatictis

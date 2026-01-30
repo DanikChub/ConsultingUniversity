@@ -6,7 +6,7 @@ const { Program,
   Statistic,
   ThemeStatistic,
   PunctStatistic,
-  File, FileAsset
+  File, FileAsset, Question, Answer
 } = require("../models/models");
 const sequelize = require('../db'); 
 const ApiError = require('../error/ApiError')
@@ -112,7 +112,7 @@ class ProgramController {
         return res.status(400).json({ error: 'No zip uploaded' });
       }
 
-      const tmpDir = path.join(__dirname, '../../tmp');
+      const tmpDir = path.join(__dirname, '../tmp');
       if (!fs.existsSync(tmpDir)) {
         fs.mkdirSync(tmpDir, { recursive: true });
       }
@@ -211,42 +211,52 @@ class ProgramController {
                   await writeFileAsync(fullPath, buffer);
 
                   const ext = fileName.split('.').pop()?.toLowerCase();
-                  let type = null;
-                  if (['docx'].includes(ext)) type = 'docx';
-                  else if (['pdf'].includes(ext)) type = 'pdf';
-                  else if (['mp3', 'wav', 'ogg'].includes(ext)) type = 'audio';
 
-                  const whereOrder = isPunctFile
-                      ? { punctId }
-                      : { themeId, punctId: null };
+                  const EXTENSION_MAP = {
+                    docx: 'docx',
+                    pdf: 'pdf',
+                    mp3: 'audio',
+                    wav: 'audio',
+                    ogg: 'audio',
+                  };
 
-                  const maxOrder = await File.max('order_index', {
-                    where: whereOrder,
-                  });
+                  const type = EXTENSION_MAP[ext ?? ''];
 
-                  const order_index = isNaN(maxOrder) ? 0 : maxOrder + 1;
+                  // ❗️ если тип не поддерживается — просто выходим
+                  if (type) {
 
-                  const fileRecord = await File.create({
-                    original_name: fileName,
-                    stored_name: storedName,
-                    mime_type: 'application/octet-stream',
-                    size: buffer.length,
-                    storage: 'local',
-                    type,
-                    themeId: isThemeFile ? themeId : null,
-                    punctId: isPunctFile ? punctId : null,
-                    order_index,
-                    status: 'idle',
-                  });
+                    const whereOrder = isPunctFile
+                        ? { punctId }
+                        : { themeId, punctId: null };
 
-                  if (type === 'docx') {
-                    const html = await convertDocxToHtmlIfExists(storedName);
-                    if (html) {
-                      await FileAsset.create({
-                        fileId: fileRecord.id,
-                        type: 'html',
-                        content: html,
-                      });
+                    const maxOrder = await File.max('order_index', {
+                      where: whereOrder,
+                    });
+
+                    const order_index = isNaN(maxOrder) ? 0 : maxOrder + 1;
+
+                    const fileRecord = await File.create({
+                      original_name: fileName,
+                      stored_name: storedName,
+                      mime_type: 'application/octet-stream',
+                      size: buffer.length,
+                      storage: 'local',
+                      type,
+                      themeId: isThemeFile ? themeId : null,
+                      punctId: isPunctFile ? punctId : null,
+                      order_index,
+                      status: 'idle',
+                    });
+
+                    if (type === 'docx') {
+                      const html = await convertDocxToHtmlIfExists(storedName);
+                      if (html) {
+                        await FileAsset.create({
+                          fileId: fileRecord.id,
+                          type: 'html',
+                          content: html,
+                        });
+                      }
                     }
                   }
 
@@ -838,7 +848,12 @@ class ProgramController {
                     model: Test,
                     separate: true, // отдельный запрос для файлов
                     order: [['order_index', 'ASC']],
-
+                    include: [
+                      {
+                        model: Question,
+                        include: [Answer],
+                      },
+                    ],
                   }
                 ]
               },

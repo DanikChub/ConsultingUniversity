@@ -42,7 +42,7 @@ class ChatController {
 
         if (role == 'USER') {
             const user = await User.findOne({where: {id: user_id}})
-            await Event.create({ event_text: 'Поступило новое сообщение', name: user.name, organiztion: user.organiztion });
+            await Event.create({ event_text: 'Поступило новое сообщение', name: user.name, organization: user.organization });
         }
             
 
