@@ -13,8 +13,8 @@ import {
     updateAnswerFields,
     deleteAnswer,
     publishTest,
-} from '../http/testAPI';
-import type { Answer, Question, Test } from "../types/test";
+} from '../entities/test/api/test.api';
+import type { Answer, Question, Test } from "../entities/test/model/type";
 
 export const useTestEditor = (targetId: number, mode: 'create' | 'edit') => {
     const [test, setTest] = useState<Test | null>(null);

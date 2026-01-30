@@ -11,17 +11,18 @@ interface Program {
 interface Props {
     filteredPrograms: Program[];
     handleSelectProgram: (program: Program) => void;
-    selectedPrograms: Program[];
+    selectedProgram?: Program;
 }
 
-export default function Dropdown({selectedPrograms, filteredPrograms, handleSelectProgram }: Props) {
+export default function Dropdown({selectedProgram, filteredPrograms, handleSelectProgram }: Props) {
     const [open, setOpen] = useState<boolean>(false);
     const [selected, setSelected] = useState<Program | null>(null);
     const dropdownRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
-        setSelected(selectedPrograms[0])
-    }, [selectedPrograms])
+        setSelected(selectedProgram)
+        console.log(selectedProgram)
+    }, [selectedProgram])
 
     const toggle = () => setOpen((prev) => !prev);
 
@@ -55,7 +56,7 @@ export default function Dropdown({selectedPrograms, filteredPrograms, handleSele
                     {selected ? (
                         <>
                             <img
-                                src={selected.img ? process.env.REACT_APP_API_URL + selected.img : ""}
+                                src={selected.img ? `${process.env.REACT_APP_API_URL}${selected.img}` : ""}
                                 alt=""
                                 className="w-12 h-10 object-cover rounded"
                             />

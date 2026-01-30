@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getOneProgram } from '../../../http/programAPI';
-import { getStatistic } from '../../../http/statisticAPI';
+import { getOneProgram } from '../../../entities/program/api/program.api';
+import { getStatistic } from '../../../entities/statistic/api/statistic.api';
 
 import { Context } from '../../../index';
 

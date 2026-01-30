@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { updateTests } from '../../../http/statisticAPI';
-import { getOneTest, updateTestStatistic } from '../../../http/testAPI';
-import { FINISH_TEST_ROUTE } from '../../../utils/consts';
+import { updateTests } from '../../../entities/statistic/api/statistic.api';
+import { getOneTest, updateTestStatistic } from '../../../entities/test/api/test.api';
+import { FINISH_TEST_ROUTE } from '../../../shared/utils/consts';
 import CountDown from '../../../components/CountDown/CountDown';
 import UserContainer from '../../../components/ui/UserContainer';
 

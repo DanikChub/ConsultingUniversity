@@ -1,6 +1,7 @@
 // modals/FileInfoModal.tsx
 import {FC, useEffect, useState} from 'react';
-import type { File as ProgramFile } from '../types/program';
+import type {File as ProgramFile} from "../entities/file/model/type";
+
 
 
 type Props = {
@@ -53,58 +54,57 @@ const FileInfoModal: FC<Props> = ({ file, onClose, onDelete, onDownload, onRenam
         }
     };
 
+    const canRename = Boolean(onRename);
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fadeIn">
-            <div className="w-full max-w-3xl rounded-2xl bg-white p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm
+                    transition-opacity duration-200
+                    opacity-0
+                    animate-fadeIn">
+            <div className="w-full max-w-3xl rounded-2xl bg-white p-6 shadow-2xl animate-fadeIn">
 
                 {/* header */}
                 <div className="mb-4 flex items-start justify-between">
                     <div className="flex-1 pr-4">
-                        {!isEditing ? (
-                            <div className="group flex items-center gap-2">
-                                <h3 className="text-lg font-semibold text-gray-900">
-                                    {fileName}
-                                </h3>
+                        <div className="group flex items-center gap-2">
+                            {isEditing && canRename ? (
+                                <input
+                                    autoFocus
+                                    value={fileName}
+                                    onChange={(e) => handleEditName(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === 'Escape') {
+                                            setIsEditing(false);
+                                        }
+                                    }}
+                                    onBlur={() => setIsEditing(false)}
+                                    className="
+                text-lg font-semibold text-gray-900
+                w-full bg-transparent border-none p-0 m-0
+                focus:outline-none focus:ring-0
+            "
+                                />
+                            ) : (
+                                <>
+                                    <h3 className="text-lg font-semibold text-gray-900">
+                                        {fileName}
+                                    </h3>
 
-
-                                <button
-                                    onClick={() => setIsEditing(true)}
-                                    className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 text-sm"
-                                    title="Переименовать"
-                                >
-                                    ✏️
-                                </button>
-
-                            </div>
-                        ) : (
-                            <input
-                                autoFocus
-                                value={fileName}
-                                onChange={(e) => handleEditName(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-
-                                        setIsEditing(false);
-                                    }
-                                    if (e.key === 'Escape') {
-
-                                        setIsEditing(false);
-                                    }
-                                }}
-                                onBlur={() => {
-
-                                    setIsEditing(false);
-                                }}
-                                className="text-lg font-semibold text-gray-900
-                                            w-full
-                                            bg-transparent
-                                            border-none
-                                            p-0
-                                            m-0
-                                            focus:outline-none
-                                            focus:ring-0"
-                            />
-                        )}
+                                    {canRename && (
+                                        <button
+                                            onClick={() => setIsEditing(true)}
+                                            className="
+                                                opacity-0 group-hover:opacity-100
+                                                text-gray-400 hover:text-gray-600 text-sm
+                                            "
+                                            title="Переименовать"
+                                        >
+                                            ✏️
+                                        </button>
+                                    )}
+                                </>
+                            )}
+                        </div>
 
                         <p className="mt-1 text-xs text-gray-500">
                             {file.type.toUpperCase()} · {(file.size / 1024 / 1024).toFixed(2)} МБ

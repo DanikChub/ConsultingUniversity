@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { createPracticalWork, getOnePracticalWorkToUser } from '../../../http/practicalWorkAPI';
+import { createPracticalWork, getOnePracticalWorkToUser } from '../../../entities/practical_work/api/practical_work.api';
 import { Context } from "../../../index"
 import './PracticalWorkPage.css'
 

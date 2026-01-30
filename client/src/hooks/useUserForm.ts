@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { getAllPrograms, getOneProgram } from '../http/programAPI';
-import { getUserById, registrateAdmin, registrateUser, remakeAdmin, remakeUser } from '../http/userAPI';
-import { ADMIN_ADMINISTRATORS_ROUTE, ADMIN_LISTENERS_ROUTE } from '../utils/consts';
+import {getAllPrograms, getAllPublishedPrograms, getOneProgram} from '../entities/program/api/program.api';
+import { getUserById, registrateAdmin, registrateUser, remakeAdmin, remakeUser } from '../entities/user/api/user.api';
+import { ADMIN_ADMINISTRATORS_ROUTE, ADMIN_LISTENERS_ROUTE } from '../shared/utils/consts';
 
 export const useUserForm = () => {
     const [name, setName] = useState('');
@@ -58,7 +58,7 @@ export const useUserForm = () => {
         (async () => {
             setLoaded(false)
             try {
-                const all = await getAllPrograms();
+                const all = await getAllPublishedPrograms();
                 setPrograms(all);
                 setFilteredPrograms(all);
 
@@ -68,15 +68,16 @@ export const useUserForm = () => {
                     setName(user.name);
                     setEmail(user.email);
                     setPhone(user.number);
-                    setOrg(user.organiztion || '');
+                    setOrg(user.organization || '');
                     setInn(user.inn || '');
                     setDiplom(user.diplom || false);
                     setAddress(user.address || '');
                     setUserProgramId(user.programs_id);
 
+                    console.log(user)
                     if (!queryParams.get('admin')) {
-                        const program = await getOneProgram(user.programs_id[0]);
-                        setSelectedPrograms([program]);
+
+                        setSelectedPrograms(user.programs);
 
                     }
                 }
@@ -109,8 +110,9 @@ export const useUserForm = () => {
 
     const handleSelectProgram = useCallback((program) => {
         setSelectedPrograms([program]);
-        console.log(programs)
+
         setUserProgramId([program.id]);
+        console.log(program.id)
         setDatalistActive(false);
     }, []);
 

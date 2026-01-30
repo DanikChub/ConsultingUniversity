@@ -1,8 +1,8 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
-import FooterNavBar from '../../../components/FooterNavBar/FooterNavBar';
-import NavBar from '../../../components/NavBar/NavBar';
-import {COURSE_ROUTE, STATEMENT_ROUTE, USER_CHAT_ROUTE} from '../../../utils/consts';
+import FooterNavBar from '../../../shared/ui/layot/FooterNavBar';
+import NavBar from '../../../shared/ui/layot/NavBar';
+import {COURSE_ROUTE, STATEMENT_ROUTE, USER_CHAT_ROUTE} from '../../../shared/utils/consts';
 
 
 import statement from "../../../assets/imgs/statement.png"
@@ -14,16 +14,16 @@ import mail_img from "../../../assets/imgs/mail.png"
 
 import "./UserPage.css"
 import {Context} from '../../../index';
-import {getOneProgram} from '../../../http/programAPI';
-import {setUserProfileImg} from "../../../http/userAPI";
+import {getOneProgram} from '../../../entities/program/api/program.api';
+import {setUserProfileImg} from "../../../entities/user/api/user.api";
 import Spinner from '../../../components/Spinner/Spinner';
 
 
-import {getStatistic} from '../../../http/statisticAPI';
+import {getStatistic} from '../../../entities/statistic/api/statistic.api';
 import {observer} from "mobx-react-lite";
 import LoadingAlert from "../../../components/ui/LoadingAlert";
 import UserContainer from "../../../components/ui/UserContainer";
-import {getUnreadCount} from "../../../http/chatAPI";
+import {getUnreadCount} from "../../../entities/chat/api/chat.api";
 
 
 

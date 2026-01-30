@@ -38,35 +38,34 @@ import {
     CHAT_USERS_PAGE_ROUTE,
     USER_CHAT_ROUTE,
     ADMIN_REGISTRATE_ADMIN
-} from './utils/consts'
+} from './shared/utils/consts'
 import LoginPage from './pages/LoginPage/LoginPage'
-import AdminPage from './pages/Admin/AdminPage/AdminPage'
-import AdminProgramsPage from './pages/Admin/AdminProgramsPage/AdminProgramsPage'
-import MakeProgram from './pages/Admin/MakeProgram/MakeProgram'
-import AdminListeners from './pages/Admin/AdminListeners/AdminListeners'
-import RegistrateUser from './pages/Admin/RegistrateUser/RegistrateUser'
-import ApplicationPage from './pages/Admin/ApplicationPage/ApplicationPage'
+import AdminPage from './pages/admin/AdminPage/AdminPage'
+import AdminProgramsPage from './pages/admin/AdminProgramsPage/AdminProgramsPage'
+import MakeProgram from './pages/admin/make-program/MakeProgramPage'
+import AdminListeners from './pages/admin/AdminListeners/AdminListeners'
+import RegistrateUser from './pages/admin/RegistrateUser/RegistrateUser'
+import ApplicationPage from './pages/admin/ApplicationPage/ApplicationPage'
 import FinishTestPage from './pages/User/FinishTestPage/FinishTestPage'
-import VideoPage from './pages/Admin/VideoPage/VideoPage'
+import VideoPage from './pages/admin/VideoPage/VideoPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage/ForgotPasswordPage'
-import ViewProgram from './pages/Admin/ViewProgram/ViewProgram'
-import ViewTest from './pages/Admin/ViewTest/ViewTest'
-import ViewVideo from './pages/Admin/ViewVideo/ViewVideo'
+import ViewProgram from './pages/admin/ViewProgram/ViewProgram'
+import ViewTest from './pages/admin/ViewTest/ViewTest'
 import PracticalWorkPage from './pages/User/PracticalWorkPage/PracticalWorkPage'
 import LectionPage from './pages/User/LectionPage/LectionPage'
-import AdminPracticalPage from './pages/Admin/AdminPracticalPage/AdminPracticalPage'
+import AdminPracticalPage from './pages/admin/AdminPracticalPage/AdminPracticalPage'
 import StatementPage from './pages/User/StatementPage/StatementPage'
-import AdminOnePracticalPage from './pages/Admin/AdminOnePracticalPage/AdminOnePracticalPage'
-import ViewLection from './pages/Admin/ViewLection/ViewLection'
-import AdminUserPage from './pages/Admin/AdminUserPage/AdminUserPage'
-import AdminStatementPage from './pages/Admin/AdminStatementPage/AdminStatementPage'
-import AdministratorsPage from './pages/Admin/AdministratorsPage/AdministratorsPage'
-import AdminDocumentsPage from './pages/Admin/AdminDocumentsPage/AdminDocumentsPage'
-import ViewPracticalWorkPage from './pages/Admin/ViewPracticalWorkPage/ViewPracticalWorkPage'
-import ChatPage from './pages/Admin/ChatPage/ChatPage'
-import ChatUsersPage from './pages/Admin/ChatUsersPage/ChatUsersPage'
+import AdminOnePracticalPage from './pages/admin/AdminOnePracticalPage/AdminOnePracticalPage'
+import ViewLection from './pages/admin/ViewLection/ViewLection'
+import AdminUserPage from './pages/admin/AdminUserPage/AdminUserPage'
+import AdminStatementPage from './pages/admin/AdminStatementPage/AdminStatementPage'
+import AdministratorsPage from './pages/admin/AdministratorsPage/AdministratorsPage'
+import AdminDocumentsPage from './pages/admin/AdminDocumentsPage/AdminDocumentsPage'
+import ViewPracticalWorkPage from './pages/admin/ViewPracticalWorkPage/ViewPracticalWorkPage'
+import ChatPage from './pages/admin/ChatPage/ChatPage'
+import ChatUsersPage from './pages/admin/ChatUsersPage/ChatUsersPage'
 import UserChatPage from './pages/User/UserChatPage/UserChatPage'
-import RegistrateAdmin from "./pages/Admin/RegistrateAdmin/RegistrateAdmin";
+import RegistrateAdmin from "./pages/admin/RegistrateAdmin/RegistrateAdmin";
 
 
 export const authRoutes = [
@@ -152,10 +151,6 @@ export const adminRoutes = [
         Component: <ViewTest/>
     },
     {
-        path: ADMIN_VIEW_VIDEO,
-        Component: <ViewVideo/>
-    },
-    {
         path: ADMIN_VIEW_LECTION,
         Component: <ViewLection/>
     },
@@ -239,10 +234,6 @@ export const viewerRoutes = [
     {
         path: ADMIN_VIEW_TEST,
         Component: <ViewTest/>
-    },
-    {
-        path: ADMIN_VIEW_VIDEO,
-        Component: <ViewVideo/>
     },
     {
         path: ADMIN_VIEW_LECTION,

@@ -1,6 +1,7 @@
 import React from 'react';
-import type { Question, Answer } from '../../types/test';
-import Button from '../ui/Button';
+import type { Question, Answer } from '../../entities/test/model/type';
+import Button from '../../shared/ui/buttons/Button';
+import {AutoResizeTextarea} from "../../shared/ui/inputs/AutoResizeTextarea";
 
 interface Props {
     question: Question;
@@ -32,14 +33,10 @@ const QuestionEditor: React.FC<Props> = ({
                 <label className="block text-sm font-medium text-gray-700">
                     Текст вопроса
                 </label>
-                <textarea
+                <AutoResizeTextarea
                     className="mt-1 w-full rounded-lg border px-3 py-2 min-h-[100px] resize-none focus:ring-2 focus:ring-blue-500 outline-none"
                     value={question?.text}
-                    onChange={e =>
-                        onChangeQuestion(question.id, {
-                            text: e.target.value,
-                        })
-                    }
+                    onChange={val => onChangeQuestion(question.id, { text: val })}
                     placeholder="Введите текст вопроса"
                 />
             </div>
@@ -68,7 +65,7 @@ const QuestionEditor: React.FC<Props> = ({
                     {question?.answers.map(answer => (
                         <li
                             key={answer.id}
-                            className="flex items-center gap-2 rounded-lg border px-3 py-2"
+                            className="flex items-center gap-2 rounded-lg border px-3 py-1"
                         >
                             <input
                                 type="checkbox"
@@ -80,14 +77,10 @@ const QuestionEditor: React.FC<Props> = ({
                                 }
                             />
 
-                            <input
-                                className="flex-1 border-none outline-none"
+                            <AutoResizeTextarea
+                                className="mt-1 w-full rounded-lg border-none px-1 min-h-[20px] resize-none  outline-none"
                                 value={answer.text}
-                                onChange={e =>
-                                    onChangeAnswer(answer.id, {
-                                        text: e.target.value,
-                                    })
-                                }
+                                onChange={val => onChangeAnswer(answer.id, { text: val })}
                                 placeholder="Текст ответа"
                             />
 

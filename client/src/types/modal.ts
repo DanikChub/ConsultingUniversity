@@ -1,8 +1,8 @@
 
 
 // types/modal.ts
-import type {File as ProgramFile} from "./program";
-import type {Test} from "./test";
+import type {Test} from "../entities/test/model/type";
+import type {File as ProgramFile} from "../entities/file/model/type";
 
 export type ModalType =
         | 'uploadFile'
@@ -10,6 +10,7 @@ export type ModalType =
         | 'uploadProgramZip'
         | 'createTest'
         | 'editTest'
+        | 'viewTest'
 
 export type ModalPayloadMap = {
     uploadFile: {
@@ -18,7 +19,7 @@ export type ModalPayloadMap = {
     fileInfo: {
         file: ProgramFile;
         onDelete?: (fileId: number) => Promise<void>;
-        onDownload?: (file: File) => void;
+        onDownload?: (file: ProgramFile) => void;
         onRename?: (newName: string) => void;
     };
     uploadProgramZip: {
@@ -32,6 +33,9 @@ export type ModalPayloadMap = {
         testId: number;
         onDelete?: (testId: number) => Promise<void>;
     }
+    viewTest: {
+        test: Test;
+    }
 };
 
 export type ModalResultMap = {
@@ -40,4 +44,5 @@ export type ModalResultMap = {
     uploadProgramZip: { file: File; resetProgram: boolean } | null; // 👈 изменили
     createTest: Test;
     editTest: Test;
+    viewTest: 'close' | 'deleted';
 };

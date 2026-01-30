@@ -2,13 +2,13 @@ import React, { useMemo } from 'react';
 import { useTestEditor } from '../hooks/useTestEditor';
 
 import Modal from '../components/ui/Modal';
-import Button from '../components/ui/Button';
+import Button from '../shared/ui/buttons/Button';
 
 import TestHeader from '../components/CreateTestModal/TestHeader';
 import QuestionNav from '../components/CreateTestModal/QuestionNav';
 import QuestionEditor from '../components/CreateTestModal/QuestionEditor';
 
-import type { Test } from '../types/test';
+import type { Test } from '../entities/test/model/type';
 
 interface Props {
     targetId: number;
@@ -197,7 +197,7 @@ const CreateTestModal: React.FC<Props> = ({
                                 onClick={handlePublish}
                                 disabled={test.questions.length === 0}
                             >
-                                Сохранить тест
+                                Проверить тест
                             </Button>
                         </div>
                     </div>

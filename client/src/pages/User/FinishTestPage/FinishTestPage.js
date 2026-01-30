@@ -5,8 +5,8 @@ import "./FinishTestPage.css"
 
 import complete from '../../../assets/imgs/complete.png';
 import fall from '../../../assets/imgs/fall.jpg';
-import { COURSE_ROUTE, TEST_ROUTE } from '../../../utils/consts';
-import { getOneTest, getTestStatistic } from '../../../http/testAPI';
+import { COURSE_ROUTE, TEST_ROUTE } from '../../../shared/utils/consts';
+import { getOneTest, getTestStatistic } from '../../../entities/test/api/test.api';
 import { Context } from '../../../index';
 import UserContainer from "../../../components/ui/UserContainer";
 

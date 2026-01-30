@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { User, UsersAPIResponse, PaginationItem } from "../types/user";
-import { getAllUsersWithPage, searchUsers, deleteUser } from "../http/userAPI";
+import { User, UsersAPIResponse, PaginationItem } from "../entities/user/model/type";
+import { getAllUsersWithPage, searchUsers, deleteUser } from "../entities/user/api/user.api";
 
 export const useAdminListeners = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -40,7 +40,7 @@ export const useAdminListeners = () => {
 
             generatePagination(data.count);
 
-            const userList = data.rows.filter(u => u.role === 'USER');
+            const userList = data.rows;
 
             if (search) {
                 userList.forEach(u => (u.yellow_value = search));

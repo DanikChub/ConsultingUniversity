@@ -6,6 +6,7 @@ import FileUploadModal from '../modals/FileUploadModal';
 import FileInfoModal from "../modals/FileInfoModal";
 import ProgramZipUploadModal from "../modals/ProgramZipUploadModal";
 import CreateTestModal from "../modals/CreateTestModal";
+import {TestViewModal} from "../modals/TestViewModal";
 
 type ActiveModal<T extends ModalType = ModalType> = {
     type: T;
@@ -89,6 +90,13 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     onSubmit={(test) => close(test)} // 👈 resolve промиса
                 />
             )}
+            {modal?.type === 'viewTest' && (
+                <TestViewModal
+                    test={modal.payload.test}
+                    onClose={() => close('close')}
+                />
+            )}
+
         </ModalContext.Provider>
     );
 };

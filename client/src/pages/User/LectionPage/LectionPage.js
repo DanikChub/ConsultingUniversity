@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams, createSearchParams, useLocation } from 'react-router-dom';
-import { getOnePunct, getOneTheme } from '../../../http/programAPI';
+import { getOnePunct, getOneTheme } from '../../../entities/program/api/program.api';
 
 import download from "../../../assets/imgs/download.png"
 

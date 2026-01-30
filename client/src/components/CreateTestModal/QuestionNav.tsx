@@ -1,6 +1,6 @@
 import React from 'react';
-import type { Question } from '../../types/test';
-import Button from '../ui/Button';
+import type { Question } from '../../entities/test/model/type';
+import Button from '../../shared/ui/buttons/Button';
 
 interface Props {
     questions: Question[];

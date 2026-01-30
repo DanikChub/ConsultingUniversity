@@ -4,13 +4,13 @@ import {
     getMessages,
     markChatAsRead,
     sendMessage
-} from '../../../http/chatAPI';
-import { getOneProgram } from '../../../http/programAPI';
-import { getUserById } from '../../../http/userAPI';
+} from '../../../entities/chat/api/chat.api';
+import { getOneProgram } from '../../../entities/program/api/program.api';
+import { getUserById } from '../../../entities/user/api/user.api';
 import { Context } from '../../../index';
 import UserContainer from '../../../components/ui/UserContainer';
 import AutoResizeTextarea from '../../../components/ui/AutoResizeTextarea';
-import ChatMessage from "../../../components/Chat/ChatMessage";
+import ChatMessage from "../../admin/ChatPage/components/ChatMessage";
 
 const makeTime = (time: string) => {
     const date = new Date(time);

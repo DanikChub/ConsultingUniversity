@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import type {Punct, File as FileType, Theme} from '../types/program';
+import type {Punct, File as FileType, Theme} from '../entities/program/model/type';
 
-import type {Test} from "../types/test";
-import {createPunct, deleteFile} from "../http/programAPI";
-import {createTest, deleteTest} from "../http/testAPI";
+import type {Test} from "../entities/test/model/type";
+import {createPunct, deleteFile} from "../entities/program/api/program.api";
+import {createTest, deleteTest} from "../entities/test/api/test.api";
 import theme = require("tailwindcss/defaultTheme");
 
 export const useTest = (punct: Punct) => {

@@ -10,7 +10,7 @@ const AppContainer: React.FC<AppContainerProps> = ({ children, ...rest }) => {
     return (
 
         <div {...rest}>
-            <div className="w-full max-w-[1536px] m-auto">
+            <div className="w-full">
                 <div className="flex items-start w-full relative">
 
                     <div className="absolute left-0 top-0 h-full bg-[#D9D9D9] w-52 z-0"/>

@@ -13,11 +13,11 @@ import presentation from "../../../assets/imgs/presentation.png"
 import check from "../../../assets/imgs/check.png"
 import test_src from "../../../assets/imgs/test.png"
 import { Context } from '../../../index';
-import { getOneProgram } from '../../../http/programAPI';
-import { FINISH_TEST_ROUTE, LECTION_ROUTE, PRACTICAL_WORK_ROUTE, TEST_ROUTE, USER_ROUTE, VIDEO_ROUTE } from '../../../utils/consts';
-import { setGraduationDate, setWellPracticalWorks, setWellTest, setWellVideos } from '../../../http/userAPI';
+import { getOneProgram } from '../../../entities/program/api/program.api';
+import { FINISH_TEST_ROUTE, LECTION_ROUTE, PRACTICAL_WORK_ROUTE, TEST_ROUTE, USER_ROUTE, VIDEO_ROUTE } from '../../../shared/utils/consts';
+import { setGraduationDate, setWellPracticalWorks, setWellTest, setWellVideos } from '../../../entities/user/api/user.api';
 import { observer } from 'mobx-react-lite';
-import { getStatistic, updatePracticalWorks, updateVideos } from '../../../http/statisticAPI';
+import { getStatistic, updatePracticalWorks, updateVideos } from '../../../entities/statistic/api/statistic.api';
 import FinishTestPage from '../FinishTestPage/FinishTestPage';
 import UserContainer from "../../../components/ui/UserContainer";
 import CustomAudioPlayer from "../../../components/CustomAudioPlayer/CustomAudioPlayer";

@@ -1,12 +1,12 @@
 import {BrowserRouter} from "react-router-dom";
 import AppRouter from "./components/AppRouter";
-import FooterNavBar from "./components/FooterNavBar/FooterNavBar";
-import NavBar from "./components/NavBar/NavBar";
+import FooterNavBar from "./shared/ui/layot/FooterNavBar";
+import NavBar from "./shared/ui/layot/NavBar";
 
 import {observer} from "mobx-react-lite";
 import { useContext, useEffect, useState } from "react";
 import { Context } from "./index"
-import { check, getUserById } from "./http/userAPI";
+import { check, getUserById } from "./entities/user/api/user.api";
 import Spinner from "./components/Spinner/Spinner";
 
 import "./App.css"

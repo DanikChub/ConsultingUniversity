@@ -1,9 +1,9 @@
 import React, {useState, useContext} from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { login, getUserById, forgotPassword } from '../../http/userAPI';
+import { login, getUserById, forgotPassword } from '../../entities/user/api/user.api';
 import { Context } from '../../index';
-import { ADMIN_ROUTE, FORGOT_PASSWORD_ROUTE, USER_ROUTE } from '../../utils/consts';
+import { ADMIN_ROUTE, FORGOT_PASSWORD_ROUTE, USER_ROUTE } from '../../shared/utils/consts';
 import "./LoginPage.css"
 
 const LoginPage = () => {

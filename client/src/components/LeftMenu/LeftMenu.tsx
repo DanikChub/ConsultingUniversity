@@ -6,8 +6,8 @@ import {
     ADMIN_ROUTE,
     ADMIN_DOCUMENTS_ROUTE,
     CHAT_USERS_PAGE_ROUTE, ADMIN_ADMINISTRATORS_ROUTE
-} from '../../utils/consts';
-import {getAllUserUnreadCount, getUnreadMessagesCount} from '../../http/chatAPI'; // предположим, есть такой API
+} from '../../shared/utils/consts';
+import {getAllUserUnreadCount, getUnreadMessagesCount} from '../../entities/chat/api/chat.api'; // предположим, есть такой API
 
 const LeftMenu: React.FC = () => {
     const [unreadMessages, setUnreadMessages] = useState<string>('0');
@@ -17,44 +17,47 @@ const LeftMenu: React.FC = () => {
         getAllUserUnreadCount().then(data => setUnreadMessages(data.unreadCount));
     }, []);
 
-    /*const menuItems = [
+    const menuItems = [
         { name: 'Главная', path: ADMIN_ROUTE, end: true },
         { name: 'Слушатели', path: ADMIN_LISTENERS_ROUTE },
         { name: 'Сообщения', path: CHAT_USERS_PAGE_ROUTE, unreadCount: unreadMessages },
         { name: 'Программы', path: ADMIN_PROGRAMS_ROUTE },
         { name: 'Выданные документы', path: ADMIN_DOCUMENTS_ROUTE },
         { name: 'Администраторы', path: ADMIN_ADMINISTRATORS_ROUTE },
-    ];*/
-
-    const menuItems = [
-        { name: 'Главная', path: ADMIN_ROUTE, end: true },
-        { name: 'Программы', path: ADMIN_PROGRAMS_ROUTE },
-
     ];
 
+
+
     return (
-        <div className="sticky top-0 self-start pt-8 pb-24 bg-[#D9D9D9] w-52 flex flex-col">
+        <div
+            className="sticky top-0 self-start h-screen w-56 bg-white shadow-lg flex flex-col py-6 px-2 overflow-y-auto">
             {menuItems.map((item, index) => (
                 <NavLink
                     key={index}
                     to={item.path}
                     end={item.end || false}
-                    className={({ isActive }) => `
-            px-4 py-2 rounded-md mb-2
-            text-gray-700 hover:bg-gray-400 flex justify-between items-center
-            ${isActive ? 'bg-gray-500 font-bold text-white' : ''}
-          `}
+                    className={({isActive}) =>
+                        `flex items-center justify-between px-4 py-2 mb-2 rounded-lg transition-all duration-200
+        hover:bg-blue-100 hover:text-blue-700
+        ${isActive ? 'bg-blue-600 text-white font-semibold shadow-md' : 'text-gray-700'}`
+                    }
                 >
-                    <span>{item.name}</span>
-                    {/*{item.unreadCount && item.unreadCount != '0' ? (*/}
-                    {/*    <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">*/}
-                    {/*      {item.unreadCount}*/}
-                    {/*    </span>*/}
-                    {/*): ''}*/}
+                    <div className="flex items-center gap-2">
+                        {/* Если есть иконка */}
+                        {item.icon && <item.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-500'}`}/>}
+                        <span>{item.name}</span>
+                    </div>
 
+                    {/* Badge для уведомлений */}
+                    {item.unreadCount && parseInt(item.unreadCount) > 0 && (
+                        <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+          {item.unreadCount}
+        </span>
+                    )}
                 </NavLink>
             ))}
         </div>
+
     );
 };
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { checkForgotPassword } from '../../http/userAPI';
-import { AUTH_ROUTE } from '../../utils/consts';
+import { checkForgotPassword } from '../../entities/user/api/user.api';
+import { AUTH_ROUTE } from '../../shared/utils/consts';
 
 import "./ForgotPasswordPage.css"
 const ForgotPasswordPage = () => {
