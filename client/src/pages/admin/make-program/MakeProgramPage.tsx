@@ -53,7 +53,7 @@ const MakeProgramPage = () => {
     return (
         <AppContainer>
             <ProgramImportProgressModal open={importing} progress={progress}/>
-            тест
+
             <ProgramHeader
                 program={program}
                 onChange={updateField}
