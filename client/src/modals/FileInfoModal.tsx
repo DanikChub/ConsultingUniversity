@@ -1,6 +1,7 @@
 // modals/FileInfoModal.tsx
 import {FC, useEffect, useState} from 'react';
 import type {File as ProgramFile} from "../entities/file/model/type";
+import {ModalContainer} from "./ModalContainer";
 
 
 
@@ -57,11 +58,7 @@ const FileInfoModal: FC<Props> = ({ file, onClose, onDelete, onDownload, onRenam
     const canRename = Boolean(onRename);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm
-                    transition-opacity duration-200
-                    opacity-0
-                    animate-fadeIn">
-            <div className="w-full max-w-3xl rounded-2xl bg-white p-6 shadow-2xl animate-fadeIn">
+        <ModalContainer  size="lg" scroll="inner" onClose={onClose}>
 
                 {/* header */}
                 <div className="mb-4 flex items-start justify-between">
@@ -155,8 +152,7 @@ const FileInfoModal: FC<Props> = ({ file, onClose, onDelete, onDownload, onRenam
                         </button>
                     )}
                 </div>
-            </div>
-        </div>
+        </ModalContainer>
     );
 };
 
@@ -177,7 +173,7 @@ const FilePreview = ({file}: { file: ProgramFile }) => {
         return (
             <iframe
                 src={src}
-                className="h-[500px] w-full rounded"
+                className="max-h-[50dvh] min-h-[100px] h-[50dvh] w-full rounded"
                 title={file.original_name}
             />
         );
@@ -186,7 +182,7 @@ const FilePreview = ({file}: { file: ProgramFile }) => {
     if (file.type === 'docx') {
         return file.file_asset?.content ? (
             <div
-                className="h-[500px] overflow-auto border rounded p-2 bg-gray-50 text-sm text-gray-800"
+                className="max-h-[40dvh] min-h-[200px] overflow-auto border rounded p-2 bg-gray-50 text-sm text-gray-800"
                 dangerouslySetInnerHTML={{__html: file.file_asset.content}}
             />
         ) : (

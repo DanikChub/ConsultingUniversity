@@ -12,12 +12,29 @@ export const useFile = (target: Punct | Theme | null, targetType: 'theme' | 'pun
     const addFile = async (file: File, onProgress?: (p: number) => void) => {
         if (!target) return;
 
+        const FILE_TYPES: Record<string, string[]> = {
+            docx: ['docx'],
+            pdf: ['pdf'],
+            audio: ['mp3', 'wav', 'ogg'],
+        };
+
+        const ext = file.name.split('.').pop()?.toLowerCase() || '';
+
+        let type: string = null; // если не нашли совпадение
+
+        for (const [key, exts] of Object.entries(FILE_TYPES)) {
+            if (exts.includes(ext)) {
+                type = key;
+                break;
+            }
+        }
+        if (!type) return;
         // создаём временный объект файла для UI
         const tempFile: any = {
             id: Date.now(),
             original_name: file.name,
             size: file.size,
-            type: file.name.split('.').pop() === 'mp3' ? 'audio' : file.name.split('.').pop(),
+            type,
             status: 'uploading',
             progress: 0,
             order_index: files.length+1,

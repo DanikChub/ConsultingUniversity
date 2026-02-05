@@ -20,6 +20,7 @@ const LoginPage = () => {
             login(inputLogin, inputPass)
             .then(data => {
                 getUserById(data.id).then(data => {
+
                     user.setUser(data)
                     user.setIsAuth(true)
               

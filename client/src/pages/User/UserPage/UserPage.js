@@ -53,25 +53,19 @@ const UserPage = observer(() => {
 
 
     useEffect(() => {
-        console.log('asd')
-        if (userContext.user.user.programs_id) {
-            let program_id = userContext.user.user.programs_id[0]
 
-            async function getProgram(id) {
-                let program = await getOneProgram(id)
-                setProgram(program);
 
-            }
+        setProgram(userContext.user.user.programs[0]);
 
-            getProgram(program_id)
-            getStatistic(userContext.user.user.id, userContext.user.user.programs_id[0]).then(data => {
-                setStatistic(data);
-                setLoading(true)
-            })
-            getUnreadCount(userContext.user.user.id, 'USER')
-                .then(data => setUnreadMessages(data.unreadCount))
-                .catch(e => alert(e))
-        }
+        setTimeout(() => {
+            console.log(program)
+        }, 3000)
+        setLoading(true)
+
+        getUnreadCount(userContext.user.user.id, 'USER')
+            .then(data => setUnreadMessages(data.unreadCount))
+            .catch(e => alert(e))
+
 
     }, [])
 

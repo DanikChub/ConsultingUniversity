@@ -101,17 +101,32 @@ export const useTestEditor = (targetId: number, mode: 'create' | 'edit') => {
         questionDebounces.current.get(questionId)!(fields);
     };
 
+    const answerPendingFields = useRef<Map<number, Partial<Pick<Answer, 'text' | 'is_correct'>>>>(
+        new Map()
+    );
+
     const debouncedUpdateAnswerFields = (answerId: number, fields: Partial<Pick<Answer, 'text' | 'is_correct'>>) => {
+        const prev = answerPendingFields.current.get(answerId) || {};
+        answerPendingFields.current.set(answerId, { ...prev, ...fields });
+
         if (!answerDebounces.current.has(answerId)) {
             answerDebounces.current.set(
                 answerId,
-                debounce(async (fields: Partial<Pick<Answer, 'text' | 'is_correct'>>) => {
-                    try { await updateAnswerFields(answerId, fields); }
-                    catch (e) { handleError(e, 'Не удалось обновить ответ'); }
+                debounce(async () => {
+                    const data = answerPendingFields.current.get(answerId);
+                    if (!data) return;
+
+                    try {
+                        await updateAnswerFields(answerId, data);
+                        answerPendingFields.current.delete(answerId);
+                    } catch (e) {
+                        handleError(e, 'Не удалось обновить ответ');
+                    }
                 }, 700)
             );
         }
-        answerDebounces.current.get(answerId)!(fields);
+
+        answerDebounces.current.get(answerId)!();
     };
 
     useEffect(() => {
