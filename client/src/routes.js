@@ -37,7 +37,7 @@ import {
     CHAR_PAGE_ROUTE,
     CHAT_USERS_PAGE_ROUTE,
     USER_CHAT_ROUTE,
-    ADMIN_REGISTRATE_ADMIN
+    ADMIN_REGISTRATE_ADMIN, TEST_OVERVIEW_ROUTE, TEST_ATTEMPT_ROUTE, PDF_ROUTE
 } from './shared/utils/consts'
 import LoginPage from './pages/LoginPage/LoginPage'
 import AdminPage from './pages/admin/AdminPage/AdminPage'
@@ -66,6 +66,9 @@ import ChatPage from './pages/admin/ChatPage/ChatPage'
 import ChatUsersPage from './pages/admin/ChatUsersPage/ChatUsersPage'
 import UserChatPage from './pages/User/UserChatPage/UserChatPage'
 import RegistrateAdmin from "./pages/admin/RegistrateAdmin/RegistrateAdmin";
+import TestOverview from "./pages/User/TestOverview/TestOverview";
+import TestAttemptPage from "./pages/User/TestAttemptPage/TestAttemptPage";
+import PdfPage from "./pages/User/PdfPage/PdfPage";
 
 
 export const authRoutes = [
@@ -76,6 +79,14 @@ export const authRoutes = [
     {
         path: TEST_ROUTE,
         Component: <TestPage/>
+    },
+    {
+        path: TEST_OVERVIEW_ROUTE,
+        Component: <TestOverview/>
+    },
+    {
+        path: TEST_ATTEMPT_ROUTE,
+        Component: <TestAttemptPage/>
     },
     {
         path: FINISH_TEST_ROUTE,
@@ -101,8 +112,11 @@ export const authRoutes = [
     {
         path: USER_CHAT_ROUTE,
         Component: <UserChatPage/>
-    }
-    
+    },
+    {
+        path: PDF_ROUTE,
+        Component: <PdfPage/>
+    },
 ]
 
 export const adminRoutes = [

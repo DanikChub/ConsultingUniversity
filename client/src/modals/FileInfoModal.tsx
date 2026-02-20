@@ -182,7 +182,7 @@ const FilePreview = ({file}: { file: ProgramFile }) => {
     if (file.type === 'docx') {
         return file.file_asset?.content ? (
             <div
-                className="max-h-[40dvh] min-h-[200px] overflow-auto border rounded p-2 bg-gray-50 text-sm text-gray-800"
+                className="docx-content max-h-[40dvh] min-h-[200px] overflow-auto border rounded p-2 bg-gray-50 text-sm text-gray-800"
                 dangerouslySetInnerHTML={{__html: file.file_asset.content}}
             />
         ) : (

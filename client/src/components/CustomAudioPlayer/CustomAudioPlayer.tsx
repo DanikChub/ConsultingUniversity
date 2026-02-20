@@ -1,132 +1,114 @@
 import React, { useRef, useState, useEffect } from "react";
+import { FiPlay, FiPause, FiVolume2 } from "react-icons/fi";
+import { MdClose } from "react-icons/md";
 
-import audio_png from "../../assets/imgs/music.png"
-import pause from "../../assets/imgs/pause.png"
-
-
-interface CustomAudioPlayerProps {
+interface Props {
     audioSrc: string;
     setPlayerActive: (active: boolean) => void;
-    setActiveTrack: (track: { i: number; j: number | null; active: boolean }) => void;
     className?: string;
 }
 
-const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({ audioSrc,  className, setPlayerActive, setActiveTrack }) => {
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-    const [isPlaying, setIsPlaying] = useState(true);
+const CustomAudioPlayer: React.FC<Props> = ({ audioSrc, setPlayerActive, className }) => {
+    const audioRef = useRef<HTMLAudioElement>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
-    const [volume, setVolume] = useState(100);
     const [duration, setDuration] = useState(0);
+    const [volume, setVolume] = useState(80);
 
-    useEffect(() => {
-        audioRef.current.play();
-    }, []);
-
-    // Play / Pause
     const togglePlay = () => {
         if (!audioRef.current) return;
-
         if (isPlaying) {
             audioRef.current.pause();
+            setIsPlaying(false);
         } else {
             audioRef.current.play();
+            setIsPlaying(true);
         }
-
-        setIsPlaying(!isPlaying);
     };
 
-    // Обновление текущего времени
     const handleTimeUpdate = () => {
         if (audioRef.current) setCurrentTime(audioRef.current.currentTime);
     };
 
-    // Смена позиции через ползунок
-    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (audioRef.current) {
-            audioRef.current.currentTime = Number(e.target.value);
-            setCurrentTime(Number(e.target.value));
-        }
-    };
-
-    const handleVolume = (e) => {
-        if (audioRef.current) {
-            audioRef.current.volume = e.target.value/100;
-            setVolume(e.target.value)
-        }
-    }
-
-    // Сохраняем длительность
     const handleLoadedMetadata = () => {
         if (audioRef.current) setDuration(audioRef.current.duration);
     };
 
-    // Форматируем секунды в mm:ss
+    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const time = Number(e.target.value);
+        if (audioRef.current) audioRef.current.currentTime = time;
+        setCurrentTime(time);
+    };
+
+    const handleVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const vol = Number(e.target.value);
+        if (audioRef.current) audioRef.current.volume = vol / 100;
+        setVolume(vol);
+    };
+
+    const handleClosePlayer = () => {
+        if (audioRef.current) audioRef.current.pause();
+        setPlayerActive(false);
+    };
+
     const formatTime = (time: number) => {
-        const minutes = Math.floor(time / 60)
-            .toString()
-            .padStart(2, "0");
+        const minutes = Math.floor(time / 60);
         const seconds = Math.floor(time % 60)
             .toString()
             .padStart(2, "0");
         return `${minutes}:${seconds}`;
     };
-    const handleClosePlayer = () => {
-        setPlayerActive(false)
-        setActiveTrack({i: null, j: null, active: false})
-    }
 
     return (
-        <div className={'bg-[#b8c0c6] fixed bottom-0 left-0 w-full h-[92px] flex items-center' + className}>
-            <div className="absolute right-0 top-0 flex justify-center cursor-pointer bg-red-500 items-center w-8 h-8 text-white" onClick={handleClosePlayer}>x</div>
+        <div
+            className={`bg-gradient-to-r from-blue-50 via-indigo-50 to-indigo-100 fixed bottom-0 left-0 w-full h-[96px] flex items-center px-6 shadow-xl border-t border-gray-200 ${className}`}
+        >
+            {/* Close button */}
+            <div
+                className="absolute right-4 top-1/2 -translate-y-1/2 flex justify-center items-center w-8 h-8 text-white bg-red-500 rounded-full cursor-pointer hover:bg-red-600 transition"
+                onClick={handleClosePlayer}
+            >
+                <MdClose size={20} />
+            </div>
 
-                <div className="w-[1100px] m-auto flex justify-between">
-                    {/* Play/Pause */}
-                    <div
-                        onClick={togglePlay}
-                        className="w-[48px] h-[48px] flex items-center justify-center bg-[#D9D9D9] text-gray-600 rounded-full hover:bg-[#D9D9D9] transition-colors cursor-pointer"
-                    >
-                        {isPlaying ? <img src={pause} className="w-[30px]"/> :
-                            <svg className="translate-x-[3px]" width="19" height="24" viewBox="0 0 19 24" fill="none"
-                                 xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M18.1944 10.8848C18.8059 11.2786 18.8059 12.1726 18.1944 12.5663L1.54142 23.2903C0.875945 23.7189 7.70174e-07 23.2411 8.04773e-07 22.4496L1.74229e-06 1.00159C1.77689e-06 0.210075 0.875946 -0.267703 1.54142 0.16084L18.1944 10.8848Z"
-                                    fill="#2C3E50"/>
-                            </svg>}
-                    </div>
-
-                    {/* Полоса прогресса */}
-                    <div className="flex items-center w-1/2 gap-2">
-                        <span className="text-base w-12 text-right text-[#2C3E50] font-semibold">
-                            {formatTime(currentTime)}
-                        </span>
-                        <input
-                            type="range"
-                            min={0}
-                            max={duration}
-                            value={currentTime}
-                            onChange={handleSeek}
-                            className="flex-1 h-[10px] rounded-none bg-gray-300 accent-blue-500 cursor-pointer"
-                        />
-                        <span className="text-base w-12 text-right text-[#2C3E50] font-semibold">
-                            {formatTime(duration)}
-                        </span>
-                    </div>
-                    <div className="flex items-center">
-                        <img src={audio_png}/>
-                        <input
-                            type="range"
-                            min={0}
-                            max={100}
-                            value={volume}
-                            onChange={handleVolume}
-                            className="flex-1 h-[2px] rounded-none bg-gray-400 accent-[#2C3E50] cursor-pointer"
-                        />
-                    </div>
-
-
+            <div className="flex justify-between items-center w-full max-w-[1100px] m-auto gap-6">
+                {/* Play/Pause */}
+                <div
+                    onClick={togglePlay}
+                    className="w-[48px] h-[48px] flex items-center justify-center bg-white text-blue-600 rounded-full shadow hover:scale-105 transition cursor-pointer"
+                >
+                    {isPlaying ? <FiPause size={24} /> : <FiPlay size={24} className="ml-[2px]" />}
                 </div>
 
-            {/* Сам audio элемент (скрыт) */}
+                {/* Progress */}
+                <div className="flex items-center gap-3 flex-1">
+                    <span className="text-sm text-gray-600 w-12 text-right font-medium">{formatTime(currentTime)}</span>
+                    <input
+                        type="range"
+                        min={0}
+                        max={duration}
+                        value={currentTime}
+                        onChange={handleSeek}
+                        className="flex-1 h-2 rounded-full bg-gray-300 accent-blue-500 cursor-pointer"
+                    />
+                    <span className="text-sm text-gray-600 w-12 text-left font-medium">{formatTime(duration)}</span>
+                </div>
+
+                {/* Volume */}
+                <div className="flex items-center gap-2 w-40">
+                    <FiVolume2 className="text-gray-600" size={20} />
+                    <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={volume}
+                        onChange={handleVolume}
+                        className="flex-1 h-2 rounded-full bg-gray-300 accent-blue-500 cursor-pointer"
+                    />
+                </div>
+            </div>
+
+            {/* Hidden audio */}
             <audio
                 ref={audioRef}
                 src={process.env.REACT_APP_API_URL + audioSrc}

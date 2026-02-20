@@ -6,7 +6,7 @@ import LoadingAlert from "./LoadingAlert";
 interface AppContainerProps extends HTMLAttributes<HTMLDivElement> {
     children: ReactNode;
 
-    loading: boolean;
+    loading?: boolean;
 }
 
 const UserContainer: React.FC<AppContainerProps> = ({ children, loading, ...rest }) => {

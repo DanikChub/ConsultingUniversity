@@ -1,7 +1,14 @@
 import {$authHost, $host} from "../../../shared/api/axios";
 
 
-import {type Answer, type Question, Test} from '../model/type'
+import {
+    type Answer,
+    type AttemptResponse,
+    type Question,
+    type SubmitAttemptDto,
+    Test,
+    type TestAttempt
+} from '../model/type'
 
 
 
@@ -115,14 +122,52 @@ export const deleteAnswer = async (
 };
 
 
-/*
-export const createTest = async (title, time_limit, puncts) => {
-   
-    const {data} = await $authHost.post('api/test', {title, time_limit, puncts: puncts} )
 
-    return data;
+interface submitPromiseDTO {
+    attemptId: number
+    score: number
+    status: string
 }
-*/
+
+
+// Отправка попытки (ответы пользователя)
+export const submitTestAttempt = async (
+    testId: number,
+    attempt: SubmitAttemptDto
+): Promise<submitPromiseDTO> => {
+
+
+    const {data} = await $authHost.post<submitPromiseDTO>(
+        `api/test/${testId}/attempts`,
+        attempt
+    );
+    return data;
+};
+
+// Получение всех попыток пользователя по тесту
+export const getAllTestAttempts = async (
+    testId: number,
+    enrollmentId: number
+): Promise<TestAttempt[]> => {
+    const { data } = await $authHost.get<TestAttempt[]>(
+        `api/test/${testId}/attempts?enrollmentId=${enrollmentId}`
+    );
+    return data;
+};
+
+// Получение конкретной попытки с разбором
+export const getTestAttempt = async (
+    attemptId: number
+): Promise<AttemptResponse> => {
+    const {data} = await $authHost.get<AttemptResponse>(
+        `api/test/attempt/${attemptId}`
+    );
+    return data;
+};
+
+
+
+
 
 export const updateTestStatistic = async (user_id, test_id, punctsStatistic) => {
    
@@ -138,11 +183,4 @@ export const getTestStatistic = async (user_id, test_id) => {
     return data;
 }
 
-/*
-export const remakeTest = async (id, title, time_limit, puncts) => {
-    
-    const {data} = await $authHost.post(`api/test/remake`, {id: id, title: title, time_limit, puncts: puncts})
 
-    return data;
-}
-*/

@@ -50,18 +50,7 @@ export interface Test {
 
 
 
-export interface TestAnswer {
-    id?: number;
-    value: string;
-}
 
-export interface TestPunct {
-    id: number;
-    question: string;
-    answers: string[];
-    correct_answer: number[];
-    several_answers: boolean;
-}
 
 export interface ThemePunct {
     test_id?: number | null;
@@ -73,11 +62,46 @@ export interface Theme {
     puncts: ThemePunct[];
 }
 
-export interface CreateTestProps {
-    show: { show: boolean; i: number; j: number; remake?: number };
-    setShow: (value: any) => void;
-    themesArray: Theme[];
-    setThemesArray: (value: Theme[]) => void;
-    counter: number;
-    setCounter: (value: number | ((prev: number) => number)) => void;
+
+
+export interface TestAttempt {
+    id: number;
+    testId: number;
+    enrollmentId: number;
+    score: number;
+    passed: boolean;
+    createdAt: string;
+    updatedAt: string;
+    answers: Array<{
+        questionId: number;
+        selectedAnswers: number[];
+        textAnswer?: string;
+        isCorrect: boolean;
+    }>;
+}
+
+
+export interface SubmitAttemptDto {
+    enrollmentId: number;   // текущий enrollment
+    answers: Array<{
+        questionId: number;
+        selected_answer_ids: number[]; // id выбранных ответов
+        textAnswer?: string;       // если текстовый ответ
+    }>;
+}
+
+export interface AttemptResponse {
+    attemptId: number;
+    score: number;
+    passed: 'Complete' | 'Fail'
+    questions: {
+        id: number;
+        answers: Array<{
+            id: number;
+            text: string;
+            is_correct: boolean;
+            is_selected: boolean;
+            answers?: Array<{id:number,text:string,is_correct:boolean}>
+        }>;
+    }[];
 }

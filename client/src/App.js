@@ -11,6 +11,7 @@ import Spinner from "./components/Spinner/Spinner";
 
 import "./App.css"
 import {ModalProvider} from "./providers/ModalProvider";
+import {getEnrollmentByProgram} from "./entities/enrollment/api/enrollment.api";
 
 
 const App = observer(() => {
@@ -18,20 +19,32 @@ const App = observer(() => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    
-    check().then(data => {
-   
-      getUserById(data.id)
-      .then(data => {
-        user.setUser(data)
+    async function init() {
+      try {
+        setLoading(true);
+
+        const data = await check();
+        const userData = await getUserById(data.id);
+        user.setUser(userData);
         user.setIsAuth(true);
-      })
-      .finally(() => setLoading(false))
-      
-    }).catch(e => {
-      setLoading(false);
-    }) 
-  }, [])
+
+        // Берем первый доступный курс, если есть
+        if (userData.programs?.length > 0) {
+          const programId = userData.programs[0].id; // или выбираем как тебе нужно
+          const enrollment = await getEnrollmentByProgram(programId, userData.id);
+          if (enrollment) {
+            user.setEnrollmentId(enrollment.id);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    init();
+  }, []);
 
   
 

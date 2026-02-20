@@ -93,77 +93,6 @@ const ViewProgram: React.FC = () => {
         });
     }
 
-    const demoTest: Test = {
-        id: 1,
-        title: 'Пример теста для проверки',
-        description: 'Это демонстрационный тест с 5 вопросами по 3 ответа.',
-        time_limit: 30,
-        status: 'published',
-        order_index: 0,
-        punctId: 123,
-        questions: [
-            {
-                id: 101,
-                testId: 1,
-                order_index: 1,
-                text: 'Какой язык программирования используется для веба?',
-                type: 'single',
-                answers: [
-                    { id: 1001, questionId: 101, text: 'Python', is_correct: false, order_index: 1 },
-                    { id: 1002, questionId: 101, text: 'JavaScript', is_correct: true, order_index: 2 },
-                    { id: 1003, questionId: 101, text: 'C++', is_correct: false, order_index: 3 },
-                ],
-            },
-            {
-                id: 102,
-                testId: 1,
-                order_index: 2,
-                text: 'Какой метод массива добавляет элемент в конец?',
-                type: 'single',
-                answers: [
-                    { id: 1004, questionId: 102, text: 'pop()', is_correct: false, order_index: 1 },
-                    { id: 1005, questionId: 102, text: 'push()', is_correct: true, order_index: 2 },
-                    { id: 1006, questionId: 102, text: 'shift()', is_correct: false, order_index: 3 },
-                ],
-            },
-            {
-                id: 103,
-                testId: 1,
-                order_index: 3,
-                text: 'Какой тег в HTML создаёт ссылку?',
-                type: 'single',
-                answers: [
-                    { id: 1007, questionId: 103, text: '<div>', is_correct: false, order_index: 1 },
-                    { id: 1008, questionId: 103, text: '<a>', is_correct: true, order_index: 2 },
-                    { id: 1009, questionId: 103, text: '<span>', is_correct: false, order_index: 3 },
-                ],
-            },
-            {
-                id: 104,
-                testId: 1,
-                order_index: 4,
-                text: 'Что такое React?',
-                type: 'single',
-                answers: [
-                    { id: 1010, questionId: 104, text: 'Фреймворк для backend', is_correct: false, order_index: 1 },
-                    { id: 1011, questionId: 104, text: 'Библиотека для frontend', is_correct: true, order_index: 2 },
-                    { id: 1012, questionId: 104, text: 'Язык программирования', is_correct: false, order_index: 3 },
-                ],
-            },
-            {
-                id: 105,
-                testId: 1,
-                order_index: 5,
-                text: 'Какой оператор в JS проверяет строгое равенство?',
-                type: 'single',
-                answers: [
-                    { id: 1013, questionId: 105, text: '==', is_correct: false, order_index: 1 },
-                    { id: 1014, questionId: 105, text: '===', is_correct: true, order_index: 2 },
-                    { id: 1015, questionId: 105, text: '=', is_correct: false, order_index: 3 },
-                ],
-            },
-        ],
-    };
 
     const handleViewTest = (test: Test) => {
         console.log(test);
@@ -247,7 +176,10 @@ const ViewProgram: React.FC = () => {
                 <div className="mt-6 space-y-3">
                     {program.themes?.sort((a, b) => a.order_index - b.order_index).map((theme) => {
                         const open = openModules[theme.id] || false;
+
+
                         return (
+
                             <div key={theme.id} className="bg-gray-50 rounded-lg border border-gray-200">
                                 <div
                                     className="flex justify-between items-center p-3 cursor-pointer hover:bg-gray-100 transition"

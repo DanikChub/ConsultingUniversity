@@ -33,3 +33,8 @@ export const moveFile = async (
     });
     return data;
 };
+
+export const getFile = async (id: string): Promise<File> => {
+    const { data } = await $authHost.get(`api/program/file/${id}`);
+    return data;
+};

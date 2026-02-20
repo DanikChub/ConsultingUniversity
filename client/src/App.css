@@ -35,3 +35,31 @@ body {
 .cotrol_height {
     min-width: 60vh;
 }
+
+
+/* src/index.css или Tailwind @layer utilities */
+.docx-content p {
+    @apply mb-4 leading-relaxed text-gray-700;
+}
+
+.docx-content h1, .docx-content h2, .docx-content h3 {
+    @apply font-semibold mb-4 text-gray-800;
+}
+
+.docx-content ul, .docx-content ol {
+    @apply list-inside list-disc mb-4;
+}
+
+.docx-content table {
+    @apply border border-gray-300 mb-4 w-full;
+    border-collapse: collapse;
+}
+
+.docx-content th, .docx-content td {
+    @apply border border-gray-300 px-3 py-2 text-left;
+}
+
+.docx-content img {
+    @apply my-4 max-w-full rounded-lg shadow-md;
+}
+
