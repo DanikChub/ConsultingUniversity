@@ -18,10 +18,9 @@ router.post('/answer', checkRole('ADMIN'), TestController.createAnswer); // со
 router.patch('/answer/:answerId', checkRole('ADMIN'), TestController.updateAnswerFields); // обновление ответа
 router.delete('/answer/:answerId', checkRole('ADMIN'), TestController.deleteAnswer); // удаление ответа
 
+router.post('/:testId/attempts', TestController.submitTestAttempt); // пользователь отправляет попытку
+router.get('/:testId/attempts', TestController.getAllAttempts); // список всех попыток пользователя по тесту
+router.get('/attempt/:attemptId', TestController.getAttemptById);   // получение конкретной попытки с разбором
 
-/*router.post('/', checkRole('ADMIN'), TestController.create);
-router.post('/updateTest', TestController.updateTestStatistics)
-router.post('/getStatistic', TestController.getTestStatistic)
-router.post('/remake', checkRole('ADMIN'), TestController.remakeTest)*/
 
 module.exports = router;

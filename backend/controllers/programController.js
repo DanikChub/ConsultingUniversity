@@ -993,6 +993,30 @@ class ProgramController {
     }
   }
 
+  async getFile(req, res, next) {
+    try {
+      const { id } = req.params; // fileId
+
+      const file = await File.findByPk(id, {
+        include: [
+          {
+            model: FileAsset,
+
+          }
+        ]
+      });
+
+      if (!file) {
+        return next(ApiError.notFound('Файл не найден'));
+      }
+
+      return res.json(file);
+    } catch (e) {
+      console.error('Get file failed:', e);
+      return next(ApiError.internal('Не удалось получить файл'));
+    }
+  }
+
   async publishProgram(req, res, next) {
     try {
       const { id } = req.params;

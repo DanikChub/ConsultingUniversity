@@ -35,6 +35,7 @@ router.get('/punct/:id', ProgramController.getOnePunct); // Получить о�
 
 // ---------- Files ----------
 router.patch('/file/:id', ProgramController.updateFileName);
+router.get('/file/:id', ProgramController.getFile);
 router.post('/file/:id/move', ProgramController.moveFile);
 router.delete('/file/:id', ProgramController.deleteFile); // Удалить файл
 router.post('/file', ProgramController.addFileToPunctOrTheme); // Добавить файл к пункту или теме

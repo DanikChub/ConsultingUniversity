@@ -6,6 +6,121 @@ const fs = require('fs');
 const STATIC_DIR = path.resolve(__dirname, '..', 'static');
 if (!fs.existsSync(STATIC_DIR)) fs.mkdirSync(STATIC_DIR, { recursive: true });
 
+function calculateProgramProgress(program, userProgressMap, enrollmentId) {
+    const byContent = {}
+    let totalCount = 0
+    let completedCount = 0
+
+    program.themes.forEach(theme => {
+
+        // файлы темы
+        theme.files.forEach(file => {
+            const key = `file-${file.id}`
+            const progress = userProgressMap[key] || {
+                id: 0,
+                enrollmentId,
+                contentType: 'file',
+                contentId: file.id,
+                status: 'not_started'
+            }
+
+            byContent[key] = progress
+            totalCount++
+
+            if (progress.status === 'completed') completedCount++
+        })
+
+        // пункты
+        theme.puncts.forEach(punct => {
+
+            // файлы пункта
+            punct.files.forEach(file => {
+                const key = `file-${file.id}`
+                const progress = userProgressMap[key] || {
+                    id: 0,
+                    enrollmentId,
+                    contentType: 'file',
+                    contentId: file.id,
+                    status: 'not_started'
+                }
+
+                byContent[key] = progress
+                totalCount++
+
+                if (progress.status === 'completed') completedCount++
+            })
+
+            // тесты пункта
+            punct.tests.forEach(test => {
+                const key = `test-${test.id}`
+                const progress = userProgressMap[key] || {
+                    id: 0,
+                    enrollmentId,
+                    contentType: 'test',
+                    contentId: test.id,
+                    status: 'not_started'
+                }
+
+                byContent[key] = progress
+                totalCount++
+
+                if (progress.status === 'completed') completedCount++
+            })
+        })
+    })
+
+    const percent = totalCount
+        ? Math.round((completedCount / totalCount) * 100)
+        : 0
+
+    return { byContent, percent }
+}
+
+async function recalculateEnrollmentProgress(enrollmentId) {
+
+    // получаем всё, что относится к enrollment
+    const userProgressItems = await UserContentProgress.findAll({
+        where: { enrollmentId },
+        raw: true
+    })
+
+    const enrollment = await Enrollment.findByPk(enrollmentId)
+    if (!enrollment) return
+
+    const program = await Program.findOne({
+        where: { id: enrollment.programId },
+        include: [
+            {
+                model: Theme,
+                include: [
+                    { model: File },
+                    {
+                        model: Punct,
+                        include: [
+                            { model: File },
+                            { model: Test }
+                        ]
+                    }
+                ]
+            }
+        ]
+    })
+
+    const userProgressMap = {}
+    userProgressItems.forEach(item => {
+        const key = `${item.contentType}-${item.contentId}`
+        userProgressMap[key] = item
+    })
+
+    const { percent } =
+        calculateProgramProgress(program, userProgressMap, enrollmentId)
+
+    enrollment.progress_percent = percent
+    await enrollment.save()
+
+    return percent
+}
+
 async function reorderAfterDelete(Model, parentId, parentKey, deletedIndex) {
     if (!parentId || deletedIndex === undefined) return;
 
@@ -181,17 +296,59 @@ const Answer = sequelize.define('answer', {
 });
 
 
-const TestStatictis = sequelize.define('test_statistic', {
-    id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-    user_id: {type: DataTypes.INTEGER},
-    test_id: {type: DataTypes.INTEGER},
+const TestAttempt = sequelize.define('test_attempt', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 
-})
+    attempt_number: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
 
-const TestPunctStatictis = sequelize.define('test_punct_statistic', {
-    id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-    user_answer: {type: DataTypes.ARRAY(DataTypes.INTEGER)}
-})
+    score: {
+        type: DataTypes.INTEGER
+    },
+
+    correct_answers: {
+        type: DataTypes.INTEGER
+    },
+
+    total_questions: {
+        type: DataTypes.INTEGER
+    },
+
+    passed: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+
+    started_at: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+    },
+
+    finished_at: {
+        type: DataTypes.DATE
+    }
+});
+
+
+const TestAttemptAnswer = sequelize.define('test_attempt_answer', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+
+
+    selected_answers: {
+        type: DataTypes.ARRAY(DataTypes.INTEGER)
+    },
+
+    text_answer: {
+        type: DataTypes.TEXT
+    },
+
+    is_correct: {
+        type: DataTypes.BOOLEAN
+    }
+});
+
 
 
 const Enrollment = sequelize.define('enrollment', {
@@ -262,6 +419,12 @@ const UserContentProgress = sequelize.define('user_content_progress', {
     },
 });
 
+UserContentProgress.addHook('afterSave', async (progress, options) => {
+
+
+    await recalculateEnrollmentProgress(progress.enrollmentId)
+})
+
 const PracticalWork = sequelize.define('practical_work', {
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
     task: {type: DataTypes.TEXT},
@@ -314,8 +477,18 @@ Question.belongsTo(Test);
 Question.hasMany(Answer, { onDelete: 'cascade', hooks: true });
 Answer.belongsTo(Question);
 
-TestStatictis.hasMany(TestPunctStatictis, { onDelete: 'cascade', hooks: true })
-TestPunctStatictis.belongsTo(TestStatictis);
+Enrollment.hasMany(TestAttempt, { onDelete: 'cascade' });
+TestAttempt.belongsTo(Enrollment);
+
+Test.hasMany(TestAttempt, { onDelete: 'cascade' });
+TestAttempt.belongsTo(Test);
+
+TestAttempt.hasMany(TestAttemptAnswer, { onDelete: 'cascade' });
+TestAttemptAnswer.belongsTo(TestAttempt);
+
+Question.hasMany(TestAttemptAnswer, { onDelete: 'cascade' });
+TestAttemptAnswer.belongsTo(Question);
+
 
 User.belongsToMany(Program, {through: Enrollment})
 Program.belongsToMany(User, {through: Enrollment})
@@ -440,6 +613,7 @@ module.exports = {
     Answer,
     Enrollment,
     PracticalWork,
-    TestStatictis,
-    TestPunctStatictis
+    TestAttempt,
+    TestAttemptAnswer,
+    UserContentProgress
 }

@@ -2,8 +2,9 @@ const {
     Test, 
     Question,
     Answer,
-    TestStatictis, 
-    TestPunctStatictis 
+    UserContentProgress,
+    TestAttemptAnswer,
+    TestAttempt
 } = require("../models/models");
 
 const ApiError = require('../error/ApiError');
@@ -24,51 +25,7 @@ async function markTestAsDraftIfPublished(testId) {
 
 class TestController {
 
-    // -------------------------------
-    // CREATE TEST
-    // -------------------------------
-    /*async create(req, res, next) {
-        const { title, puncts, time_limit, punctId } = req.body;
 
-        if (!title) {
-            return next(ApiError.internal('Заполните название теста!'));
-        }
-
-        try {
-            const test = await Test.create({
-                id: Math.floor(Math.random() * 9000000) + 1000000,
-                title,
-                time_limit,
-                punctId
-            });
-
-            for (const punct of puncts) {
-                if (!punct.question) {
-                    return next(ApiError.internal('Заполните все вопросы в пунктах!'));
-                }
-
-                if (!punct.correct_answer || punct.correct_answer.length === 0) {
-                    return next(ApiError.internal('Заполните правильные ответы!'));
-                }
-
-
-
-                await TestPunct.create({
-                    question: punct.question,
-                    answers: punct.answers,
-                    correct_answer: punct.correct_answer,
-                    several_answers: punct.correct_answer.length > 1,
-                    testId: test.id
-                });
-            }
-
-            return res.json({ test });
-
-        } catch (e) {
-            console.error(e);
-            return next(ApiError.badRequest('Ошибка при сохранении теста или пунктов'));
-        }
-    }*/
 
     async createTest(req, res) {
         try {
@@ -402,136 +359,210 @@ class TestController {
         }
     }
 
-
-
-    // -------------------------------
-    // REMAKE TEST
-    // -------------------------------
-    async remakeTest(req, res, next) {
-        const { id, title, time_limit, puncts } = req.body;
-
-        if (!title) {
-            return next(ApiError.internal('Заполните название теста!'));
-        }
-
+    async submitTestAttempt(req, res) {
         try {
-            const test = await Test.findOne({ where: { id } });
-            if (!test) return next(ApiError.badRequest("Тест не найден"));
-
-            test.title = title;
-            test.time_limit = time_limit;
-
-            // Удаляем старые пункты
-            await TestPunct.destroy({ where: { testId: id } });
-
-            // Добавляем новые
-            for (const punct of puncts) {
-                if (!punct.question) {
-                    return next(ApiError.internal('Заполните все вопросы в пунктах!'));
-                }
-
-                if (!punct.correct_answer || punct.correct_answer.length === 0) {
-                    return next(ApiError.internal('Заполните правильные ответы!'));
-                }
-
-                await TestPunct.create({
-                    question: punct.question,
-                    answers: punct.answers,
-                    correct_answer: punct.correct_answer,
-                    several_answers: punct.correct_answer.length > 1,
-                    testId: id
-                });
-            }
-
-            await test.save();
-
-            return res.json({ test });
-
-        } catch (e) {
-            console.error(e);
-            return next(ApiError.badRequest('Ошибка при обновлении теста'));
-        }
-    }
-
-
-
-
-
-
-
-
-    // -------------------------------
-    // UPDATE TEST STATISTICS
-    // -------------------------------
-    async updateTestStatistics(req, res, next) {
-        const { user_id, punctsStatistic, test_id } = req.body;
-
-        try {
-            let stat = await TestStatictis.findOne({
-                where: {
-                    [Op.and]: [{ user_id, test_id }]
+            const { testId } = req.params;
+            const { enrollmentId, answers } = req.body;
+            // answers: [{ questionId, selected_answer_ids: [] }]
+            console.log(enrollmentId)
+            const test = await Test.findByPk(testId, {
+                include: {
+                    model: Question,
+                    include: [Answer],
                 }
             });
 
-            if (!stat) {
-                stat = await TestStatictis.create({ user_id, test_id });
+            if (!test) {
+                return res.status(404).json({ message: 'Тест недоступен' });
+            }
+
+            // номер попытки
+            const lastAttempt = await TestAttempt.max('attempt_number', {
+                where: { enrollmentId, testId }
+            });
+
+            const attemptNumber = (lastAttempt ?? 0) + 1;
+
+            const attempt = await TestAttempt.create({
+                enrollmentId,
+                testId,
+                attempt_number: attemptNumber,
+                started_at: new Date()
+            });
+
+            let correctCount = 0;
+
+            for (const question of test.questions) {
+                const userAnswer = answers.find(a => a.questionId === question.id);
+                const correctAnswers = question.answers
+                    .filter(a => a.is_correct)
+                    .map(a => a.id)
+                    .sort();
+
+                const selected = (userAnswer?.selected_answer_ids || []).sort();
+
+                const isCorrect =
+                    JSON.stringify(correctAnswers) === JSON.stringify(selected);
+
+                if (isCorrect) correctCount++;
+                console.log(selected)
+                await TestAttemptAnswer.create({
+                    testAttemptId: attempt.id,
+                    questionId: question.id,
+                    selected_answers: selected,
+                    is_correct: isCorrect
+                });
+            }
+
+            const score = Math.round(
+                (correctCount / test.questions.length) * 100
+            );
+
+            const passed = score >= 70;
+
+            attempt.score = score;
+            attempt.passed = passed;
+            attempt.finished_at = new Date();
+
+            await attempt.save();
+
+            // 🔥 обновляем UserContentProgress
+            let progress = await UserContentProgress.findOne({
+                where: {
+                    enrollmentId,
+                    contentType: 'test',
+                    contentId: testId
+                }
+            });
+
+            if (!progress) {
+                // первый раз — создаём
+                progress = await UserContentProgress.create({
+                    enrollmentId,
+                    contentType: 'test',
+                    contentId: testId,
+                    status: passed ? 'completed' : 'failed',
+                    score,
+                    completedAt: passed ? new Date() : null
+                });
             } else {
-                await TestPunctStatictis.destroy({
-                    where: { testStatisticId: stat.id }
-                });
-            }
-    
-            for (const punct of punctsStatistic) {
-                console.log(punct)
-                if (!punct || punct.length === 0) {
-                    return next(ApiError.internal('Заполните правильные ответы!'));
+                // уже есть прогресс — обновляем только если score выше
+                if (score > (progress.score ?? 0)) {
+                    progress.status = passed ? 'completed' : 'failed';
+                    progress.score = score;
+
+                    if (passed) {
+                        progress.completedAt = new Date();
+                    }
+
+                    await progress.save();
+                } else {
+                    console.log(`Попытка ${score} хуже или равна предыдущей ${progress.score}, прогресс не меняем`);
                 }
-
-                await TestPunctStatictis.create({
-                    user_answer: punct,
-                    testStatisticId: stat.id
-                });
             }
 
-            return res.json({ stat });
+            return res.json({
+                attemptId: attempt.id,
+                score,
+                status: attempt.status
+            });
 
         } catch (e) {
             console.error(e);
-            return next(ApiError.badRequest("Ошибка при сохранении статистики"));
+            return res.status(500).json({ message: 'Ошибка при отправке теста' });
         }
     }
 
 
-
-
-    // -------------------------------
-    // GET TEST STATISTICS
-    // -------------------------------
-    async getTestStatistic(req, res, next) {
-        const { user_id, test_id } = req.body;
-
+    async getAllAttempts(req, res) {
         try {
-            const stat = await TestStatictis.findOne({
-                where: {
-                    [Op.and]: [{ user_id, test_id }]
-                }
+            const { testId } = req.params;
+            const { enrollmentId } = req.query;
+
+            const attempts = await TestAttempt.findAll({
+                where: { testId, enrollmentId },
+                order: [['score', 'DESC']]
             });
 
-            if (!stat) return res.json(null);
-
-            const punctsStatistic = await TestPunctStatictis.findAll({
-                where: { testStatisticId: stat.id }
-            });
-
-            stat.dataValues.punctsStatistic = punctsStatistic;
-
-            return res.json(stat);
+            return res.json(attempts);
 
         } catch (e) {
             console.error(e);
-            return next(ApiError.badRequest("Ошибка при получении статистики"));
+            return res.status(500).json({ message: 'Ошибка при получении попыток' });
         }
     }
+
+
+
+    async getAttemptById(req, res) {
+        try {
+            const { attemptId } = req.params;
+
+            const attempt = await TestAttempt.findByPk(attemptId, {
+                include: [
+                    {
+                        model: Test,
+                        include: {
+                            model: Question,
+                            include: [Answer]
+                        }
+                    },
+                    {
+                        model: TestAttemptAnswer
+                    }
+                ]
+            });
+
+            if (!attempt) {
+                return res.status(404).json({ message: 'Попытка не найдена' });
+            }
+
+            // создаём map ответов пользователя
+            const answerMap = {};
+            attempt.test_attempt_answers.forEach(a => {
+                answerMap[a.questionId] = a;
+            });
+
+            const questions = attempt.test.questions.map(question => {
+
+                const userAnswer = answerMap[question.id];
+                const selectedIds = userAnswer?.selected_answers || [];
+
+                return {
+                    id: question.id,
+                    text: question.text,
+                    is_correct: userAnswer?.is_correct ?? false,
+                    answers: question.answers.map(answer => ({
+                        id: answer.id,
+                        text: answer.text,
+                        is_correct: answer.is_correct,
+                        is_selected: selectedIds.includes(answer.id)
+                    }))
+                };
+            });
+
+
+            return res.json({
+                attemptId: attempt.id,
+                score: attempt.score,
+                status: attempt.status,
+                passed: attempt.passed,
+                questions
+            });
+
+        } catch (e) {
+            console.error(e);
+            return res.status(500).json({ message: 'Ошибка получения попытки' });
+        }
+    }
+
+
+
+
+
+
+
+
 }
 
 module.exports = new TestController();
