@@ -1,61 +1,93 @@
-import { FiHeadphones, FiFileText, FiCheck } from "react-icons/fi"
+import {
+    FiHeadphones,
+    FiFileText,
+    FiCheck,
+    FiClock,
+    FiXCircle
+} from "react-icons/fi"
+import { AiFillFilePdf } from "react-icons/ai"
 import type { ProgramProgress } from "../../../../entities/progress/model/type"
-import { isContentCompleted } from "../../../../entities/progress/model/selectors"
+import { getContentStatus } from "../../../../entities/progress/model/selectors"
 import type { File } from "../../../../entities/file/model/type"
 import { useNavigate } from "react-router-dom"
-import {LECTION_ROUTE, PDF_ROUTE} from "../../../../shared/utils/consts"
-import { updateProgress } from "../../../../entities/progress/api/progress.api"
-import {useContext, useState} from "react"
-import {AiFillFilePdf} from "react-icons/ai";
+import { LECTION_ROUTE, PDF_ROUTE } from "../../../../shared/utils/consts"
+import {useContext, useEffect, useState} from "react"
+import {updateProgress} from "../../../../entities/progress/api/progress.api";
 import {Context} from "../../../../index";
+import {observer} from "mobx-react-lite";
 
 interface FileBlockProps {
     file: File
     progress: ProgramProgress | null
     setPlayerActive: (active: boolean) => void
-    setActiveAudio: (track: string) => void
-    isReference: boolean
+    setActiveAudio: (track: File) => void
+    isReference?: boolean
 }
 
-const FileBlock = ({ file, progress, setPlayerActive, setActiveAudio, isReference=false }: FileBlockProps) => {
+const FileBlockComponent = ({
+                       file,
+                       progress,
+                       setPlayerActive,
+                       setActiveAudio,
+                       isReference = false
+                   }: FileBlockProps) => {
 
     const navigate = useNavigate()
-    const completed = isContentCompleted(progress, 'file', file.id)
+    const status = getContentStatus(progress, 'file', file.id)
     const [loading, setLoading] = useState(false)
     const userContext = useContext(Context);
+
+
+    const changes = userContext.user.getProgressChanges(userContext.user.enrollmentId);
+    const isChanged = changes.includes(`file-${file.id}`);
+
+    const [animateStage, setAnimateStage] = useState<"idle" | "delay" | "fill">("idle");
+
+    useEffect(() => {
+        if (isChanged && status === "completed") {
+
+            setAnimateStage("delay");
+
+            const delayTimer = setTimeout(() => {
+                setAnimateStage("fill");
+            }, 300); // задержка перед стартом
+
+            const resetTimer = setTimeout(() => {
+                setAnimateStage("idle");
+            }, 1200);
+
+            return () => {
+                clearTimeout(delayTimer);
+                clearTimeout(resetTimer);
+            };
+        }
+    }, [isChanged, status]);
 
     const handleClick = async () => {
         if (loading) return
         setLoading(true)
-        const enrollmentId = userContext.user.enrollmentId;
-        try {
-            await updateProgress({
-                enrollmentId,
-                contentType: 'file',
-                contentId: file.id,
-                status: 'completed'
-            })
-        } catch (e) {
-            console.error(e)
-        } finally {
-            setLoading(false)
-        }
 
-        if (file.type == 'audio') {
+        if (file.type === 'audio') {
             setPlayerActive(true)
-            setActiveAudio(file.stored_name)
+            setActiveAudio(file)
+
         }
 
-        if (file.type == 'docx') {
+        if (file.type === 'docx') {
             navigate(LECTION_ROUTE.replace(':id', `${file.id}`))
         }
 
-        if (file.type == 'pdf') {
+        if (file.type === 'pdf') {
             navigate(PDF_ROUTE.replace(':id', `${file.id}`))
         }
+
+        setLoading(false)
     }
 
-    const icon = (() => {
+    // -----------------------------
+    // Иконка типа файла
+    // -----------------------------
+    const fileIcon = (() => {
         switch (file.type) {
             case "audio":
                 return <FiHeadphones className="text-blue-500" />
@@ -68,39 +100,90 @@ const FileBlock = ({ file, progress, setPlayerActive, setActiveAudio, isReferenc
         }
     })()
 
+    // -----------------------------
+    // Стили по статусу
+    // -----------------------------
+    const statusStyles: Record<string, string> = {
+        not_started:
+            "bg-white hover:bg-gray-50 border border-gray-100",
+        in_progress:
+            "bg-blue-50 hover:bg-blue-100 border border-blue-100",
+        completed:
+            "bg-green-50 hover:bg-green-100 border border-green-100",
+        failed:
+            "bg-red-50 hover:bg-red-100 border border-red-100"
+    }
+
+    // -----------------------------
+    // Правый блок (иконки + текст)
+    // -----------------------------
+    const renderStatus = () => {
+        switch (status) {
+            case "in_progress":
+                return (
+                    <div className="flex items-center text-blue-600">
+                        <FiClock />
+                        <span className="ml-2 text-sm font-light">
+                            В процессе
+                        </span>
+                    </div>
+                )
+
+            case "completed":
+                return (
+                    <div className="flex items-center text-green-600">
+                        <FiCheck />
+                        {!isReference && (
+                            <span className="ml-2 text-sm font-light">
+                                {file.type === 'audio'
+                                    ? 'Прослушано'
+                                    : 'Прочитано'}
+                            </span>
+                        )}
+                    </div>
+                )
+
+            case "failed":
+                return (
+                    <div className="flex items-center text-red-600">
+                        <FiXCircle />
+                        <span className="ml-2 text-sm font-light">
+                            Не пройдено
+                        </span>
+                    </div>
+                )
+
+            default:
+                return null
+        }
+    }
+
     return (
         <div
             onClick={handleClick}
-            className={!isReference ?`flex items-center justify-between p-4 rounded-xl cursor-pointer transition shadow-sm ${
-                completed
-                    ? "bg-green-50 hover:bg-green-100"
-                    : "bg-white hover:bg-gray-50 border border-gray-100"
-            }`:
-                `flex items-center justify-between p-4 space-x-4 max-w-max rounded-xl cursor-pointer transition shadow-sm ${
-                    completed
-                        ? "bg-green-50 hover:bg-green-100"
-                        : "bg-white hover:bg-gray-50 border border-gray-100"
-                }`
-            }
-        >
-            <div className="flex items-center gap-3 text-gray-700">
-                {icon}
+            className={`relative overflow-hidden flex items-center justify-between p-4 rounded-xl cursor-pointer transition shadow-sm
+            ${animateStage !== "idle" ? "progress-pop" : ""}
+            ${animateStage == "idle" ? statusStyles[status] : ""}
+            ${isReference ? "max-w-max space-x-4" : ""}`}
+            >
+            {/* Зеленый слой заполнения */}
+            {animateStage === "fill" && (
+                <div className="absolute inset-0 bg-green-100 progress-fill z-0" />
+            )}
+            <div className="relative flex items-center gap-3 text-gray-700 z-1">
+                {fileIcon}
                 <span>{file.original_name}</span>
             </div>
-
-            {completed && (
-                <div className="flex items-center">
-                    <FiCheck className="text-green-500" />
-                    {
-                        !isReference &&
-                        <span className="text-green-500 ml-2 font-light text-sm">{file.type == 'audio' ? 'Прослушано' : 'Прочитано'}</span>
-                    }
-
+            {animateStage == "idle" && (
+                <div className="relative z-1 progress-status">
+                    {renderStatus()}
                 </div>
-
             )}
-        </div>
-    )
+
+
+    </div>
+)
 }
 
-export default FileBlock
+const FileBlock = observer(FileBlockComponent);
+export default FileBlock;

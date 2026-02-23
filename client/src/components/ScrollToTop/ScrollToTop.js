@@ -1,18 +1,20 @@
-import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect } from "react";
+import { useLocation, useNavigationType } from "react-router-dom";
 
-function ScrollToTop() {
-  const { pathname } = useLocation();
+export default function ScrollManager() {
+  const location = useLocation();
+  const navigationType = useNavigationType();
 
   useEffect(() => {
+
+
+    // При обычном переходе — скроллим вверх
     window.scrollTo({
       top: 0,
-      left: 0,
-      behavior: 'smooth' // Или 'auto' для мгновенного перехода
+      behavior: "smooth",
     });
-  }, [pathname]); // Перепрокрутка происходит при каждом изменении пути
+
+  }, [location.pathname, navigationType]);
 
   return null;
 }
-
-export default ScrollToTop;

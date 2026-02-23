@@ -28,7 +28,7 @@ const UserTable: React.FC<Props> = ({ users, loading, onEdit, onDelete, handleCo
             <div
                 className="
                     grid 
-                    grid-cols-[20px_2fr_2fr_2fr_2fr_1fr_1fr]
+                    grid-cols-[20px_2fr_2fr_2fr_2fr_1fr]
                     gap-[40px] 
                     items-center
                     font-semibold 
@@ -41,7 +41,7 @@ const UserTable: React.FC<Props> = ({ users, loading, onEdit, onDelete, handleCo
                 <div className="text-sm text-[#2C3E50] font-semibold">Программа</div>
                 <div className="text-sm text-[#2C3E50] font-semibold">Процент завершенности</div>
                 <div className="text-sm text-[#2C3E50] font-semibold">Дата начала</div>
-                <div className="text-sm text-[#2C3E50] font-semibold">Дата окончания</div>
+
             </div>
 
             {/* Строки */}
@@ -59,7 +59,7 @@ const UserTable: React.FC<Props> = ({ users, loading, onEdit, onDelete, handleCo
                             }
                             className="
                                 grid
-                                grid-cols-[20px_2fr_2fr_2fr_2fr_1fr_1fr]
+                                grid-cols-[20px_2fr_2fr_2fr_2fr_1fr]
                                 gap-[40px]
                                 items-center
                                 py-2
@@ -95,8 +95,8 @@ const UserTable: React.FC<Props> = ({ users, loading, onEdit, onDelete, handleCo
                             </div>
 
                             <div className="text-sm text-[#2C3E50]">
-                                {user.programs[0].progress != null ? (
-                                    <ProgressBar value={user.programs[0].progress} />
+                                {user.programs[0]?.progress != null ? (
+                                    <ProgressBar value={user.programs[0]?.progress} />
                                 ) : (
                                     <span className="text-gray-400">—</span>
                                 )}
@@ -106,11 +106,7 @@ const UserTable: React.FC<Props> = ({ users, loading, onEdit, onDelete, handleCo
                                 {dateToString(user?.createdAt)}
                             </div>
 
-                            <div className="text-sm text-[#2C3E50]">
-                                {user?.graduation_date
-                                    ? dateToString(user?.graduation_date)
-                                    : '—'}
-                            </div>
+
                         </div>
                     );
                 })}

@@ -63,3 +63,52 @@ body {
     @apply my-4 max-w-full rounded-lg shadow-md;
 }
 
+
+
+
+@keyframes fillGreen {
+    0% {
+        transform: scaleX(0);
+        opacity: 0.4;
+    }
+    100% {
+        transform: scaleX(1);
+        opacity: 1;
+    }
+}
+
+@keyframes softPop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.04); }
+    100% { transform: scale(1); }
+}
+
+.progress-fill {
+    animation: fillGreen 600ms ease-out forwards;
+    transform-origin: left;
+}
+
+.progress-pop {
+    animation: softPop 300ms ease-out;
+}
+
+
+@keyframes fromTopToDown {
+    0% {
+        transform: translateY(-10px);
+        opacity: 0.4;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.progress-status {
+    animation: fromTopToDown 600ms ease-out forwards;
+
+}
+
+
+
+

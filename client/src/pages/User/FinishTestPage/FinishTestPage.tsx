@@ -40,7 +40,7 @@ const FinishTestPage: React.FC = () => {
         <UserContainer loading={true}>
             {/* 🔙 Back */}
             <button
-                onClick={() => navigate(USER_ROUTE)}
+                onClick={() => navigate(TEST_OVERVIEW_ROUTE.replace(':id', localStorage.getItem('testId')))}
                 className="flex items-center gap-3 text-gray-600 hover:text-gray-900 transition group"
             >
                 <div className="p-3 rounded-full bg-gray-100 group-hover:bg-gray-200 transition">
@@ -89,7 +89,7 @@ const FinishTestPage: React.FC = () => {
                         </button>
                     )}
                     <button
-                        onClick={() => navigate(USER_ROUTE)}
+                        onClick={() => navigate(COURSE_ROUTE.replace(':id', localStorage.getItem('programId')))}
                         className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition font-medium"
                     >
                         Вернуться к курсу

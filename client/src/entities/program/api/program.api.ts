@@ -6,6 +6,7 @@ import { Program } from "../model/type";
 // Получить одну программу
 export const getOneProgram = async (id: number): Promise<Program> => {
     const { data } = await $authHost.get<Program>(`api/program/${id}`);
+    localStorage.setItem('programId', `${id}`)
     return data;
 };
 

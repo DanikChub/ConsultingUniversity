@@ -15,6 +15,7 @@ import type {ProgramProgress} from "../../../entities/progress/model/type";
 import {getEnrollmentProgress} from "../../../entities/progress/api/progress.api";
 import {getEnrollmentByProgram} from "../../../entities/enrollment/api/enrollment.api";
 import CustomAudioPlayer from "../../../components/CustomAudioPlayer/CustomAudioPlayer";
+import type {File} from "../../../entities/file/model/type";
 
 import './CoursePage.css'
 import {USER_ROUTE} from "../../../shared/utils/consts";
@@ -31,37 +32,67 @@ export default function CoursePage() {
 
 
     const [playerActive, setPlayerActive] = useState(false)
-    const [activeAudio, setActiveAudio] = useState<string | null>(null)
-
+    const [activeAudio, setActiveAudio] = useState<File | null>(null)
+    const [animatedPercent, setAnimatedPercent] = useState(0);
     const userContext = useContext(Context);
 
 
     useEffect(() => {
-        if (!Number(id)) return
-
+        if (!Number(id)) return;
 
         async function load() {
             try {
-                setLoading(false)
+                setLoading(false);
 
-                const programData = await getOneProgram(Number(id))
-                setProgram(programData)
+                const programData = await getOneProgram(Number(id));
+                setProgram(programData);
 
-                const enrollment = await getEnrollmentByProgram(programData.id, userContext.user.user.id)
+                const enrollment = await getEnrollmentByProgram(programData.id, userContext.user.user.id);
                 userContext.user.setEnrollmentId(enrollment.id);
 
-                const progressData = await getEnrollmentProgress(enrollment.id)
-                setProgress(progressData)
+                const freshProgress = await getEnrollmentProgress(enrollment.id);
+
+                // --- Сравниваем со старым прогрессом ---
+                const oldProgress = userContext.user.getEnrollmentProgress(enrollment.id);
+                const changedItems: string[] = [];
+
+                Object.keys(freshProgress.byContent).forEach(key => {
+                    const oldItem = oldProgress?.byContent?.[key];
+                    const newItem = freshProgress.byContent[key];
+
+                    if (!oldItem || oldItem.status !== newItem.status) {
+                        changedItems.push(key);
+                    }
+                });
+
+
+                // Сохраняем анимационные изменения
+                userContext.user.setProgressChanges(enrollment.id, changedItems);
+
+                // Обновляем прогресс
+                userContext.user.setEnrollmentProgress(enrollment.id, freshProgress);
+                setProgress(freshProgress);
 
             } catch (e) {
-                console.error(e)
+                console.error(e);
             } finally {
-                setLoading(true)
+                setLoading(true);
             }
         }
 
-        load()
-    }, [id])
+        load();
+    }, [id]);
+
+    useEffect(() => {
+        if (progress?.percent !== undefined) {
+            const target = Math.round(progress.percent);
+
+            // маленькая задержка, чтобы DOM успел отрисоваться
+            setTimeout(() => {
+                setAnimatedPercent(target);
+            }, 100);
+        }
+    }, [progress?.percent]);
 
     const toggleTheme = (themeId: number) => {
         setOpenThemes(prev =>
@@ -71,7 +102,7 @@ export default function CoursePage() {
         )
     }
 
-    const percent = Math.round(progress?.percent ?? 0)
+
 
     const statusStyles = {
         published: {
@@ -90,7 +121,7 @@ export default function CoursePage() {
             icon: <FiArchive />
         }
     }
-
+    const percent = Math.round(progress?.percent ?? 0)
     const status = statusStyles['published']
 
 
@@ -159,12 +190,7 @@ export default function CoursePage() {
                                         {status.label}
                                     </div>
 
-                                    {program.price && (
-                                        <div
-                                            className="px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium">
-                                            {program.price} ₽
-                                        </div>
-                                    )}
+
                                 </div>
 
                                 {program.short_title && (
@@ -186,8 +212,8 @@ export default function CoursePage() {
 
                                 <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
                                     <div
-                                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500"
-                                        style={{width: `${percent}%`}}
+                                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-700 ease-out"
+                                        style={{width: `${animatedPercent}%`}}
                                     />
                                 </div>
 
@@ -225,11 +251,12 @@ export default function CoursePage() {
 
             {playerActive && activeAudio && (
                 <CustomAudioPlayer
-                    audioSrc={activeAudio}
+                    track={activeAudio}
                     setPlayerActive={setPlayerActive}
-                    setActiveTrack={() => {
-                    }}
+                    setActiveTrack={() => {}}
                     className=""
+                    setProgress={setProgress}
+                    progress={progress}
                 />
             )}
 

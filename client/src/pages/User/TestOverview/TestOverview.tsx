@@ -73,7 +73,7 @@ const TestOverview = ({}: TestOverviewProps) => {
 
     const handleStartTest = () => {
         // переход на страницу прохождения теста
-        navigate(TEST_ROUTE.replace(":id", `${test.id}?enrollment_id=${enrollmentId}`))
+        navigate(TEST_ROUTE.replace(":id", `${test.id}`))
     }
 
     return (

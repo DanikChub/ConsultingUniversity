@@ -7,6 +7,7 @@ import FileInfoModal from "../modals/FileInfoModal";
 import ProgramZipUploadModal from "../modals/ProgramZipUploadModal";
 import CreateTestModal from "../modals/CreateTestModal";
 import {TestViewModal} from "../modals/TestViewModal";
+import GradeBookModal from "../modals/GradeBookModal";
 
 type ActiveModal<T extends ModalType = ModalType> = {
     type: T;
@@ -93,6 +94,13 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             {modal?.type === 'viewTest' && (
                 <TestViewModal
                     test={modal.payload.test}
+                    onClose={() => close('close')}
+                />
+            )}
+            {modal?.type === 'viewGradeBook' && (
+                <GradeBookModal
+                    program={modal.payload.program}
+                    progress={modal.payload.progress}
                     onClose={() => close('close')}
                 />
             )}

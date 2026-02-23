@@ -3,6 +3,8 @@
 // types/modal.ts
 import type {Test} from "../entities/test/model/type";
 import type {File as ProgramFile} from "../entities/file/model/type";
+import type {Program} from "../entities/program/model/type";
+import type {ProgramProgress} from "../entities/progress/model/type";
 
 export type ModalType =
         | 'uploadFile'
@@ -11,6 +13,7 @@ export type ModalType =
         | 'createTest'
         | 'editTest'
         | 'viewTest'
+        | 'viewGradeBook'
 
 export type ModalPayloadMap = {
     uploadFile: {
@@ -36,6 +39,10 @@ export type ModalPayloadMap = {
     viewTest: {
         test: Test;
     }
+    viewGradeBook: {
+        program: Program;
+        progress: ProgramProgress;
+    }
 };
 
 export type ModalResultMap = {
@@ -45,4 +52,5 @@ export type ModalResultMap = {
     createTest: Test;
     editTest: Test;
     viewTest: 'close' | 'deleted';
+    viewGradeBook: 'close' | 'deleted';
 };

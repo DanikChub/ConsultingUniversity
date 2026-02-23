@@ -229,12 +229,7 @@ const UserPage = observer(() => {
                                             {status.label}
                                         </div>
 
-                                        {program.price && (
-                                            <div
-                                                className="px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium">
-                                                {program.price} ₽
-                                            </div>
-                                        )}
+
                                     </div>
 
                                     {program.short_title && (

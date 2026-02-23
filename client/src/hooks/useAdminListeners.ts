@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { User, UsersAPIResponse, PaginationItem } from "../entities/user/model/type";
 import { getAllUsersWithPage, searchUsers, deleteUser } from "../entities/user/api/user.api";
+import {generateFakeUsers, getUsersPage} from "../shared/utils/generateFakeUsers";
 
 export const useAdminListeners = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -37,10 +38,12 @@ export const useAdminListeners = () => {
                     sortDown ? 'DESC' : 'ASC'
                 );
             }
+            // const data = getUsersPage(page)
 
             generatePagination(data.count);
 
             const userList = data.rows;
+
 
             if (search) {
                 userList.forEach(u => (u.yellow_value = search));

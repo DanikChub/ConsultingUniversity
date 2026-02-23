@@ -4,6 +4,7 @@ import FileBlock from "./FileBlock"
 import type { Theme } from "../../../../entities/theme/model/type"
 import type { ProgramProgress } from "../../../../entities/progress/model/type"
 import { isContentCompleted } from "../../../../entities/progress/model/selectors"
+import type {File} from "../../../../entities/file/model/type";
 
 interface ThemeBlockProps {
     theme: Theme
@@ -11,7 +12,7 @@ interface ThemeBlockProps {
     toggle: () => void
     progress: ProgramProgress | null
     setPlayerActive: (active: boolean) => void
-    setActiveAudio: (track: string) => void
+    setActiveAudio: (track: File) => void
 }
 
 const ThemeBlock = ({ theme, open, toggle, progress, setPlayerActive, setActiveAudio }: ThemeBlockProps) => {
@@ -102,7 +103,7 @@ const ThemeBlock = ({ theme, open, toggle, progress, setPlayerActive, setActiveA
                 )}
             </div>
 
-            {!open && (
+            {open && (
                 <div className="border-t bg-gray-50 p-6 space-y-6">
 
 

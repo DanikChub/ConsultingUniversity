@@ -34,6 +34,7 @@ export const getOneTest = async (
     testId: number
 ): Promise<Test> => {
     const { data } = await $authHost.get<Test>(`api/test/${testId}`);
+    localStorage.setItem('testId', `${testId}`)
     return data;
 };
 

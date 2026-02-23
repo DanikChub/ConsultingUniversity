@@ -19,7 +19,7 @@ export interface User {
     statistic?: number | null;
     graduation_date?: string | null; // ISO date string
     forgot_pass_code?: string | null;
-
+    img: string;
     // дополнительные поля, которые фронт может ожидать
     yellow_value?: string; // используется в поиске подсветки
     createdAt?:string;

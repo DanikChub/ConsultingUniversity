@@ -56,6 +56,7 @@ const App = observer(() => {
           loading ?
           <Spinner/>
           :
+
           <AppRouter/>
         }
 

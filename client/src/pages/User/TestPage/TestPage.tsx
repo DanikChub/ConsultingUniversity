@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import UserContainer from '../../../components/ui/UserContainer';
 import CountDown from '../../../components/CountDown/CountDown';
@@ -7,6 +7,7 @@ import { submitTestAttempt } from '../../../entities/test/api/test.api';
 import { FINISH_TEST_ROUTE } from '../../../shared/utils/consts';
 import type { Test } from '../../../entities/test/model/type';
 import {FiArrowLeft} from "react-icons/fi";
+import {Context} from "../../../index";
 
 function shuffle<T>(array: T[]): T[] {
     const arr = [...array];
@@ -19,7 +20,6 @@ function shuffle<T>(array: T[]): T[] {
 
 const TestPage: React.FC = () => {
     const params = useParams();
-    const [queryParams] = useSearchParams();
     const navigate = useNavigate();
 
     const [test, setTest] = useState<Test | null>(null);
@@ -27,6 +27,8 @@ const TestPage: React.FC = () => {
     const [userAnswers, setUserAnswers] = useState<Record<number, number[]>>({});
     const [secForEnd, setSecForEnd] = useState<number | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const userContext = useContext(Context);
+    const enrollmentId = userContext.user.enrollmentId;
 
     useEffect(() => {
         if (!params.id) return;
@@ -59,8 +61,6 @@ const TestPage: React.FC = () => {
         setSubmitting(true);
 
         try {
-            const enrollmentId = queryParams.get('enrollment_id');
-            if (!enrollmentId) throw new Error('Enrollment ID is required');
 
             // формируем payload в формате бэка
             const answersPayload = test.questions.map((q, i) => ({
@@ -88,7 +88,7 @@ const TestPage: React.FC = () => {
     // Проверяем, все ли вопросы отвечены
     const allAnswered = test.questions.every((_, i) => (userAnswers[i]?.length ?? 0) > 0);
 
-// Определяем, показывать ли кнопку
+    // Определяем, показывать ли кнопку
     const showFinishButton = numberQuestion === test.questions.length - 1;
     return (
         <UserContainer loading={true}>

@@ -98,29 +98,7 @@ export const deleteUser = async (id) => {
 
     return data
 }
-export const setWellTest = async(id) => {
-    const {data} = await $authHost.post('api/user/set_well_tests', {id});
 
-    return data;
-}
-
-export const setWellVideos = async(id) => {
-    const {data} = await $authHost.post('api/user/set_well_videos', {id});
-
-    return data;
-}
-
-export const setWellPracticalWorks = async(id) => {
-    const {data} = await $authHost.post('api/user/set_well_practical_works', {id});
-
-    return data;
-}
-
-export const setGraduationDate = async (id, graduation_date) => {
-    const {data} = await $host.post('api/user/setGraduationDate', {id, graduation_date})
-
-    return data
-}
 
 export const setUserProfileImg = async (formdata) => {
     const {data} = await $host.post('api/user/setUserProfileImg', formdata)

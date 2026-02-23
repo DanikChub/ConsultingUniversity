@@ -13,6 +13,7 @@ import arrow_down from '../../../assets/imgs/arrow_down.png'
 import arrow_up from '../../../assets/imgs/arrow_up.png'
 import ListenersSkeleton from '../AdminListeners/components/ListenersSkeleton';
 import AppContainer from '../../../components/ui/AppContainer';
+import ProgressBar from "../AdminListeners/components/ProgressBar";
 
 function dateToString(date) {
     
@@ -34,28 +35,14 @@ const AdminDocumentsPage = () => {
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [searchInput, setSearchInput] = useState('');
     const navigate = useNavigate();
-    const [sortClasses, setSortClasses] = useState(['', '', 'active']);
-    const [sortType, setSortType] = useState(0);
-    const [sortDown, setSortDown] = useState(true);
-    const [sort_type_variations, setSortTypeVariations] = useState(["statistic", "name", "createdAt"]);
 
     useEffect(() => {
-        let sort_down = Boolean(Number(localStorage.getItem("sort_down")));
 
-        setSortDown(sort_down);
 
-        let sort_type = Number(localStorage.getItem('sort_type'))
-        let prev_value = ['', '', ''];
-
-        prev_value[sort_type] = 'active';
-
-        setSortClasses(prev_value);
-        setSortType(sort_type);
       
-        getAllUsersGraduation(1, sort_type_variations[sort_type], sort_down?'DESC':'ASC')
+        getAllUsersGraduation()
             .then(users => {
                 setUsers(users);
-                setFilteredUsers(users);
                 setLoading(true);
             })
             .catch(error => {
@@ -92,61 +79,104 @@ const AdminDocumentsPage = () => {
     return (
         <AppContainer>
             <input onChange={(e) => handleSearchInput(e.target.value)} value={searchInput} className='SearchInput' placeholder='Поиск'/>
-            
-            <div className='admin_table_container'>
-                <table className="admin_table">
-                    <thead>
-                        <tr>
-                            <th style={{width: '20%'}}>Тип документа</th>
-                            <th style={{display: 'table-cell', width: "15%"}}>Номер</th>
-                            <th style={{display: 'table-cell', width: "15%"}}>Дата выдачи</th>
-                            <th style={{display: 'table-cell', width: "28%"}}>ФИО</th>
-                            <th style={{display: 'table-cell', width: "30%"}}>Организация</th>
-                            
-                            
-                        </tr>
-                    </thead>
-                    {
-                        loading?
-                    
-                    <tbody>
-                        {
-                            filteredUsers.map((user, i) => 
-                                
-                                <tr>
-                                    <td onClick={() => {copyTextToClipboard(user.diplom?'':user.address)}}>{user.diplom?'Диплом':'Удостоверение'}</td>
-                                    <td >
-                                        <a href={`tel:${user.number}`}>{user.number}</a>
-                                    </td>
-                                    <td style={{display: 'table-cell', width: "20%"}}>
-                                        {dateToString(user.graduation_date)}
-                                    </td>
-                                    <td class='th_orh'>
-                                        
-                                        <Link to={"/admin/listeners/" + user.id}>
-                                            <div dangerouslySetInnerHTML={{__html: user.name.replace(user.yellow_value, "<b class=\"background-yellow\">"+user.yellow_value+"</b>")}}/>
-                                        </Link>
-                                    </td>
-                                    <td>
-                                        <div>{user.organization}</div>
-                                        
-                                    </td>
-                                    
-                                    
-                                    
-                                </tr>
-                                )
-                        }
-                        
-                    </tbody>
-                    : <ListenersSkeleton/>
-                    }
-                    
 
-                    
-                </table>
+            <div className="w-full mt-4 min-h-[410px]">
+                {/* Шапка */}
+                <div
+                    className="
+                    grid
+                    grid-cols-[20px_1fr_1fr_2fr_2fr_1fr_1fr]
+                    gap-[40px]
+                    items-center
+                    font-semibold
+                    pb-2
+                "
+                >
+                    <div>#</div>
+                    <div className="text-sm text-[#2C3E50] font-semibold">ФИО</div>
+                    <div className="text-sm text-[#2C3E50] font-semibold">Номер телефона</div>
+                    <div className="text-sm text-[#2C3E50] font-semibold">Организация</div>
+                    <div className="text-sm text-[#2C3E50] font-semibold">Программа</div>
+
+                    <div className="text-sm text-[#2C3E50] font-semibold">Дата начала</div>
+                    <div className="text-sm text-[#2C3E50] font-semibold">Дата окончания</div>
+
+                </div>
+
+                {/* Строки */}
+                {!loading ? (
+                    <ListenersSkeleton/>
+                ) : <>
+                    {users.map((user) => {
+                        const program = user.programs?.[0];
+
+                        return (
+                            <div
+                                key={user.id}
+                                className="
+                                grid
+                                grid-cols-[20px_1fr_1fr_2fr_2fr_1fr_1fr]
+                                gap-[40px]
+                                items-center
+                                py-2
+                                hover:bg-gray-100
+                                relative
+                              "
+                            >
+                                <div className="text-sm text-[#2C3E50]">{user?.id}.</div>
+
+                                <div className="text-sm text-[#2C3E50]">
+                                    <Link className="hover:text-blue-700" to={`/admin/listeners/${user?.id}`}>
+                                        {user?.name}
+                                    </Link>
+                                </div>
+                                <div className="text-sm text-[#2C3E50]">
+                                    <a href={`tel:${user?.number}`} className="hover:text-blue-700">
+                                        {user?.number}
+                                    </a>
+                                </div>
+
+                                <div className="text-sm text-[#2C3E50]">
+                                    {user?.organization?.length > 21
+                                        ? `${user.organization.slice(0, 21)}...`
+                                        : user.organization}
+                                </div>
+
+                                <div className="text-sm text-[#2C3E50]">
+                                    {program ? (
+                                        <Link
+                                            className="hover:text-blue-700"
+                                            to={`/admin/programs/${program.id}`}
+                                        >
+                                            {program?.short_title}
+                                        </Link>
+                                    ) : (
+                                        <span className="text-gray-400 italic">Нет программы</span>
+                                    )}
+                                </div>
+
+
+                                <div className="text-sm text-[#2C3E50]">
+                                    {dateToString(user?.createdAt)}
+                                </div>
+                                <div className="text-sm text-[#2C3E50]">
+                                    {dateToString(user?.programs[0]?.completed_at)}
+                                </div>
+
+
+                            </div>
+                        );
+                    })}
+
+
+                </>
+
+
+                }
+
+
             </div>
-    </AppContainer>
+        </AppContainer>
     );
 };
 

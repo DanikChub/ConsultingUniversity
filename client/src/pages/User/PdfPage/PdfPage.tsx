@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react"
+import React, {useContext, useEffect, useRef, useState} from "react"
 import {useNavigate, useParams} from "react-router-dom"
 import { Document, Page, pdfjs } from "react-pdf"
 import {getFile} from "../../../entities/file/api/file.api";
 import UserContainer from "../../../components/ui/UserContainer";
 import {COURSE_ROUTE, USER_ROUTE} from "../../../shared/utils/consts";
-import {FiArrowLeft} from "react-icons/fi";
+import {FiArrowLeft, FiCheck} from "react-icons/fi";
+import {getContentProgress, updateProgress} from "../../../entities/progress/api/progress.api";
+import {Context} from "../../../index";
 
 // Используем CDN воркер — гарантировано работает
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
@@ -23,25 +25,91 @@ const PdfPage = () => {
     const [numPages, setNumPages] = useState(0)
     const [pageNumber, setPageNumber] = useState(1)
     const [loading, setLoading] = useState(true)
-
+    const userContext = useContext(Context);
     const navigate = useNavigate()
+    const [isCompleted, setIsCompleted] = useState(false)
+
+    const completedRef = useRef(false)
+
 
     useEffect(() => {
         if (!id) return
 
-        getFile(id)
-            .then(data => {
+        const fetchFile = async () => {
+            try {
+                setLoading(true)
+
+                const data = await getFile(id)
                 setFile(data)
-            })
-            .catch(err => {
-                console.error(err)
-            })
+
+                const enrollmentId = userContext.user.enrollmentId
+
+                // 🔎 Проверяем существующий прогресс
+                const existing = await getContentProgress(
+                    data.id,
+                    "file",
+                    enrollmentId
+                )
+
+                if (!existing.exists) {
+                    await updateProgress({
+                        enrollmentId,
+                        contentType: "file",
+                        contentId: data.id,
+                        status: "in_progress"
+                    })
+                } else {
+                    if (existing.progress.status === "completed") {
+                        setIsCompleted(true)
+                        completedRef.current = true
+                    }
+                }
+
+                window.scrollTo({ top: 0, left: 0, behavior: "auto" })
+            } catch (e) {
+                console.error("Ошибка загрузки файла:", e)
+            } finally {
+                setLoading(true)
+            }
+        }
+
+        fetchFile()
     }, [id])
 
     const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
         setNumPages(numPages)
         setLoading(false)
     }
+
+    useEffect(() => {
+        if (!file || !numPages) return
+        if (completedRef.current) return
+
+        if (pageNumber === numPages) {
+            const markCompleted = async () => {
+                try {
+                    completedRef.current = true // ставим ДО await
+
+                    const enrollmentId = userContext.user.enrollmentId
+
+                    await updateProgress({
+                        enrollmentId,
+                        contentType: "file",
+                        contentId: file.id,
+                        status: "completed"
+                    })
+
+                    setIsCompleted(true)
+                } catch (e) {
+                    completedRef.current = false
+                    console.error("Ошибка обновления прогресса:", e)
+                }
+            }
+
+            markCompleted()
+        }
+    }, [pageNumber, numPages, file])
+
     const remakeFileName = (url: string, newName: string) => {
         const xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
@@ -65,7 +133,7 @@ const PdfPage = () => {
 
     const progressPercent = ((pageNumber / numPages) * 100).toFixed(0)
     return (
-        <UserContainer loading={true}>
+        <UserContainer isLeftPanel={true} loading={true}>
             <button
                 onClick={() => navigate(-1)}
                 className="flex items-center gap-3 text-gray-600 hover:text-gray-900 transition group"
@@ -80,22 +148,26 @@ const PdfPage = () => {
 
                     {/* Заголовок документа */}
                     <div className="w-full flex flex-col md:flex-row md:justify-between md:items-center mb-4">
-                        <h1 className="text-2xl font-semibold text-gray-800 mb-3 md:mb-0">
-                            {file.original_name}
+                        <h1 className="text-2xl font-semibold text-gray-800 mb-3 md:mb-0 flex items-center">
+                            {file.original_name}{isCompleted&&<FiCheck className="text-green-500 ml-4"/>}
                         </h1>
 
                         <div
                             onClick={() => remakeFileName(fileUrl, file.original_name)}
-                            className="px-5 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition cursor-pointer"
+                            className="px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-green-600 transition cursor-pointer"
                         >
                             Скачать PDF
                         </div>
                     </div>
 
                     {/* Прогресс бар */}
-                    <div className="w-full bg-gray-200 h-3 rounded-full mb-6">
+                    <div className="w-full bg-gray-200 h-3 rounded-full mb-6 overflow-hidden">
                         <div
-                            className="bg-blue-500 h-3 rounded-full transition-all"
+                            className={`h-3 rounded-full transition-all duration-500 ${
+                                isCompleted
+                                    ? "bg-gradient-to-r from-green-400 to-green-600"
+                                    : "bg-gradient-to-r from-blue-400 to-blue-600"
+                            }`}
                             style={{width: `${progressPercent}%`}}
                         />
                     </div>
@@ -142,6 +214,7 @@ const PdfPage = () => {
                             Загружаем документ...
                         </div>
                     )}
+
                 </div>
             </div>
             <button
