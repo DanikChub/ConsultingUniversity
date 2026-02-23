@@ -421,6 +421,7 @@ class UserController {
                         attributes: ['id', 'title', 'short_title', 'price', 'img'],
                         through: {
                             attributes: [
+                                'id',
                                 'status',
                                 'progress_percent',
                                 'started_at',
@@ -454,10 +455,42 @@ class UserController {
 
     async getAllUsersGraduation(req, res, next) {
         try {
-            const users = await User.findAll({
-                where: { role: 'USER', graduation_date: { [Op.not]: null } }
+
+            const users = await User.findAndCountAll({
+                where: { role: 'USER' },
+                include: [
+                    {
+                        model: Program,
+                        attributes: ['id', 'title', 'short_title'],
+                        through: {
+                            where: { status: 'completed' }, // только активные Enrollment
+                            attributes: ['progress_percent', 'completed_at'], // подтягиваем процент прохождения
+                        },
+                        required: true,
+                    },
+                ],
             });
-            return res.json(users);
+
+            // Мапим JSON, чтобы прогресс был прямо внутри программы
+            const result = users.rows.map(user => ({
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                number: user.number,
+                organization: user.organization,
+                role: user.role,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                programs: user.programs.map(p => ({
+                    id: p.id,
+                    title: p.title,
+                    short_title: p.short_title,
+                    progress: p.enrollment ? p.enrollment.progress_percent : null,
+                    completed_at: p.enrollment ? p.enrollment.completed_at : null,
+                })),
+            }));
+
+            return res.json(result);
         } catch (e) {
             console.error('getAllUsersGraduation error:', e);
             return next(ApiError.internal('Ошибка получения пользователей с датой окончания'));
@@ -504,7 +537,7 @@ class UserController {
                             where: { status: 'active' }, // только активные Enrollment
                             attributes: ['progress_percent'], // подтягиваем процент прохождения
                         },
-                        required: false,
+                        required: true,
                     },
                 ],
             });
@@ -556,17 +589,43 @@ class UserController {
                         Sequelize.where(fn('LOWER', Sequelize.col('name')), { [Op.like]: `%${q.toLowerCase()}%` }),
                         Sequelize.where(fn('LOWER', Sequelize.col('organization')), { [Op.like]: `%${q.toLowerCase()}%` })
                     ]
-                }
+                },
+                include: [
+                    {
+                        model: Program,
+                        attributes: ['id', 'title', 'short_title'],
+                        through: {
+                            where: { status: 'active' }, // только активные Enrollment
+                            attributes: ['progress_percent'], // подтягиваем процент прохождения
+                        },
+                        required: true,
+                    },
+                ],
             });
 
-            for (const user of users.rows) {
-                if (user.role !== 'ADMIN') {
-                    const statistic = await Statistic.findOne({ where: { [Op.and]: [{ users_id: user.id, programs_id: user.programs_id[0] }] } });
-                    if (statistic) user.dataValues.statistic = Math.round((statistic.well_tests / statistic.max_tests) * 100);
-                }
-            }
+            const result = users.rows.map(user => ({
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                number: user.number,
+                organization: user.organization,
+                role: user.role,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                programs: user.programs.map(p => ({
+                    id: p.id,
+                    title: p.title,
+                    short_title: p.short_title,
+                    progress: p.enrollment ? p.enrollment.progress_percent : null,
+                })),
+            }));
 
-            return res.json(users);
+            return res.json({
+                count: users.count,
+                page,
+                totalPages: Math.ceil(users.count / 10),
+                rows: result,
+            });
 
         } catch (e) {
             console.error('searchUsers error:', e);

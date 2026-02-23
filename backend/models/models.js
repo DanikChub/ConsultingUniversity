@@ -2,6 +2,8 @@ const sequelize = require('../db');
 const {DataTypes, Op} = require('sequelize');
 const path = require('path');
 const fs = require('fs');
+const {sendCompletionEmail} = require("../services/mail.service");
+
 
 const STATIC_DIR = path.resolve(__dirname, '..', 'static');
 if (!fs.existsSync(STATIC_DIR)) fs.mkdirSync(STATIC_DIR, { recursive: true });
@@ -116,6 +118,11 @@ async function recalculateEnrollmentProgress(enrollmentId) {
         calculateProgramProgress(program, userProgressMap, enrollmentId)
 
     enrollment.progress_percent = percent
+    if (enrollment.progress_percent == 100) {
+        sendCompletionEmail('chabanovdan@gmail.com', 'Даниил Чабанов', 'Тестовая программа потом доделаю')
+        enrollment.status = 'completed';
+        enrollment.completed_at = new Date();
+    }
     await enrollment.save()
 
     return percent
@@ -227,12 +234,12 @@ const File = sequelize.define('file', {
     original_name: { type: DataTypes.STRING, allowNull: false },
     stored_name: { type: DataTypes.STRING, allowNull: false },
     mime_type: { type: DataTypes.STRING, allowNull: false },
-    type: { type: DataTypes.ENUM('docx', 'pdf', 'audio')},
+    type: { type: DataTypes.ENUM('docx', 'pdf', 'audio', 'video')},
     size: { type: DataTypes.INTEGER },
     order_index: {type: DataTypes.INTEGER},
     status: { type: DataTypes.ENUM('uploading','idle','error'), defaultValue: 'uploading' },
     storage: {
-        type: DataTypes.ENUM('local', 's3'),
+        type: DataTypes.ENUM('local', 's3', 'external'),
         defaultValue: 'local'
     },
 }, {

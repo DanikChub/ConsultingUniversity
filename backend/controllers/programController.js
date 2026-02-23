@@ -560,10 +560,9 @@ class ProgramController {
 
   async addFileToPunctOrTheme(req, res, next) {
     try {
-      const { targetType, targetId, type } = req.body;
+      const { targetType, targetId, type, url } = req.body;
       const files = req.files;
-      console.log("################################################################################")
-      console.log(targetType, targetId, type)
+
       if (!targetType || !targetId) {
         return res.status(400).json({ error: 'targetType and targetId are required' });
       }
@@ -576,7 +575,7 @@ class ProgramController {
         return res.status(400).json({ error: 'No files uploaded' });
       }
 
-      if (!['docx', 'pdf', 'audio'].includes(type)) {
+      if (!['docx', 'pdf', 'audio', 'video'].includes(type)) {
         return res.status(400).json({ error: 'Invalid type' });
       }
 
