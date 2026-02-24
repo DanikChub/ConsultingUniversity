@@ -6,7 +6,7 @@ const { Program,
   Statistic,
   ThemeStatistic,
   PunctStatistic,
-  File, FileAsset, Question, Answer
+  File, FileAsset, Question, Answer, Event
 } = require("../models/models");
 const sequelize = require('../db'); 
 const ApiError = require('../error/ApiError')
@@ -363,6 +363,11 @@ class ProgramController {
         status: 'draft'
       });
 
+      await Event.create({
+        event_text: 'Создана новая программа',
+
+      });
+
       return res.json(program);
     } catch (e) {
       console.error(e);
@@ -558,6 +563,26 @@ class ProgramController {
     }
   }
 
+  async updatePunctDescription(req, res, next) {
+    try {
+      const { description } = req.body;
+      const { id } = req.params;
+      if (!id) return res.status(400).json({ message: 'punctId обязателен' });
+      if (typeof description !== 'string') return res.status(400).json({ message: 'description обязателен' });
+
+      const punct = await Punct.findByPk(id);
+      if (!punct) return res.status(404).json({ message: 'Пункт не найден' });
+
+      punct.description = description;
+      await punct.save();
+
+      return res.json({ id: punct.id, description: punct.description });
+    } catch (e) {
+      console.error(e);
+      return next(e);
+    }
+  }
+
   async addFileToPunctOrTheme(req, res, next) {
     try {
       const { targetType, targetId, type, url } = req.body;
@@ -571,12 +596,50 @@ class ProgramController {
         return res.status(400).json({ error: 'Invalid targetType' });
       }
 
-      if (!files || Object.keys(files).length === 0) {
-        return res.status(400).json({ error: 'No files uploaded' });
-      }
-
       if (!['docx', 'pdf', 'audio', 'video'].includes(type)) {
         return res.status(400).json({ error: 'Invalid type' });
+      }
+
+      // ----------------- order_index -----------------
+      const orderWhere =
+          targetType === 'punct'
+              ? { punctId: targetId }
+              : { themeId: targetId };
+
+      const maxOrder = await File.max('order_index', { where: orderWhere });
+      const order_index = isNaN(maxOrder) ? 0 : maxOrder + 1;
+
+
+      // ----------------- ЗАГРУЗКА ВИДЕО -----------------
+      if (type === 'video') {
+        if (!url) {
+          return res.status(400).json({ error: 'Video url required' });
+        }
+
+        const videoRecord = await File.create({
+          original_name: 'Видео',
+          stored_name: null,
+          mime_type: null,
+          type: 'video',
+          size: null,
+          url,
+          storage: 'vimeo',
+
+          themeId: targetType === 'theme' ? targetId : null,
+          punctId: targetType === 'punct' ? targetId : null,
+
+          order_index,
+          status: 'idle',
+        });
+
+        return res.json({
+          success: true,
+          file: videoRecord,
+        });
+      }
+
+      if (!files || Object.keys(files).length === 0) {
+        return res.status(400).json({ error: 'No files uploaded' });
       }
 
       const fileKey = Object.keys(files)[0];
@@ -597,14 +660,7 @@ class ProgramController {
         });
       }
 
-      // ----------------- order_index -----------------
-      const orderWhere =
-          targetType === 'punct'
-              ? { punctId: targetId }
-              : { themeId: targetId };
 
-      const maxOrder = await File.max('order_index', { where: orderWhere });
-      const order_index = isNaN(maxOrder) ? 0 : maxOrder + 1;
 
       // ----------------- Создаём файл (uploading) -----------------
       const originalName = Buffer.from(file.name, 'latin1').toString('utf8');
@@ -893,7 +949,10 @@ class ProgramController {
       if (!program) {
         return res.status(404).json({ message: 'Программа не найдена' });
       }
-
+      await Event.create({
+        event_text: 'Программа удалена',
+        name: program.title
+      });
       await program.destroy();
 
       return res.json({ message: 'Программа успешно удалена' });
@@ -1125,6 +1184,11 @@ class ProgramController {
         });
       }
 
+      await Event.create({
+        event_text: 'Программа опубликована',
+        name: program.title
+      });
+
       // ----------------- Все проверки пройдены, публикуем программу -----------------
       program.status = 'published';
       await program.save();
@@ -1198,162 +1262,7 @@ class ProgramController {
     }
   }
 
-  /*async remake(req, res, next) {
-    const t = await sequelize.transaction();
-    try {
-      const {
-        title,
-        number_of_practical_work,
-        number_of_test,
-        number_of_videos,
-        themes,
-        id,
-        short_title,
-        price
-      } = req.body;
 
-      if (!title) return next(ApiError.badRequest('Программа не имеет названия!'));
-
-      const parsedThemes = (() => {
-        try { return JSON.parse(themes); } catch (e) { return null; }
-      })();
-
-      const validationError = validateParsedThemes(parsedThemes);
-      if (validationError) return next(ApiError.badRequest(validationError));
-
-      const files = req.files || {};
-
-
-
-      const docsSaved = await saveFilesArrayOrSingle(files.docs);
-      console.log(docsSaved)
-      const presentationsSaved = await saveFilesArrayOrSingle(files.presentation_src);
-      const lection_pdfsSaved = await saveFilesArrayOrSingle(files.lection_pdfs);
-      const themeLectionSaved = await saveFilesArrayOrSingle(files.theme_lection_src);
-      const audiosSaved = await saveFilesArrayOrSingle(files.audios);
-      const imgSaved = files.img ? (await saveSingleFile(files.img)) : '';
-
-      const program = await Program.findOne({ where: { id } });
-      if (!program) return next(ApiError.notFound('Программа не найдена'));
-
-      if (number_of_test < program.number_of_test)
-        return next(ApiError.badRequest('Нельзя удалять тесты при изменении программы'));
-
-      program.img = imgSaved || program.img;
-      program.title = title;
-      program.short_title = short_title;
-      program.price = price;
-      program.number_of_practical_work = number_of_practical_work;
-      program.number_of_test = number_of_test;
-      program.number_of_videos = number_of_videos;
-      await program.save({ transaction: t });
-
-      await Theme.destroy({ where: { programId: program.id } }, { transaction: t });
-
-      const statistics = await Statistic.findAll({ where: { programs_id: program.id } });
-      for (const statistic of statistics) {
-        for (let i = statistic.max_tests; i < number_of_test; i++) {
-          const themeStatistic = await ThemeStatistic.create({
-            theme_id: i,
-            well: false,
-            statisticId: statistic.id
-          }, { transaction: t });
-
-          await PunctStatistic.create({
-            punct_id: i,
-            lection: false,
-            practical_work: null,
-            video: false,
-            test_bool: false,
-            themeStatisticId: themeStatistic.id
-          }, { transaction: t });
-        }
-
-        statistic.max_videos = number_of_videos;
-        statistic.max_tests = number_of_test;
-        statistic.max_practical_works = number_of_practical_work;
-        await statistic.save({ transaction: t });
-      }
-
-      for (const theme_el of parsedThemes) {
-        const presentation_src =
-            typeof theme_el.presentation_src === 'string' && theme_el.presentation_src
-                ? theme_el.presentation_src
-                : (presentationsSaved[theme_el.presentation_id] || null);
-
-        const theme_lection_src =
-            typeof theme_el.lection_src === 'string' && theme_el.lection_src
-                ? theme_el.lection_src
-                : (themeLectionSaved[theme_el.lection_id] || null);
-
-        const themeLectionHtml = await convertDocxToHtmlIfExists(theme_lection_src);
-
-        const createdTheme = await Theme.create({
-          title: theme_el.title,
-          programId: program.id,
-          theme_id: theme_el.theme_id,
-          presentation_src,
-          presentation_title: theme_el.presentation_title || null,
-          presentation_id: theme_el.presentation_id,
-          video_src: theme_el.video_src || null,
-          lection_src: theme_lection_src || null,
-          lection_html: themeLectionHtml,
-          lection_title: theme_el.lection_title || null,
-          lection_id: theme_el.lection_id
-        }, { transaction: t });
-
-        for (const punct_el of theme_el.puncts) {
-          const punctLectionSrc =
-              typeof punct_el.lection_src === 'string' && punct_el.lection_src
-                  ? punct_el.lection_src
-                  : (docsSaved[punct_el.lection_id] || null);
-
-          const punctLectionPdfSrc =
-              typeof punct_el.lection_pdf === 'string' && punct_el.lection_pdf
-                  ? punct_el.lection_pdf
-                  : (lection_pdfsSaved[punct_el.lection_pdf_id] || null);
-
-          const punctAudioSrc =
-              typeof punct_el.audio_src === 'string' && punct_el.audio_src
-                  ? punct_el.audio_src
-                  : (audiosSaved[punct_el.audio_id] || null);
-
-          const punctLectionHtml = await convertDocxToHtmlIfExists(punctLectionSrc);
-
-          await Punct.create({
-            title: punct_el.title,
-            themeId: createdTheme.id,
-
-            video_src: punct_el.video_src || null,
-
-            lection_src: punctLectionSrc || null,
-            lection_html: punctLectionHtml,
-            lection_title: punct_el.lection_title || null,
-            lection_id: punct_el.lection_id,
-
-            lection_pdf: punctLectionPdfSrc || null,
-            lection_pdf_id: punct_el.lection_pdf_id,
-            lection_pdf_title: punct_el.lection_pdf_title  || null,
-
-            practical_work: punct_el.practical_work || null,
-            practical_work_task: punct_el.practical_work_task || null,
-
-            audio_src: punctAudioSrc,
-
-            test_id: punct_el.test_id || null,
-            punct_id: punct_el.punct_id
-          }, { transaction: t });
-        }
-      }
-
-      await t.commit();
-      return res.json({ message: 'Program updated' });
-    } catch (e) {
-      await t.rollback();
-      console.error('Remake failed', e.stack || e.message || e);
-      return next(ApiError.internal('Ошибка при обновлении программы'));
-    }
-  }*/
 
 }
 

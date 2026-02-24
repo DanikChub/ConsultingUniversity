@@ -121,7 +121,13 @@ async function recalculateEnrollmentProgress(enrollmentId) {
     if (enrollment.progress_percent == 100) {
         sendCompletionEmail('chabanovdan@gmail.com', 'Даниил Чабанов', 'Тестовая программа потом доделаю')
         enrollment.status = 'completed';
+        await Event.create({
+            event_text: 'Пользователь завершил обучение',
+            name: program.title
+        });
         enrollment.completed_at = new Date();
+    } else {
+        enrollment.status = 'active';
     }
     await enrollment.save()
 
@@ -220,6 +226,7 @@ Theme.addHook('afterDestroy', async (theme, options) => {
 const Punct = sequelize.define('punct', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     title: { type: DataTypes.STRING },
+    description: {type: DataTypes.TEXT},
     order_index: { type: DataTypes.INTEGER },
 });
 
@@ -232,18 +239,25 @@ const File = sequelize.define('file', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 
     original_name: { type: DataTypes.STRING, allowNull: false },
-    stored_name: { type: DataTypes.STRING, allowNull: false },
-    mime_type: { type: DataTypes.STRING, allowNull: false },
-    type: { type: DataTypes.ENUM('docx', 'pdf', 'audio', 'video')},
+    stored_name: { type: DataTypes.STRING, allowNull: true },
+    mime_type: { type: DataTypes.STRING, allowNull: true },
+
+    type: { type: DataTypes.ENUM('docx', 'pdf', 'audio', 'video') },
+
     size: { type: DataTypes.INTEGER },
-    order_index: {type: DataTypes.INTEGER},
-    status: { type: DataTypes.ENUM('uploading','idle','error'), defaultValue: 'uploading' },
-    storage: {
-        type: DataTypes.ENUM('local', 's3', 'external'),
-        defaultValue: 'local'
+    url: { type: DataTypes.TEXT, allowNull: true }, // 🔥 ВАЖНО
+
+    order_index: { type: DataTypes.INTEGER },
+
+    status: {
+        type: DataTypes.ENUM('uploading', 'idle', 'error'),
+        defaultValue: 'uploading',
     },
-}, {
-    tableName: 'files'
+
+    storage: {
+        type: DataTypes.ENUM('local', 's3', 'vimeo'),
+        defaultValue: 'local',
+    },
 });
 
 File.addHook('beforeDestroy', async (file) => {

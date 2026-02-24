@@ -146,6 +146,12 @@ class UserController {
                 address
             });
 
+            await Event.create({
+                event_text: 'Добавлен новый администратор',
+                name,
+                organization,
+            }, { transaction: t });
+
             const token = generateJwt(user.id, user.email, user.role);
             return res.json({ token });
 
@@ -300,7 +306,7 @@ class UserController {
     // ======================== REMAKE ADMIN ========================
     async remakeAdmin(req, res, next) {
         try {
-            const { id, email, password, name, number } = req.body;
+            const { id, email, password, role, name, number } = req.body;
             const user = await User.findOne({ where: { id } });
             if (!user) return next(ApiError.badRequest('Пользователь не найден'));
             if (!email) return next(ApiError.badRequest('Некорректный email'));
@@ -310,6 +316,9 @@ class UserController {
             if (password) user.password = await bcrypt.hash(password, 5);
             user.name = name;
             user.number = number;
+            if (role) {
+                user.role = role;
+            }
             await user.save();
             return res.json({ user });
 
@@ -637,8 +646,14 @@ class UserController {
     async deleteUser(req, res, next) {
         try {
             const { id } = req.body;
-            const deleted = await User.destroy({ where: { id } });
-            return res.json(deleted);
+            const user = await User.findOne({ where: { id } });
+            await Event.create({
+                event_text: 'Пользователь удален',
+                name: user.name,
+                organization: user.organization,
+            });
+            user.destroy();
+            return res.json(user);
         } catch (e) {
             console.error('deleteUser error:', e);
             return next(ApiError.internal('Ошибка удаления пользователя'));
