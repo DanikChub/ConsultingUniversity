@@ -20,7 +20,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ value, onChange, placeholder 
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         className={clsx(
-          "w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500",
+          "w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400",
           icon ? "pl-8" : "",
         )}
         {...props}

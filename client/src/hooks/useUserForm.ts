@@ -74,6 +74,10 @@ export const useUserForm = () => {
                     setAddress(user.address || '');
                     setUserProgramId(user.programs_id);
 
+                    if (user.role != 'USER') {
+                        setRole(user.role)
+                    }
+
                     console.log(user)
                     if (!queryParams.get('admin')) {
 
@@ -108,6 +112,11 @@ export const useUserForm = () => {
         setFilteredPrograms(filtered);
     }, [programs]);
 
+    const handleSelectRole = (newRole: 'ADMIN' | 'VIEWER') => {
+        console.log(newRole)
+        setRole(newRole)
+    }
+
     const handleSelectProgram = useCallback((program) => {
         setSelectedPrograms([program]);
 
@@ -139,7 +148,8 @@ export const useUserForm = () => {
         try {
             if (params.id) {
                 if (queryParams.get('admin')) {
-                    await remakeAdmin(params.id, email, password, name, phone);
+                    console.log(role)
+                    await remakeAdmin(params.id, email, password, role, name, phone);
                     navigate(ADMIN_ADMINISTRATORS_ROUTE);
                 } else {
                     await remakeUser(params.id, email, password, 'USER', name, phone, org, userProgramId, diplom, inn, address);
@@ -157,11 +167,11 @@ export const useUserForm = () => {
         } catch (err: any) {
             setServerMessage(err?.response?.data?.message || 'Ошибка сервера');
         }
-    }, [params.id, email, password, name, phone, org, userProgramId, diplom, inn, address]);
+    }, [params.id, email, password, name, role, phone, org, userProgramId, diplom, inn, address]);
 
     return {
         // DATA
-        role, setRole,
+        role, handleSelectRole,
         name, setName,
         email, setEmail,
         password, setPassword,

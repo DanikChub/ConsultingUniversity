@@ -27,13 +27,13 @@ export const getAllPrograms = async (): Promise<Program[]> => {
 
 // Получить все опубликованные программы
 export const getAllPublishedPrograms = async (): Promise<Program[]> => {
-    const { data } = await $host.get<Program[]>('api/program/published');
+    const { data } = await $authHost.get<Program[]>('api/program/published');
     return data;
 };
 
 // Получить все черновые программы
 export const getAllDraftPrograms = async (): Promise<Program[]> => {
-    const { data } = await $host.get<Program[]>('api/program/draft');
+    const { data } = await $authHost.get<Program[]>('api/program/draft');
     return data;
 };
 

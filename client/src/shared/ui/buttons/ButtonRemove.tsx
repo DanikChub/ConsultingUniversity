@@ -1,16 +1,25 @@
 import React from 'react';
 import {FaTrashAlt} from "react-icons/fa";
+import {useModals} from "../../../hooks/useModals";
 
 
 
 
 const ButtonRemove = ({onClick, message}) => {
+    const { openModal } = useModals();
 
-    const handleClick = (e) => {
+    const handleClick = async (e) => {
         e.stopPropagation()
-        const ok = window.confirm(message)
+        const confirmed = await openModal('confirm', {
+            title: message,
+            description: "Это действие нельзя отменить",
+            variant: "danger",
+            confirmText: "Удалить",
 
-        if (!ok) return;
+        });
+
+
+        if (!confirmed) return;
 
         onClick();
     }

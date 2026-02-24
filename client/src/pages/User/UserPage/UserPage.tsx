@@ -16,6 +16,7 @@ import check from '../../../assets/imgs/check.png';
 import user_img from '../../../assets/imgs/user.png';
 import { COURSE_ROUTE, STATEMENT_ROUTE, USER_CHAT_ROUTE } from '../../../shared/utils/consts';
 import {FiArchive, FiCheckCircle, FiClock} from "react-icons/fi";
+import UserPageSkeleton from "./components/UserPageSkeleton";
 
 const UserPage = observer(() => {
     const userContext = useContext(Context);
@@ -26,14 +27,16 @@ const UserPage = observer(() => {
     const [alertLoading, setAlertLoading] = useState(false);
 
     useEffect(() => {
+        setLoading(false)
         const userProgram = userContext.user.user.programs[0];
         setProgram(userProgram);
         setProgress(userProgram.enrollment.progress_percent ?? 0);
-        setLoading(true);
+
 
         getUnreadCount(userContext.user.user.id, 'USER')
             .then((data) => setUnreadMessages(data.unreadCount))
-            .catch((e) => console.error(e));
+            .catch((e) => console.error(e))
+            .finally(() => setLoading(true))
     }, []);
 
     const handleProfileImgClick = (e: ChangeEvent<HTMLInputElement>) => {
@@ -78,10 +81,10 @@ const UserPage = observer(() => {
     const status = statusStyles['published']
 
     return (
-        <UserContainer loading={loading}>
+        <UserContainer loading={loading} skeleton={<UserPageSkeleton/>}>
             <LoadingAlert show={alertLoading} text="Загружаем картинку профиля..." />
 
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                 {/* Профиль и приветствие */}
                 <div className="flex items-center mb-8 md:mb-0">
                     <div className="relative">
@@ -107,7 +110,7 @@ const UserPage = observer(() => {
 
                     <div className="ml-12">
                         <div className="text-3xl font-bold text-gray-800">
-                            {userContext.user.user.name.split(' ')[1]}, привет!
+                            {userContext.user.user.name.split(' ')[0]}, привет!
                         </div>
                         <div className="mt-5 text-xl font-light text-gray-800">
                             Сегодня отличный день, <br/> чтобы узнать что-то новое.
@@ -153,7 +156,7 @@ const UserPage = observer(() => {
                             </defs>
                         </svg>
 
-                        {unreadMessages && unreadMessages !== 0 && (
+                        {unreadMessages !== 0 && (
                             <div className="absolute -right-2.5 -bottom-2.5 w-11 h-11 bg-red-600 rounded-full flex items-center justify-center">
                                 <span className="text-white font-bold text-2xl">{unreadMessages}</span>
                             </div>
@@ -171,7 +174,7 @@ const UserPage = observer(() => {
                         <img src={statement} alt="" />
                     </div>
                     <div className="ml-4">
-                        <Link to={STATEMENT_ROUTE} className="font-medium text-lg text-gray-800 mt-12 block">
+                        <Link to={STATEMENT_ROUTE} className="font-medium text-lg text-gray-800 block">
                             Электронная <br /> ведомость
                         </Link>
                     </div>

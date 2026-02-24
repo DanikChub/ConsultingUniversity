@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import { deleteUser, getAllAdmins, getAllUsersWithPage,  } from '../../../entities/user/api/user.api';
-import {ADMIN_REGISTRATE_ADMIN, ADMIN_REGISTRATE_USER} from '../../../shared/utils/consts';
+import {ADMIN_CHANGE_ADMIN, ADMIN_REGISTRATE_ADMIN, ADMIN_REGISTRATE_USER} from '../../../shared/utils/consts';
 
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -101,13 +101,14 @@ const AdministratorsPage = () => {
             })
         );
     }
-
+    const containerRef = useRef(null);
     const handleContextMenu = (e, userId) => {
         e.preventDefault(); // отключаем стандартное меню
+        const rect = containerRef.current.getBoundingClientRect();
         setContextMenu({
             visible: true,
-            x: e.clientX,
-            y: e.pageY,
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
             userId
         });
     };
@@ -118,16 +119,16 @@ const AdministratorsPage = () => {
         }
     };
 
-    const handleEdit = (id) => navigate(`/admin/listeners/new_listener/${id}`);
+    const handleEdit = (id) => navigate(ADMIN_CHANGE_ADMIN.replace(':id', id) + '?admin=true');
     
     return (
-        <AppContainer onClick={handleClickOutside}>
-
-            <Button to={ADMIN_REGISTRATE_ADMIN + '?admin=true'}  checkRole='ADMIN' className="admin_button">Добавить администратора</Button>
-            <div className="w-full mt-4 min-h-[410px]">
-                {/* Шапка */}
-                <div
-                    className="
+        <AppContainer onClick={handleClickOutside}  >
+            <div className="relative" ref={containerRef}>
+                <Button to={ADMIN_REGISTRATE_ADMIN + '?admin=true'}  checkRole='ADMIN' className="admin_button">Добавить администратора</Button>
+                <div className="w-full mt-4 min-h-[410px]">
+                    {/* Шапка */}
+                    <div
+                        className="
                     grid
                     grid-cols-[1fr_3fr_3fr_3fr_3fr_3fr]
                     gap-[40px]
@@ -135,27 +136,27 @@ const AdministratorsPage = () => {
                     font-semibold
                     pb-2
                 "
-                >
+                    >
 
-                    <div className="text-sm text-[#2C3E50] font-semibold">ID</div>
-                    <div className="text-sm text-[#2C3E50] font-semibold">ФИО</div>
-                    <div className="text-sm text-[#2C3E50] font-semibold">EMAIL</div>
-                    <div className="text-sm text-[#2C3E50] font-semibold">Роль</div>
-                    <div className="text-sm text-[#2C3E50] font-semibold">Дата создания</div>
+                        <div className="text-sm text-[#2C3E50] font-semibold">ID</div>
+                        <div className="text-sm text-[#2C3E50] font-semibold">ФИО</div>
+                        <div className="text-sm text-[#2C3E50] font-semibold">EMAIL</div>
+                        <div className="text-sm text-[#2C3E50] font-semibold">Роль</div>
+                        <div className="text-sm text-[#2C3E50] font-semibold">Дата создания</div>
 
-                    <div className="text-sm text-[#2C3E50] font-semibold">Сеанс</div>
+                        <div className="text-sm text-[#2C3E50] font-semibold">Сеанс</div>
 
-                </div>
+                    </div>
 
-                {/* Строки */}
-                {!loading ? (
-                    <ListenersSkeleton/>
-                ) : (
-                    filteredUsers.map((user, i) => (
-                        <div
-                            key={user.id}
-                            onContextMenu={(e) => handleContextMenu(e, user.id)}
-                            className={`
+                    {/* Строки */}
+                    {!loading ? (
+                        <ListenersSkeleton/>
+                    ) : (
+                        filteredUsers.map((user, i) => (
+                            <div
+                                key={user.id}
+                                onContextMenu={(e) => handleContextMenu(e, user.id)}
+                                className={`
                             grid
                             grid-cols-[1fr_3fr_3fr_3fr_3fr_3fr]
                             gap-[40px]
@@ -164,46 +165,48 @@ const AdministratorsPage = () => {
                             
                             relative ${i==0?'bg-green-200':'hover:bg-gray-100'}
                         `}
-                        >
-                            <div className="text-sm text-[#2C3E50]">{user.id}.</div>
-                            <div className="text-sm text-[#2C3E50]">{user.name}</div>
-                            <div className="text-sm text-[#2C3E50]">{user.email}</div>
-                            <div className="text-sm text-[#2C3E50]">{user.role}</div>
-                            <div className="text-sm text-[#2C3E50]">{dateToString(user.createdAt)}</div>
-                            <div className="text-sm text-[#2C3E50]">{i==0?`(Текущий)`:''}</div>
-                        </div>
-                    ))
-                )}
+                            >
+                                <div className="text-sm text-[#2C3E50]">{user.id}.</div>
+                                <div className="text-sm text-[#2C3E50]">{user.name}</div>
+                                <div className="text-sm text-[#2C3E50]">{user.email}</div>
+                                <div className="text-sm text-[#2C3E50]">{user.role == 'ADMIN'?'Полный доступ':'Только просмотр'}</div>
+                                <div className="text-sm text-[#2C3E50]">{dateToString(user.createdAt)}</div>
+                                <div className="text-sm text-[#2C3E50]">{i==0?`(Текущий)`:''}</div>
+                            </div>
+                        ))
+                    )}
 
 
-            </div>
-            {contextMenu.visible && (
-                <div
-                    style={{ top: contextMenu.y, left: contextMenu.x }}
-                    className="absolute bg-white z-50 w-[220px] rounded-md overflow-hidden"
-                >
-
-                    <button
-                        onClick={() => {
-                            if (contextMenu.userId) handleEdit(contextMenu.userId);
-                            setContextMenu({ visible: false, x: 0, y: 0, userId: null });
-                        }}
-                        className="w-full bg-[#D9D9D9] hover:bg-[#2D91CB] hover:text-white py-2 px-3 transition text-left text-sm"
-                    >
-                        Изменить
-                    </button>
-                    <button
-                        onClick={() => {
-                            if (contextMenu.userId) destroyUser(contextMenu.userId);
-                            setContextMenu({ visible: false, x: 0, y: 0, userId: null });
-                        }}
-
-                        className="w-full bg-[#D9D9D9] hover:bg-red-600 hover:text-white py-2 px-3 transition text-left text-sm"
-                    >
-                        Удалить
-                    </button>
                 </div>
-            )}
+                {contextMenu.visible && (
+                    <div
+                        style={{ top: contextMenu.y, left: contextMenu.x }}
+                        className="absolute bg-white z-50 w-[220px] rounded-md overflow-hidden"
+                    >
+
+                        <button
+                            onClick={() => {
+                                if (contextMenu.userId) handleEdit(contextMenu.userId);
+                                setContextMenu({ visible: false, x: 0, y: 0, userId: null });
+                            }}
+                            className="w-full bg-[#D9D9D9] hover:bg-[#2D91CB] hover:text-white py-2 px-3 transition text-left text-sm"
+                        >
+                            Изменить
+                        </button>
+                        <button
+                            onClick={() => {
+                                if (contextMenu.userId) destroyUser(contextMenu.userId);
+                                setContextMenu({ visible: false, x: 0, y: 0, userId: null });
+                            }}
+
+                            className="w-full bg-[#D9D9D9] hover:bg-red-600 hover:text-white py-2 px-3 transition text-left text-sm"
+                        >
+                            Удалить
+                        </button>
+                    </div>
+                )}
+            </div>
+
         </AppContainer>
     );
 };

@@ -36,19 +36,26 @@ const PunctBlock = ({ punct, progress, setPlayerActive, setActiveAudio }: PunctB
     return (
         <div className="space-y-3">
 
-            <div className="flex items-center justify-between">
-                <h4 className="font-medium text-gray-700">
-                    {punct.title}
-                </h4>
+            <div className="flex items-start justify-between gap-4">
+                <div>
+                    <h4 className="font-semibold text-gray-800">
+                        {punct.title}
+                    </h4>
 
-                <div className="flex items-center gap-2 text-sm text-gray-500">
+                    {punct.description && (
+                        <p className="mt-2 text-sm text-gray-500 leading-relaxed whitespace-pre-line">
+                            {punct.description}
+                        </p>
+                    )}
+                </div>
+
+                <div className="flex items-center gap-2 text-sm text-gray-500 whitespace-nowrap">
                     {completedCount} / {allItemsCount}
                     {isPunctCompleted && (
-                        <FiCheckCircle className="text-green-500" />
+                        <FiCheckCircle className="text-green-500"/>
                     )}
                 </div>
             </div>
-
             <div className="space-y-2 pl-4 border-l border-gray-200">
                 {punct.files?.map(file => (
                     <FileBlock

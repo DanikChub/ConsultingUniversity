@@ -14,6 +14,7 @@ import arrow_up from '../../../assets/imgs/arrow_up.png'
 import ListenersSkeleton from '../AdminListeners/components/ListenersSkeleton';
 import AppContainer from '../../../components/ui/AppContainer';
 import ProgressBar from "../AdminListeners/components/ProgressBar";
+import SearchInput from "../../../shared/ui/inputs/SearchInput";
 
 function dateToString(date) {
     
@@ -78,8 +79,13 @@ const AdminDocumentsPage = () => {
    
     return (
         <AppContainer>
-            <input onChange={(e) => handleSearchInput(e.target.value)} value={searchInput} className='SearchInput' placeholder='Поиск'/>
 
+            <SearchInput
+                className="mt-7"
+                value={searchInput}
+                onChange={e => handleSearchInput(e)}
+                placeholder="Поиск"
+            />
             <div className="w-full mt-4 min-h-[410px]">
                 {/* Шапка */}
                 <div

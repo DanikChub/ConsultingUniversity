@@ -15,7 +15,7 @@ type Props = {
 };
 
 const FileList: React.FC<Props> = ({ target, targetType }) => {
-    const { files, addFile, destroyFile, moveOneFile, editFileName  } = useFile(target, targetType);
+    const { files, addFile, addVideo, destroyFile, moveOneFile, editFileName  } = useFile(target, targetType);
     const { openModal } = useModals();
 
     // ----------------- drag & drop -----------------
@@ -33,10 +33,21 @@ const FileList: React.FC<Props> = ({ target, targetType }) => {
     };
 
 
-    const handleAddFile = async () => {
-        const file = await openModal('uploadFile', {});
-        if (file) await addFile(file);
+
+    const handleAddMaterial = async () => {
+        const result = await openModal('uploadFile', {});
+
+        if (!result) return;
+
+        if (result.type === 'file') {
+            await addFile(result.file);
+        }
+
+        if (result.type === 'video') {
+            await addVideo(result.url);
+        }
     };
+
 
     // ----------------- render -----------------
     return (
@@ -50,7 +61,7 @@ const FileList: React.FC<Props> = ({ target, targetType }) => {
                             {...provided.droppableProps}
                         >
                             <button
-                                onClick={handleAddFile}
+                                onClick={handleAddMaterial}
                                 className="flex flex-col h-full items-center justify-center py-3 w-40
                                 bg-gray-200 rounded border border-gray-300 hover:bg-gray-300 text-gray-600 font-medium cursor-pointer"
                             >

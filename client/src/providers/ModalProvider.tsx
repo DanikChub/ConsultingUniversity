@@ -8,6 +8,9 @@ import ProgramZipUploadModal from "../modals/ProgramZipUploadModal";
 import CreateTestModal from "../modals/CreateTestModal";
 import {TestViewModal} from "../modals/TestViewModal";
 import GradeBookModal from "../modals/GradeBookModal";
+import AlertModal from "../modals/AlertModal";
+import ConfirmModal from "../modals/ConfirmModal";
+
 
 type ActiveModal<T extends ModalType = ModalType> = {
     type: T;
@@ -52,7 +55,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             {modal?.type === 'uploadFile' && (
                 <FileUploadModal
                     onClose={() => close(null)}
-                    onSubmit={(file) => close(file)} // 👈 resolve промиса
+                    onSubmit={(data) => close( data )} // 👈 resolve промиса
                 />
             )}
 
@@ -104,6 +107,27 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     onClose={() => close('close')}
                 />
             )}
+            {modal?.type === 'alert' && (
+                <AlertModal
+                    title={modal.payload.title}
+                    description={modal.payload.description}
+                    buttonText={modal.payload.buttonText}
+                    onClose={() => close(undefined)}
+                />
+            )}
+
+            {modal?.type === 'confirm' && (
+                <ConfirmModal
+                    title={modal.payload.title}
+                    description={modal.payload.description}
+                    confirmText={modal.payload.confirmText}
+                    cancelText={modal.payload.cancelText}
+                    variant={modal.payload.variant}
+                    onCancel={() => close(false)}
+                    onConfirm={() => close(true)}
+                />
+            )}
+
 
         </ModalContext.Provider>
     );

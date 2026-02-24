@@ -86,8 +86,8 @@ export const remakeUser = async (id, email, password, role, name, number, organi
     return data
 }
 
-export const remakeAdmin = async (id, email, password, name, number) => {
-    const {data} = await $authHost.post('api/user/remakeAdmin', {id, email, password, name, number})
+export const remakeAdmin = async (id, email, password, role, name, number) => {
+    const {data} = await $authHost.post('api/user/remakeAdmin', {id, email, password, role, name, number})
 
     return data
 }

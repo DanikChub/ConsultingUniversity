@@ -226,10 +226,7 @@ const AdminUserPage = () => {
                                     alt={user.name}
                                     className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-full h-full object-cover"
                                 />
-                                <div
-                                    className="absolute inset-0 bg-white/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-center text-gray-800 text-sm">
-                                    Изменить <br/> фото
-                                </div>
+
                             </div>
                         ) : (
                             <div

@@ -7,6 +7,8 @@ import {COURSE_ROUTE, USER_ROUTE} from "../../../shared/utils/consts";
 import {FiArrowLeft, FiCheck} from "react-icons/fi";
 import {getContentProgress, updateProgress} from "../../../entities/progress/api/progress.api";
 import {Context} from "../../../index";
+import ButtonBack from "../../../shared/ui/buttons/ButtonBack";
+import {downloadFile} from "../../../shared/lib/download/downloadFile";
 
 // Используем CDN воркер — гарантировано работает
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
@@ -24,7 +26,7 @@ const PdfPage = () => {
     const [file, setFile] = useState<FileDto | null>(null)
     const [numPages, setNumPages] = useState(0)
     const [pageNumber, setPageNumber] = useState(1)
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
     const userContext = useContext(Context);
     const navigate = useNavigate()
     const [isCompleted, setIsCompleted] = useState(false)
@@ -37,7 +39,7 @@ const PdfPage = () => {
 
         const fetchFile = async () => {
             try {
-                setLoading(true)
+                setLoading(false)
 
                 const data = await getFile(id)
                 setFile(data)
@@ -78,7 +80,7 @@ const PdfPage = () => {
 
     const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
         setNumPages(numPages)
-        setLoading(false)
+        setLoading(true)
     }
 
     useEffect(() => {
@@ -110,39 +112,40 @@ const PdfPage = () => {
         }
     }, [pageNumber, numPages, file])
 
-    const remakeFileName = (url: string, newName: string) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.responseType = 'blob';
-        xhr.onload = function () {
-            const blob = this.response;
-            const link = document.createElement("a");
-            link.style.display = "none";
-            link.href = window.URL.createObjectURL(blob);
-            link.setAttribute("download", newName);
-            link.click();
-        };
-        xhr.send();
-    };
 
-    if (!file) {
-        return <div className="p-6">Загрузка файла...</div>
+    const handleDownload = (url: string, filename: string) => {
+        downloadFile({url: url, filename: filename})
+        const markCompleted = async () => {
+            try {
+                completedRef.current = true // ставим ДО await
+
+                const enrollmentId = userContext.user.enrollmentId
+
+                await updateProgress({
+                    enrollmentId,
+                    contentType: "file",
+                    contentId: file.id,
+                    status: "completed"
+                })
+
+                setIsCompleted(true)
+            } catch (e) {
+                completedRef.current = false
+                console.error("Ошибка обновления прогресса:", e)
+            }
+        }
+
+        markCompleted()
     }
+
+    if (!file) return <UserContainer>Загрузка...</UserContainer>
 
     const fileUrl = `${process.env.REACT_APP_API_URL}/${file.stored_name}`
 
     const progressPercent = ((pageNumber / numPages) * 100).toFixed(0)
     return (
-        <UserContainer isLeftPanel={true} loading={true}>
-            <button
-                onClick={() => navigate(-1)}
-                className="flex items-center gap-3 text-gray-600 hover:text-gray-900 transition group"
-            >
-                <div className="p-3 rounded-full bg-gray-100 group-hover:bg-gray-200 transition">
-                    <FiArrowLeft size={20}/>
-                </div>
-                <span className="text-lg font-medium">Назад</span>
-            </button>
+        <UserContainer isLeftPanel={true} loading={loading}>
+            <ButtonBack/>
             <div className="min-h-[787px] flex flex-col items-center py-8">
                 <div className="bg-white shadow-2xl rounded-2xl py-6 px-6 w-full flex flex-col items-center">
 
@@ -153,7 +156,7 @@ const PdfPage = () => {
                         </h1>
 
                         <div
-                            onClick={() => remakeFileName(fileUrl, file.original_name)}
+                            onClick={() => handleDownload(fileUrl, file.original_name)}
                             className="px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-green-600 transition cursor-pointer"
                         >
                             Скачать PDF

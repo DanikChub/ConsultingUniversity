@@ -37,7 +37,7 @@ import {
     CHAR_PAGE_ROUTE,
     CHAT_USERS_PAGE_ROUTE,
     USER_CHAT_ROUTE,
-    ADMIN_REGISTRATE_ADMIN, TEST_OVERVIEW_ROUTE, TEST_ATTEMPT_ROUTE, PDF_ROUTE
+    ADMIN_REGISTRATE_ADMIN, TEST_OVERVIEW_ROUTE, TEST_ATTEMPT_ROUTE, PDF_ROUTE, ADMIN_CHANGE_ADMIN
 } from './shared/utils/consts'
 import LoginPage from './pages/LoginPage/LoginPage'
 import AdminPage from './pages/admin/AdminPage/AdminPage'
@@ -47,7 +47,7 @@ import AdminListeners from './pages/admin/AdminListeners/AdminListeners'
 import RegistrateUser from './pages/admin/RegistrateUser/RegistrateUser'
 import ApplicationPage from './pages/admin/ApplicationPage/ApplicationPage'
 import FinishTestPage from './pages/User/FinishTestPage/FinishTestPage'
-import VideoPage from './pages/admin/VideoPage/VideoPage'
+import VideoPage from './pages/User/VideoPage/VideoPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage/ForgotPasswordPage'
 import ViewProgram from './pages/admin/ViewProgram/ViewProgram'
 import ViewTest from './pages/admin/ViewTest/ViewTest'
@@ -200,6 +200,11 @@ export const adminRoutes = [
     ,
     {
         path: ADMIN_REGISTRATE_ADMIN,
+        Component: <RegistrateAdmin/>
+    }
+    ,
+    {
+        path: ADMIN_CHANGE_ADMIN,
         Component: <RegistrateAdmin/>
     }
 ]

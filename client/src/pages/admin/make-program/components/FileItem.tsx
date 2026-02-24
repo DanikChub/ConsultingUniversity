@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaTrashAlt } from 'react-icons/fa';
+import { FaTrashAlt, FaVideo } from 'react-icons/fa';
 import pdfIcon from '../../../../assets/imgs/pdf.png';
 import wordIcon from '../../../../assets/imgs/word_blue.png';
 import audioIcon from '../../../../assets/imgs/audio.png';
@@ -7,6 +7,8 @@ import type { File as FileType } from '../../../../entities/file/model/type';
 import {useModals} from "../../../../hooks/useModals";
 import ButtonRemove from "../../../../shared/ui/buttons/ButtonRemove";
 import {downloadFile} from "../../../../shared/lib/download/downloadFile";
+import {FiFileText, FiHeadphones} from "react-icons/fi";
+import {AiFillFilePdf} from "react-icons/ai";
 
 type Props = {
     file: FileType;
@@ -20,30 +22,48 @@ const FileItem: React.FC<Props> = ({ file, onDelete, renameFile }) => {
 
 
     const handleViewFile = () => {
-        openModal('fileInfo', {
-            file,
-            onDelete: async (id) => onDelete(id),
-            onDownload: (file: FileType) => {
-                downloadFile({
-                    url: `${process.env.REACT_APP_API_URL}${file.stored_name}`,
-                    filename: file.original_name,
-                });
+        if (file.type == 'video') {
+            openModal('fileInfo', {
+                file,
+                onDelete: async (id) => onDelete(id),
+                onRename: async (newName) => renameFile(file.id, newName)
+            });
+        } else {
+            openModal('fileInfo', {
+                file,
+                onDelete: async (id) => onDelete(id),
+                onDownload: (file: FileType) => {
+                    downloadFile({
+                        url: `${process.env.REACT_APP_API_URL}${file.stored_name}`,
+                        filename: file.original_name,
+                    });
 
-            },
-            onRename: async (newName) => renameFile(file.id, newName)
-        });
-    };
-
-    const getIcon = () => {
-        switch (file.type) {
-            case 'pdf': return pdfIcon;
-            case 'docx': return wordIcon;
-            case 'audio': return audioIcon;
-            default: return pdfIcon;
+                },
+                onRename: async (newName) => renameFile(file.id, newName)
+            });
         }
+
     };
+
+
+
+    const fileIcon = (() => {
+        switch (file.type) {
+            case "audio":
+                return <FiHeadphones className="w-6 h-6 text-blue-500" />
+            case "docx":
+                return <FiFileText className="w-6 h-6 text-green-500" />
+            case "pdf":
+                return <AiFillFilePdf className="w-6 h-6 text-red-500" />
+            case 'video':
+                return <FaVideo className="w-6 h-6 text-blue-500" />;
+            default:
+                return <FiFileText className="w-6 h-6 text-gray-500" />
+        }
+    })()
 
     const formatSize = (size: number) => {
+        if (!size) return '0 B'
         if (size < 1024) return size + ' B';
         if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB';
         return (size / (1024 * 1024)).toFixed(1) + ' MB';
@@ -66,10 +86,14 @@ const FileItem: React.FC<Props> = ({ file, onDelete, renameFile }) => {
     return (
         <div onClick={handleViewFile} className="flex flex-col w-full max-w-max min-w-[150px] h-full bg-gray-50 rounded p-2 border border-gray-200 hover:bg-gray-100">
             <div className="flex items-center gap-2">
-                <img src={getIcon()} alt={file.type} className="w-6 h-6 flex-shrink-0" />
+                {fileIcon}
+
                 <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{makeShortFileName(file.original_name)}</p>
+
                     <p className="text-xs text-gray-500">{formatSize(file.size)}</p>
+
+
                 </div>
                 <ButtonRemove onClick={() => onDelete(file.id)} message="Вы уверены, что хотите удалить файл?"/>
             </div>

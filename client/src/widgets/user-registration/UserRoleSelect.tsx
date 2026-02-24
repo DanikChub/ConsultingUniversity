@@ -1,10 +1,10 @@
 import React from 'react';
 
-type UserRole = 'admin' | 'editor' | 'viewer';
+type UserRole = 'ADMIN' | 'VIEWER';
 
 interface Props {
     role: UserRole;
-    setRole: (role: UserRole) => void;
+    handleSelectRole: (role: UserRole) => void;
 }
 
 const roles = [
@@ -20,7 +20,7 @@ const roles = [
     }
 ];
 
-const UserRoleSelect: React.FC<Props> = ({ role, setRole }) => {
+const UserRoleSelect: React.FC<Props> = ({ role, handleSelectRole }) => {
     return (
         <div className="grid grid-cols-[118px_auto] p-[25px] border-b border-[#C7C7C7] gap-[30px]">
             <div className="text-right">
@@ -32,7 +32,7 @@ const UserRoleSelect: React.FC<Props> = ({ role, setRole }) => {
                     <button
                         key={r.value}
                         type="button"
-                        onClick={() => setRole(r.value as UserRole)}
+                        onClick={() => handleSelectRole(r.value as UserRole)}
                         className={`
                             p-4 rounded-xl border text-left transition
                             ${role === r.value

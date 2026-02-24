@@ -10,11 +10,12 @@ import type { ProgramProgress } from "../../../../entities/progress/model/type"
 import { getContentStatus } from "../../../../entities/progress/model/selectors"
 import type { File } from "../../../../entities/file/model/type"
 import { useNavigate } from "react-router-dom"
-import { LECTION_ROUTE, PDF_ROUTE } from "../../../../shared/utils/consts"
-import {useContext, useEffect, useState} from "react"
+import {LECTION_ROUTE, PDF_ROUTE, VIDEO_ROUTE} from "../../../../shared/utils/consts"
+import React, {useContext, useEffect, useState} from "react"
 import {updateProgress} from "../../../../entities/progress/api/progress.api";
 import {Context} from "../../../../index";
 import {observer} from "mobx-react-lite";
+import {FaVideo} from "react-icons/fa";
 
 interface FileBlockProps {
     file: File
@@ -81,6 +82,10 @@ const FileBlockComponent = ({
             navigate(PDF_ROUTE.replace(':id', `${file.id}`))
         }
 
+        if (file.type === 'video') {
+            navigate(VIDEO_ROUTE.replace(':id', `${file.id}`))
+        }
+
         setLoading(false)
     }
 
@@ -95,6 +100,8 @@ const FileBlockComponent = ({
                 return <FiFileText className="text-green-500" />
             case "pdf":
                 return <AiFillFilePdf className="text-red-500" />
+            case 'video':
+                return <FaVideo className="text-blue-500" />;
             default:
                 return <FiFileText className="text-gray-500" />
         }

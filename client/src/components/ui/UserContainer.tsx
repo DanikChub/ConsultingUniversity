@@ -12,9 +12,10 @@ interface AppContainerProps extends HTMLAttributes<HTMLDivElement> {
     children: ReactNode;
     loading?: boolean;
     isLeftPanel?: boolean;
+    skeleton?: ReactNode;
 }
 
-const UserContainer: React.FC<AppContainerProps> = ({ children, loading, isLeftPanel,...rest }) => {
+const UserContainer: React.FC<AppContainerProps> = ({ children, loading, isLeftPanel, skeleton, ...rest }) => {
     return (
         <div className="">
             {/*<div className="fixed top-[200px] left-0">*/}
@@ -25,14 +26,19 @@ const UserContainer: React.FC<AppContainerProps> = ({ children, loading, isLeftP
             <div className="w-full mb-[121px] mt-[95px]" {...rest}>
 
                 <div className="min-h-[55vh]">
-                    {
-                        loading &&
-                        <div className="w-full m-auto max-w-[1209px]">
 
+                    <div className="w-full m-auto max-w-[1209px]">
+                        {
+                            loading ?
+                                <div>{children}</div>
+                                :
+                                skeleton ?
+                                    <div>{skeleton}</div>
+                                    :
+                                    <div>Загрузка...</div>
+                        }
+                    </div>
 
-                            <div>{children}</div>
-                        </div>
-                    }
                 </div>
 
             </div>

@@ -7,6 +7,7 @@ export interface Punct {
     kind: 'punct';
     themeId: number;
     title: string;
+    description: string;
     order_index: number;
     files?: File[];
     tests?: Test[];

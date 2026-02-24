@@ -9,6 +9,7 @@ import { Context } from '../../../index';
 import AutoResizeTextarea from '../../../components/ui/AutoResizeTextarea';
 import ChatMessage from "./components/ChatMessage";
 import AppContainer from "../../../components/ui/AppContainer";
+import ButtonBack from "../../../shared/ui/buttons/ButtonBack";
 
 const makeTime = (time: string) => {
     const date = new Date(time);
@@ -59,20 +60,12 @@ const ChatPage: React.FC = () => {
     return (
         <AppContainer loading={loading}>
             {/* Header */}
-            <div className="flex items-center gap-3 mb-4">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="p-2 rounded-full bg-gray-200"
-                >
-                    ←
-                </button>
-                <span className="text-lg font-medium">Назад</span>
-            </div>
+            <ButtonBack/>
 
             {/* Chat container */}
             <div
                 ref={chatContainerRef}
-                className="flex flex-col border rounded-xl p-4 space-y-2 h-[500px] max-h-[70vh] overflow-y-auto bg-white"
+                className="flex flex-col border rounded-xl p-4 space-y-2 h-[500px] max-h-[70vh] overflow-y-auto bg-white mt-4"
             >
                 {chatItems.map(msg => (
                     <ChatMessage

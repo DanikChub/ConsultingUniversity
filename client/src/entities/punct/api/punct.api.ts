@@ -21,11 +21,13 @@ export const updatePunctTitle = async (punctId: number, title: string): Promise<
     return data;
 };
 
-// Добавить файл к пункту
-export const addFileToPunct = async (punctId: number, formData: FormData): Promise<{ success: boolean; file: File; fileAsset?: any }> => {
-    const { data } = await $authHost.post(`api/program/punct/${punctId}/files`, formData);
+// Обновить описание пункта
+export const updatePunctDescription = async (punctId: number, description: string): Promise<{ id: number; title: string }> => {
+    const { data } = await $authHost.patch(`api/program/punct/${punctId}/description`, { description });
     return data;
 };
+
+
 
 // Удалить пункт
 export const deletePunct = async (punctId: number): Promise<{ success: boolean; message: string }> => {

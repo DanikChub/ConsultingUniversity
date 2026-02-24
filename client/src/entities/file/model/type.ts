@@ -9,14 +9,15 @@ export interface FileAsset {
 export interface File {
     id: number;
     original_name: string;
-    stored_name: string;
-    mime_type: string;
-    size: number;
-    type: 'docx' | 'pdf' | 'audio';
+    stored_name?: string;
+    mime_type?: string;
+    url?: string;
+    size?: number;
+    type: 'docx' | 'pdf' | 'audio' | 'video';
     order_index: number;
     status: 'uploading' | 'idle' | 'error';
     progress?: number;
-    storage: 'local' | 's3';
+    storage: 'local' | 's3' | 'vimeo';
     themeId?: number | null;
     punctId?: number | null;
     file_asset?: FileAsset | null;

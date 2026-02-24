@@ -192,6 +192,24 @@ const FilePreview = ({file}: { file: ProgramFile }) => {
         );
     }
 
+    if (file.type === 'video') {
+        const match = file.url.match(/vimeo\.com\/(\d+)/);
+        const videoId = match[1]
+        return (
+            <iframe
+                key={videoId}
+                src={`https://player.vimeo.com/video/${videoId}`}
+                width="640"
+                height="360"
+                frameBorder="0"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                style={{backgroundColor: "#000"}}
+                className="w-full rounded"
+            />
+        );
+    }
+
     return (
         <div className="text-sm text-gray-500">
             Предпросмотр недоступен

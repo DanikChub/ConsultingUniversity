@@ -29,7 +29,7 @@ const TestList: React.FC<Props> = ({ punct }) => {
             {/* Красивая кнопка "Добавить тест" */}
             <button
                 onClick={addTest}
-                className="flex items-center gap-1 bg-[#2980B9] hover:bg-[#2C3E50] active:bg-[#2C3E50] text-white text-sm font-medium px-3 py-1.5 rounded-md transition-colors"
+                className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 active:bg-blue-600 text-white text-sm font-medium px-3 py-1.5 rounded-md transition-colors"
             >
                 <FaPlus size={14}/>
                 <span>Добавить тест</span>

@@ -34,7 +34,7 @@ export const TestViewModal: FC<Props> = ({ test, onClose }) => {
                     {/* Header */}
                     <div className="p-6 border-b flex flex-col gap-2">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                            <h2 className="text-2xl font-bold">{test.title || 'Без названия'}</h2>
+                            <h2 className="text-2xl font-bold text-left">{test.title || 'Без названия'}</h2>
                             <span className={`px-3 py-1 rounded-full text-sm font-semibold 
                                 ${test.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700'}`}>
                                 {statusTranslate[test.status]}

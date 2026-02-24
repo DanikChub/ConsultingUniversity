@@ -3,6 +3,7 @@ import type {Punct} from "../../../entities/punct/model/type";
 import type {Theme} from "../../../entities/theme/model/type";
 import type {File as FileType} from "../../../entities/file/model/type";
 import {deleteFile, moveFile, updateFileName} from "../../../entities/file/api/file.api";
+import axios from "axios";
 
 export const useFile = (target: Punct | Theme | null, targetType: 'theme' | 'punct') => {
     const [files, setFiles] = useState<FileType[]>(() => target?.files || []);
@@ -101,6 +102,50 @@ export const useFile = (target: Punct | Theme | null, targetType: 'theme' | 'pun
         }
     };
 
+    const addVideo = async (url: string) => {
+        if (!target) return;
+
+        const tempFile: any = {
+            id: Date.now(),
+            original_name: 'VK Video',
+            type: 'video',
+            storage: 'vk',
+            url,
+            status: 'idle',
+            order_index: files.length + 1,
+        };
+
+        setFiles(prev => [...prev, tempFile]);
+
+        try {
+            const { data } = await axios.post(
+                `${process.env.REACT_APP_API_URL}api/program/file`,
+                {
+                    targetType,
+                    targetId: target.id,
+                    type: 'video',
+                    url,
+                }
+            );
+
+
+            setFiles(prev =>
+                prev.map(f => (f.id === tempFile.id ? data.file : f))
+            );
+
+            return data.file;
+
+        } catch (e) {
+            console.error('Ошибка добавления видео', e);
+            setFiles(prev =>
+                prev.map(f =>
+                    f.id === tempFile.id ? { ...f, status: 'error' } : f
+                )
+            );
+        }
+    };
+
+
     const destroyFile = async (fileId: number) => {
         try {
             // optimistic UI
@@ -174,6 +219,7 @@ export const useFile = (target: Punct | Theme | null, targetType: 'theme' | 'pun
     return {
         files,
         addFile,
+        addVideo,
         destroyFile,
         moveOneFile,
         editFileName

@@ -7,17 +7,16 @@ type DownloadParams = {
 };
 
 export const downloadFile = async ({ url, filename }: DownloadParams) => {
-    const response = await fetch(url);
-    const blob = await response.blob();
-
-    const objectUrl = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = objectUrl;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(objectUrl);
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'blob';
+    xhr.onload = function () {
+        const blob = this.response;
+        const link = document.createElement("a");
+        link.style.display = "none";
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute("download", filename);
+        link.click();
+    };
+    xhr.send();
 };

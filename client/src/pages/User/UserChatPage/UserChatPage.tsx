@@ -11,6 +11,7 @@ import { Context } from '../../../index';
 import UserContainer from '../../../components/ui/UserContainer';
 import AutoResizeTextarea from '../../../components/ui/AutoResizeTextarea';
 import ChatMessage from "../../admin/ChatPage/components/ChatMessage";
+import ButtonBack from "../../../shared/ui/buttons/ButtonBack";
 
 const makeTime = (time: string) => {
     const date = new Date(time);
@@ -18,7 +19,7 @@ const makeTime = (time: string) => {
 };
 
 const UserChatPage: React.FC = () => {
-    const { user } = useContext(Context);
+    const userContext = useContext(Context);
     const navigate = useNavigate();
 
     const [chatItems, setChatItems] = useState<any[]>([]);
@@ -37,26 +38,29 @@ const UserChatPage: React.FC = () => {
 
     useEffect(() => {
         setLoading(true);
+        if (userContext.user.user.id) {
+            console.log(userContext.user.user.id)
+            // Получаем данные пользователя и программу (логика оставлена)
+            getUserById(userContext.user.user.id)
+                .then(data => getOneProgram(data.programs[0].id));
 
-        // Получаем данные пользователя и программу (логика оставлена)
-        getUserById(user.user.id)
-            .then(data => getOneProgram(data.programs_id[0]));
+            // Получаем сообщения и помечаем как прочитанные
+            getMessages(userContext.user.user.id).then(messages => {
+                setChatItems(messages);
+                setTimeout(scrollToBottom, 50); // прокрутка после загрузки
+            });
 
-        // Получаем сообщения и помечаем как прочитанные
-        getMessages(user.user.id).then(messages => {
-            setChatItems(messages);
-            setTimeout(scrollToBottom, 50); // прокрутка после загрузки
-        });
+            markChatAsRead(userContext.user.user.id, 'USER');
+        }
 
-        markChatAsRead(user.user.id, 'USER');
 
-    }, [user.user.id]);
+    }, [userContext.user.user.id]);
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim()) return;
 
-        const messages = await sendMessage(input, user.user.id, 'user');
+        const messages = await sendMessage(input, userContext.user.user.id, 'user');
         setChatItems(messages);
         setInput('');
         setTimeout(scrollToBottom, 50); // прокрутка после отправки
@@ -67,17 +71,12 @@ const UserChatPage: React.FC = () => {
             <div className="flex flex-col h-full">
 
                 {/* Header */}
-                <div className="flex items-center gap-3 mb-4">
-                    <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-gray-200">
-                        ←
-                    </button>
-                    <span className="text-lg font-medium">Назад</span>
-                </div>
+                <ButtonBack/>
 
                 {/* Chat container */}
                 <div
                     ref={chatContainerRef}
-                    className="flex-1 overflow-y-auto border rounded-xl p-4 space-y-2 h-[500px] max-h-[70vh] bg-white"
+                    className="flex-1 overflow-y-auto border rounded-xl p-4 space-y-2 h-[500px] max-h-[70vh] bg-white mt-4"
                 >
                     {chatItems.map(msg => (
                         <ChatMessage

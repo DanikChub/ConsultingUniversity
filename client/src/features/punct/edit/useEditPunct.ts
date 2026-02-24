@@ -2,7 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 
 
 import type {Test} from "../../../entities/test/model/type";
-import {createPunct, deletePunct, updatePunctTitle, movePunct as apiMovePunct} from "../../../entities/punct/api/punct.api";
+import {
+    createPunct,
+    deletePunct,
+    updatePunctTitle,
+    movePunct as apiMovePunct,
+    updatePunctDescription
+} from "../../../entities/punct/api/punct.api";
 import type {Theme} from "../../../entities/theme/model/type";
 import type {Punct} from "../../../entities/punct/model/type";
 
@@ -26,6 +32,27 @@ export const usePunct = (theme: Theme | null) => {
         debounceTimers.current[punctIndex] = setTimeout(async () => {
             try {
                 await updatePunctTitle(puncts[punctIndex].id, value);
+            } catch (e) {
+                console.error('Ошибка обновления пункта', e);
+            }
+        }, 700);
+    };
+
+    // ----------------- обновление description пункта -----------------
+    const updateDescriptionPunct = (punctIndex: number, value: string) => {
+        setPuncts(prev => {
+            const next = [...prev];
+            next[punctIndex] = { ...next[punctIndex], description: value };
+            return next;
+        });
+
+        if (debounceTimers.current[punctIndex]) {
+            clearTimeout(debounceTimers.current[punctIndex]);
+        }
+
+        debounceTimers.current[punctIndex] = setTimeout(async () => {
+            try {
+                await updatePunctDescription(puncts[punctIndex].id, value);
             } catch (e) {
                 console.error('Ошибка обновления пункта', e);
             }
@@ -79,6 +106,7 @@ export const usePunct = (theme: Theme | null) => {
         puncts,
         setPuncts,
         updateTitlePunct,
+        updateDescriptionPunct,
         addPunct,
         destroyPunct,
         moveOnePunct,

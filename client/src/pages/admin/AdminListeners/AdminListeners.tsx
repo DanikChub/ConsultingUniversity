@@ -63,6 +63,7 @@ const AdminListeners: React.FC = () => {
             <div className="relative" ref={containerRef}>
                 <Button
                     to={ADMIN_REGISTRATE_USER}
+                    checkRole="ADMIN"
                 >
                     Добавить слушателя
                 </Button>
@@ -71,7 +72,7 @@ const AdminListeners: React.FC = () => {
                     className="mt-7"
                     value={searchInput}
                     onChange={e => handleSearchInput(e)}
-                    placeholder="Поиск"
+                    placeholder="Поиск..."
                 />
 
                 <UserTable

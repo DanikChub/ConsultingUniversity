@@ -54,7 +54,7 @@ export default function CoursePage() {
 
                 // --- Сравниваем со старым прогрессом ---
                 const oldProgress = userContext.user.getEnrollmentProgress(enrollment.id);
-                const changedItems: string[] = [];
+                let changedItems: string[] = [];
 
                 Object.keys(freshProgress.byContent).forEach(key => {
                     const oldItem = oldProgress?.byContent?.[key];
@@ -65,6 +65,9 @@ export default function CoursePage() {
                     }
                 });
 
+                if (changedItems.length > 1) {
+                    changedItems = []
+                }
 
                 // Сохраняем анимационные изменения
                 userContext.user.setProgressChanges(enrollment.id, changedItems);
@@ -74,7 +77,7 @@ export default function CoursePage() {
                 setProgress(freshProgress);
 
             } catch (e) {
-                console.error(e);
+                alert(e.response.data.message);
             } finally {
                 setLoading(true);
             }
@@ -126,7 +129,9 @@ export default function CoursePage() {
 
 
     if (!loading) return <ProgramSkeleton/>
-    if (!program) return <div>Программа не найдена</div>
+    if (!program) return <UserContainer loading={true}>
+        Программа не найдена
+    </UserContainer>
 
     return (
 

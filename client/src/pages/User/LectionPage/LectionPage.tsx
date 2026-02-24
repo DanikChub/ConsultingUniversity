@@ -6,6 +6,8 @@ import type { File } from "../../../entities/file/model/type";
 import {FiArrowLeft, FiCheck} from "react-icons/fi";
 import {getContentProgress, updateProgress} from "../../../entities/progress/api/progress.api";
 import { Context } from "../../../index";
+import ButtonBack from "../../../shared/ui/buttons/ButtonBack";
+import {downloadFile} from "../../../shared/lib/download/downloadFile";
 
 const LectionPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -13,11 +15,12 @@ const LectionPage: React.FC = () => {
     const userContext = useContext(Context);
 
     const [file, setFile] = useState<File | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [scrollProgress, setScrollProgress] = useState(0);
     const [isCompleted, setIsCompleted] = useState(false);
     const completedRef = useRef(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [error, setError] = useState('')
     // -----------------------------
     // Загрузка файла + in_progress
     // -----------------------------
@@ -26,7 +29,7 @@ const LectionPage: React.FC = () => {
 
         const fetchFile = async () => {
             try {
-                setLoading(true);
+                setLoading(false);
 
                 const data = await getFile(id);
                 setFile(data);
@@ -60,9 +63,10 @@ const LectionPage: React.FC = () => {
                 window.scrollTo({ top: 0, left: 0, behavior: "auto" });
 
             } catch (e) {
-                console.error('Ошибка загрузки файла:', e);
+                console.log(e.response.data.message)
+                setError(e.response.data.message)
             } finally {
-                setLoading(false);
+                setLoading(true);
             }
         };
 
@@ -130,49 +134,45 @@ const LectionPage: React.FC = () => {
         };
     }, [file]);
 
-    // -----------------------------
-    // Скачать файл
-    // -----------------------------
-    const remakeFileName = (url: string, newName: string) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.responseType = 'blob';
-        xhr.onload = function () {
-            const blob = this.response;
-            const link = document.createElement("a");
-            link.style.display = "none";
-            link.href = window.URL.createObjectURL(blob);
-            link.setAttribute("download", newName);
-            link.click();
-        };
-        xhr.send();
-    };
+    const handleDownload = (url: string, filename: string) => {
+        downloadFile({url: url, filename: filename})
+        const markCompleted = async () => {
+            try {
+                completedRef.current = true // ставим ДО await
 
-    if (!file) {
-        return (
-            <UserContainer loading={loading}>
-                <div className="p-10 text-center">Загрузка...</div>
-            </UserContainer>
-        );
+                const enrollmentId = userContext.user.enrollmentId
+
+                await updateProgress({
+                    enrollmentId,
+                    contentType: "file",
+                    contentId: file.id,
+                    status: "completed"
+                })
+
+                setIsCompleted(true)
+            } catch (e) {
+                completedRef.current = false
+                console.error("Ошибка обновления прогресса:", e)
+            }
+        }
+
+        markCompleted()
     }
 
-    const fileUrl = `${process.env.REACT_APP_API_URL}/${file.stored_name}`;
+
+
+    if (!file && !error) return <UserContainer>Загрузка...</UserContainer>
+    if (error) return <UserContainer>{error}</UserContainer>
+
+    const fileUrl = `${process.env.REACT_APP_API_URL}/${file.stored_name}`
 
     return (
-        <UserContainer isLeftPanel={true} loading={!loading}>
+        <UserContainer isLeftPanel={true} loading={loading} skeleton={<div>Загрузка</div>}>
 
 
 
             {/* Назад */}
-            <button
-                onClick={() => navigate(-1)}
-                className="flex items-center gap-3 text-gray-600 hover:text-gray-900 transition group"
-            >
-                <div className="p-3 rounded-full bg-gray-100 group-hover:bg-gray-200 transition">
-                    <FiArrowLeft size={20}/>
-                </div>
-                <span className="text-lg font-medium">Назад</span>
-            </button>
+            <ButtonBack/>
 
             <div className="min-h-[787px] flex flex-col items-center py-8">
                 <div ref={containerRef} className="relative bg-white shadow-2xl rounded-2xl py-6 px-6 w-full flex flex-col items-center">
@@ -191,7 +191,7 @@ const LectionPage: React.FC = () => {
                         </h1>
 
                         <div
-                            onClick={() => remakeFileName(fileUrl, file.original_name)}
+                            onClick={() => handleDownload(fileUrl, file.original_name)}
                             className="px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-green-600 transition cursor-pointer"
                         >
                             Скачать файл

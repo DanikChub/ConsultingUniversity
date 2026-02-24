@@ -15,6 +15,7 @@ const PunctList: React.FC<Props> = ({ theme, isHide }) => {
     const {
         puncts,
         updateTitlePunct,
+        updateDescriptionPunct,
         addPunct,
         destroyPunct,
         moveOnePunct,
@@ -61,6 +62,7 @@ const PunctList: React.FC<Props> = ({ theme, isHide }) => {
                                                     punct={punct}
                                                     punctIndex={index}
                                                     updateTitlePunct={updateTitlePunct}
+                                                    updateDescriptionPunct={updateDescriptionPunct}
                                                     destroyPunct={destroyPunct}
                                                     setDisableParentDrag={setDisableDrag}
                                                 />
