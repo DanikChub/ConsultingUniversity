@@ -24,9 +24,6 @@ class ChatController {
             ]
         })
 
-        
-
-
 
         return res.json(events)
     }

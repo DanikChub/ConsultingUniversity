@@ -103,6 +103,8 @@ class UserController {
                 event_text: 'Добавлен новый слушатель',
                 name,
                 organization,
+                type: 'user',
+                event_id: user.id,
             }, { transaction: t });
 
             await t.commit();
@@ -150,6 +152,8 @@ class UserController {
                 event_text: 'Добавлен новый администратор',
                 name,
                 organization,
+                type: 'admin',
+                event_id: user.id,
             }, { transaction: t });
 
             const token = generateJwt(user.id, user.email, user.role);
@@ -651,6 +655,7 @@ class UserController {
                 event_text: 'Пользователь удален',
                 name: user.name,
                 organization: user.organization,
+                type: 'admin',
             });
             user.destroy();
             return res.json(user);

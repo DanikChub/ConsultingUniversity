@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import { Context } from '../../../index';
 import { observer } from 'mobx-react-lite';
 import logo from '../../../assets/imgs/logo/logo.png';
@@ -22,10 +22,13 @@ interface IUser {
 const NavBar: React.FC = observer(() => {
     const { user } = useContext(Context) as { user: IUser };
 
+    const navigate = useNavigate()
+
     const handleClick = () => {
         localStorage.setItem('token', '');
         user.setUser({});
         user.setIsAuth(false);
+        navigate(AUTH_ROUTE);
     };
 
     return (

@@ -48,7 +48,13 @@ const AppRouter = observer(() => {
 
                     )}
                 <Route path="/" element={<RedirectTo role={user.user.role}/>} />
-                <Route path="*" element={<ErrorPage/>}/>
+                {
+                    user.isAuth ?
+                        <Route path="*" element={<ErrorPage/>}/>
+                        :
+                        <Route path="*" element={<LoginPage/>}/>
+                }
+
             </Routes>
         </>
 

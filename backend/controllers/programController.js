@@ -365,7 +365,8 @@ class ProgramController {
 
       await Event.create({
         event_text: 'Создана новая программа',
-
+        type: 'program',
+        event_id: program.id,
       });
 
       return res.json(program);
@@ -951,7 +952,9 @@ class ProgramController {
       }
       await Event.create({
         event_text: 'Программа удалена',
-        name: program.title
+        name: program.title,
+        type: 'program',
+
       });
       await program.destroy();
 
@@ -1186,7 +1189,9 @@ class ProgramController {
 
       await Event.create({
         event_text: 'Программа опубликована',
-        name: program.title
+        name: program.title,
+        event_id: program.id,
+        type: 'program',
       });
 
       // ----------------- Все проверки пройдены, публикуем программу -----------------

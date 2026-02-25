@@ -12,6 +12,8 @@ import type {File} from "../../../entities/file/model/type";
 import {downloadFile} from "../../../shared/lib/download/downloadFile";
 import type {Test} from "../../../entities/test/model/type";
 import {type Enrollment, getAllEnrollmentsByProgram} from "../../../entities/enrollment/api/enrollment.api";
+import {FiChevronRight, FiClipboard, FiFileText, FiHeadphones, FiPlay} from "react-icons/fi";
+import {AiFillFilePdf} from "react-icons/ai";
 
 const statusTranslate: Record<string, string> = {
     draft: 'Черновик',
@@ -21,14 +23,16 @@ const statusTranslate: Record<string, string> = {
 
 const fileIcon = (type: string) => {
     switch (type) {
-        case 'pdf':
-            return <FaFilePdf className="text-red-500 w-4 h-4" />;
-        case 'docx':
-            return <FaFileWord className="text-blue-500 w-4 h-4" />;
-        case 'audio':
-            return <FaFileAudio className="text-green-500 w-4 h-4" />;
+        case "audio":
+            return <FiHeadphones className="w-6 h-6 text-blue-500" />
+        case "docx":
+            return <FiFileText className="w-6 h-6 text-green-500" />
+        case "pdf":
+            return <AiFillFilePdf className="w-6 h-6 text-red-500" />
+        case 'video':
+            return <FaVideo className="w-6 h-6 text-blue-500" />;
         default:
-            return <FaFilePdf className="w-4 h-4" />;
+            return <FiFileText className="w-6 h-6 text-gray-500" />
     }
 };
 
@@ -185,26 +189,33 @@ const ViewProgram: React.FC = () => {
 
                         return (
 
-                            <div key={theme.id} className="bg-gray-50 rounded-lg border border-gray-200">
+                            <div key={theme.id} className="bg-gray-50 rounded-lg border border-gray-200" >
                                 <div
                                     className="flex justify-between items-center p-3 cursor-pointer hover:bg-gray-100 transition"
                                     onClick={() => toggleModule(theme.id)}
                                 >
-                                    <span className="font-medium text-gray-800">{theme.title}</span>
+                                    <div className="text-lg font-semibold text-gray-800 tracking-tight">
+                                        {theme.title}
+                                    </div>
                                     {open ? <MdExpandLess className="w-6 h-6"/> : <MdExpandMore className="w-6 h-6"/>}
                                 </div>
-                                <div className="flex flex-wrap gap-2 mt-1">
+                                <div className="flex flex-wrap gap-2 mt-1 p-4">
                                     {theme.files?.map((file) => (
                                         <div key={file.id}
                                              onClick={() => handleViewFile(file)}
-                                             className="flex items-center gap-1
-                                                        text-gray-600 text-sm
-                                                        bg-gray-100 px-2 py-1 rounded
+                                             className="flex items-center gap-2
+                                                        px-4 py-2
+                                                        rounded-xl
+                                                        bg-gray-50
+                                                        border border-gray-200
+                                                        text-sm font-medium text-gray-700
 
                                                         cursor-pointer
-                                                        transition
-                                                        hover:bg-gray-200
-                                                        hover:text-gray-800">
+                                                        transition-all
+                                                        hover:bg-gray-100
+                                                        hover:border-gray-300
+                                                        hover:shadow-sm
+                                                        active:scale-[0.98]">
                                             {fileIcon(file.type)}
                                             <span>{file.original_name}</span>
                                             {file.status === 'uploading' &&
@@ -212,81 +223,136 @@ const ViewProgram: React.FC = () => {
                                         </div>
                                     ))}
                                 </div>
-                                {open && (
+                                {!open && (
                                     <div className="pl-6 pr-3 pb-3 space-y-2">
-                                        {theme.puncts?.sort((a, b) => a.order_index - b.order_index).map((punct, i) => (
-                                            <div key={punct.id} className="border-b border-gray-200 pb-2">
-                                                <div className="font-medium text-gray-700">{i + 1}. {punct.title}</div>
+                                        {theme.puncts
+                                            ?.sort((a, b) => a.order_index - b.order_index)
+                                            .map((punct, i) => (
+                                                <div
+                                                    key={punct.id}
+                                                    className="border-b border-gray-200 pb-6 mb-6 last:border-none last:mb-0"
+                                                >
+                                                    {/* Заголовок */}
+                                                    <div className="flex items-start gap-3 mb-2">
+                                                        <div className="text-sm font-semibold text-gray-400 mt-0.5">
+                                                            {i + 1}.
+                                                        </div>
 
-                                                {/* Файлы */}
-                                                <div className="flex flex-wrap gap-2 mt-1">
-                                                    {punct.files?.map((file) => (
-                                                        <div
-                                                            key={file.id}
-                                                            onClick={() => handleViewFile(file)}
-                                                            className="
-                                                                flex items-center gap-1
-                                                                text-gray-600 text-sm
-                                                                bg-gray-100 px-2 py-1 rounded
+                                                        <div>
+                                                            <div className="text-base font-medium text-gray-700">
+                                                                {punct.title}
+                                                            </div>
 
-                                                                cursor-pointer
-                                                                transition
-                                                                hover:bg-gray-200
-                                                                hover:text-gray-800
-                                                            "
-                                                        >
-                                                            {fileIcon(file.type)}
-                                                            <span>{file.original_name}</span>
-
-                                                            {file.status === 'uploading' && (
-                                                                <span className="ml-1 text-xs text-blue-500">
-                                                                    Загрузка...
-                                                                </span>
+                                                            {/* Описание */}
+                                                            {punct.description && (
+                                                                <div className="mt-1 text-sm text-gray-500 leading-relaxed">
+                                                                    {punct.description}
+                                                                </div>
                                                             )}
                                                         </div>
-                                                    ))}
-                                                </div>
-
-
-                                                {/* Тесты */}
-                                                {punct.tests?.length > 0 && (
-                                                    <div className="mt-1">
-                                                        {punct.tests.map((test) => (
-                                                            <button
-                                                                key={test.id}
-                                                                onClick={() => handleViewTest(test)}
-                                                                className="
-                                                                  w-full
-                                                                  flex items-center gap-3
-                                                                  px-4 py-3
-                                                                  rounded-lg
-                                                                  border border-green-200
-                                                                  bg-green-50
-                                                                  text-left text-sm font-medium text-green-800
-
-                                                                  hover:bg-green-100
-                                                                  hover:border-green-300
-
-                                                                  active:bg-green-200
-                                                                  transition
-                                                                "
-                                                            >
-                                                                <FaCheck className="text-green-600 text-lg shrink-0" />
-
-                                                                <span className="flex-1">
-                                                                  {test.title || `Тест ${test.id}`}
-                                                                </span>
-
-                                                                <span className="text-xs text-green-600 opacity-70">
-                                                                  открыть
-                                                                </span>
-                                                            </button>
-                                                        ))}
-
                                                     </div>
-                                                )}
-                                            </div>
-                                        ))}
+
+                                                    {/* Файлы */}
+                                                    {punct.files?.length > 0 && (
+                                                        <div className="flex flex-wrap gap-3 mt-3">
+                                                            {punct.files.map((file) => (
+                                                                <div
+                                                                    key={file.id}
+                                                                    onClick={() => handleViewFile(file)}
+                                                                    className="
+                                                                    flex items-center gap-2
+                                                                    px-4 py-2
+                                                                    rounded-xl
+                                                                    bg-gray-50
+                                                                    border border-gray-200
+                                                                    text-sm font-medium text-gray-700
+
+                                                                    cursor-pointer
+                                                                    transition-all
+                                                                    hover:bg-gray-100
+                                                                    hover:border-gray-300
+                                                                    hover:shadow-sm
+                                                                    active:scale-[0.98]
+                                                                  "
+                                                                >
+                                                                    <div className="text-base">{fileIcon(file.type)}</div>
+
+                                                                    <span className="truncate max-w-[200px]">
+                                                                        {file.original_name}
+                                                                      </span>
+
+                                                                    {file.status === "uploading" && (
+                                                                        <span className="text-xs text-blue-500 animate-pulse">
+                                                                          Загрузка...
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+
+                                                    {/* Тесты */}
+                                                    {punct.tests?.length > 0 && (
+                                                        <div className="mt-4 space-y-3">
+                                                            {punct.tests.map((test) => (
+                                                                <button
+                                                                    key={test.id}
+                                                                    onClick={() => handleViewTest(test)}
+                                                                    className="
+                                                                          group
+                                                                          w-full
+                                                                          flex items-center gap-4
+                                                                          px-5 py-4
+                                                                          rounded-2xl
+                                                                          border border-green-200
+                                                                          bg-green-50/70
+                                                                          text-left
+
+                                                                          hover:bg-green-100
+                                                                          hover:border-green-300
+                                                                          hover:shadow-md
+
+                                                                          active:scale-[0.99]
+                                                                          transition-all
+                                                                        "
+                                                                >
+                                                                    {/* Левая иконка теста */}
+                                                                    <div className="
+                                                                      w-10 h-10
+                                                                      flex items-center justify-center
+                                                                      rounded-xl
+                                                                      bg-white
+                                                                      border border-green-200
+                                                                      text-green-600
+                                                                      group-hover:scale-105
+                                                                      transition
+                                                                    ">
+                                                                        <FiClipboard className="text-lg" />
+                                                                    </div>
+
+                                                                    {/* Название */}
+                                                                    <div className="flex-1">
+                                                                        <div className="text-sm font-semibold text-green-900">
+                                                                            {test.title || `Тест ${test.id}`}
+                                                                        </div>
+                                                                        <div className="text-xs text-green-700/70">
+                                                                            Проверка знаний
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Правая часть */}
+                                                                    <div className="flex items-center gap-2 text-green-700 text-sm font-medium">
+                                                                        <FiPlay className="text-base" />
+                                                                        <span>просмотр</span>
+                                                                        <FiChevronRight className="opacity-60 group-hover:translate-x-1 transition" />
+                                                                    </div>
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+
                                     </div>
                                 )}
                             </div>
