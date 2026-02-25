@@ -7,8 +7,8 @@ const checkRole = require('../middleware/checkRoleMiddleware')
 
 
 router.get('/getMessages/:id', chatController.getMessages)
-router.get('/deleteMessages/:id', chatController.deleteMessage)
-router.post('/sendMessages/', chatController.sendMessage)
+router.get('/deleteMessages/:id', checkRole('ADMIN', 'USER'), chatController.deleteMessage)
+router.post('/sendMessages/', checkRole('ADMIN', 'USER'), chatController.sendMessage)
 
 router.get('/getUnreadCount/', chatController.getAllUserUnreadCount)
 router.get('/getUnreadCount/:userId', chatController.getUnreadCount)

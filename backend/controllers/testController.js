@@ -65,8 +65,8 @@ class TestController {
             if (!test) {
                 return res.status(404).json({ message: 'Test not found' });
             }
-
-            const allowedFields = ['title', 'description', 'time_limit'];
+            console.log(fields)
+            const allowedFields = ['title', 'description', 'final_test', 'time_limit'];
 
             for (const key of Object.keys(fields)) {
                 if (allowedFields.includes(key)) {
@@ -544,6 +544,7 @@ class TestController {
 
             return res.json({
                 attemptId: attempt.id,
+                attempt_number: attempt.attempt_number,
                 score: attempt.score,
                 status: attempt.status,
                 passed: attempt.passed,

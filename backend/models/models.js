@@ -15,42 +15,10 @@ function calculateProgramProgress(program, userProgressMap, enrollmentId) {
 
     program.themes.forEach(theme => {
 
-        // файлы темы
-        theme.files.forEach(file => {
-            const key = `file-${file.id}`
-            const progress = userProgressMap[key] || {
-                id: 0,
-                enrollmentId,
-                contentType: 'file',
-                contentId: file.id,
-                status: 'not_started'
-            }
-
-            byContent[key] = progress
-            totalCount++
-
-            if (progress.status === 'completed') completedCount++
-        })
 
         // пункты
         theme.puncts.forEach(punct => {
 
-            // файлы пункта
-            punct.files.forEach(file => {
-                const key = `file-${file.id}`
-                const progress = userProgressMap[key] || {
-                    id: 0,
-                    enrollmentId,
-                    contentType: 'file',
-                    contentId: file.id,
-                    status: 'not_started'
-                }
-
-                byContent[key] = progress
-                totalCount++
-
-                if (progress.status === 'completed') completedCount++
-            })
 
             // тесты пункта
             punct.tests.forEach(test => {
@@ -291,6 +259,7 @@ const Test = sequelize.define('test', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, allowNull: false },
     title: { type: DataTypes.STRING },
     description: { type: DataTypes.TEXT },
+    final_test: { type: DataTypes.BOOLEAN },
     time_limit: { type: DataTypes.INTEGER }, // в секундах
     status: {
         type: DataTypes.ENUM('draft', 'published', 'archived'),

@@ -7,7 +7,7 @@ const checkProgramAccess = async (req, res, next) => {
         const programId = req.params.id;
 
         // ADMIN — полный доступ
-        if (userRole === 'ADMIN') {
+        if (userRole === 'ADMIN' | userRole === 'VIEWER') {
             return next();
         }
 

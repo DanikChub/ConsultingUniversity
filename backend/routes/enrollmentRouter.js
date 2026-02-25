@@ -6,7 +6,7 @@ const enrollmentController = require('../controllers/enrollmentController')
 
 
 router.post('/getEnrollment/:programId', enrollmentController.getEnrollment)
-
+router.get('/getEnrollment/:programId', enrollmentController.getEnrollmentsByProgram)
 
 
 
