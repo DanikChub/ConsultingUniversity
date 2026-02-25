@@ -59,11 +59,6 @@ const StatementPage = () => {
         let allContentCompleted = true;
 
         theme.puncts?.forEach(punct => {
-            punct.files?.forEach(file => {
-                const key = `file-${file.id}`;
-                const status = progress.byContent[key]?.status;
-                if (status !== "completed") allContentCompleted = false;
-            });
 
             punct.tests?.forEach(test => {
                 const key = `test-${test.id}`;

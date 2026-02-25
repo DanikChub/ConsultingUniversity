@@ -4,7 +4,7 @@ import FileBlock from "./FileBlock"
 import type { Theme } from "../../../../entities/theme/model/type"
 import type { ProgramProgress } from "../../../../entities/progress/model/type"
 import { isContentCompleted } from "../../../../entities/progress/model/selectors"
-import type {File} from "../../../../entities/file/model/type";
+import type { File } from "../../../../entities/file/model/type"
 
 interface ThemeBlockProps {
     theme: Theme
@@ -15,28 +15,57 @@ interface ThemeBlockProps {
     setActiveAudio: (track: File) => void
 }
 
-const ThemeBlock = ({ theme, open, toggle, progress, setPlayerActive, setActiveAudio }: ThemeBlockProps) => {
+const ThemeBlock = ({
+                        theme,
+                        open,
+                        toggle,
+                        progress,
+                        setPlayerActive,
+                        setActiveAudio
+                    }: ThemeBlockProps) => {
 
-    const completedPunctsCount = theme.puncts?.reduce((acc, punct) => {
-        const allItemsCount = (punct.files?.length || 0) + (punct.tests?.length || 0)
-        let completedCount = 0
+    // 🔹 все тесты темы
+    const allTests =
+        theme.puncts?.flatMap(punct => punct.tests || []) || []
 
-        punct.files?.forEach(file => {
-            if (isContentCompleted(progress, 'file', file.id)) completedCount++
-        })
-        punct.tests?.forEach(test => {
-            if (isContentCompleted(progress, 'test', test.id)) completedCount++
-        })
+    // 🔹 обычные тесты (не финальные)
+    const regularTests =
+        allTests.filter(test => !test.final_test)
 
-        return acc + (allItemsCount > 0 && completedCount === allItemsCount ? 1 : 0)
-    }, 0) || 0
+    // 🔹 финальные тесты
+    const finalTests =
+        allTests.filter(test => test.final_test)
 
-    const totalPuncts = theme.puncts?.length || 0
-    const progressPercent = totalPuncts > 0
-        ? Math.round((completedPunctsCount / totalPuncts) * 100)
-        : 0
+    // ---------------------------
+    // ПРОГРЕСС (СТАРАЯ ЛОГИКА СОХРАНЕНА)
+    // ---------------------------
 
-    const isThemeCompleted = totalPuncts > 0 && completedPunctsCount === totalPuncts
+    const totalTests = allTests.length
+
+    const completedTests = allTests.reduce((acc, test) => {
+        if (isContentCompleted(progress, "test", test.id)) {
+            return acc + 1
+        }
+        return acc
+    }, 0)
+
+    const progressPercent =
+        totalTests > 0
+            ? Math.round((completedTests / totalTests) * 100)
+            : 0
+
+    const isThemeCompleted =
+        totalTests > 0 && completedTests === totalTests
+
+    // ---------------------------
+    // 🔥 БЛОКИРОВКА ФИНАЛЬНОГО ТЕСТА
+    // ---------------------------
+
+    const allRegularCompleted =
+        regularTests.length === 0 ||
+        regularTests.every(test =>
+            isContentCompleted(progress, "test", test.id)
+        )
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -58,21 +87,19 @@ const ThemeBlock = ({ theme, open, toggle, progress, setPlayerActive, setActiveA
                             )}
                         </div>
 
-                        {totalPuncts > 0 && (
-                            <div className="mt-3">
-                                <div className="flex justify-between text-sm text-gray-500 mb-1">
-                                    <span>Прогресс модуля</span>
-                                    <span>{progressPercent}%</span>
-                                </div>
-
-                                <div className="h-2 bg-gray-100 rounded-full">
-                                    <div
-                                        className="h-2 bg-green-300 rounded-full transition-all"
-                                        style={{ width: `${progressPercent}%` }}
-                                    />
-                                </div>
+                        <div className="mt-3">
+                            <div className="flex justify-between text-sm text-gray-500 mb-1">
+                                <span>Прогресс модуля</span>
+                                <span>{progressPercent}%</span>
                             </div>
-                        )}
+
+                            <div className="h-2 bg-gray-100 rounded-full">
+                                <div
+                                    className="h-2 bg-green-300 rounded-full transition-all"
+                                    style={{ width: `${progressPercent}%` }}
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <FiChevronDown
@@ -82,10 +109,12 @@ const ThemeBlock = ({ theme, open, toggle, progress, setPlayerActive, setActiveA
                     />
                 </div>
 
-                {/* 🔹 Справочные файлы — всегда видны */}
+                {/* Справочные файлы */}
                 {theme.files?.length > 0 && (
                     <div className="space-y-2 mt-4">
-                        <h4 className="font-semibold text-gray-700 mb-2 text-right">Справочные материалы</h4>
+                        <h4 className="font-semibold text-gray-700 mb-2 text-right">
+                            Справочные материалы
+                        </h4>
                         <div className="flex justify-end space-x-2">
                             {theme.files.map(file => (
                                 <FileBlock
@@ -98,16 +127,12 @@ const ThemeBlock = ({ theme, open, toggle, progress, setPlayerActive, setActiveA
                                 />
                             ))}
                         </div>
-
                     </div>
                 )}
             </div>
 
             {open && (
                 <div className="border-t bg-gray-50 p-6 space-y-6">
-
-
-
                     {theme.puncts?.map(punct => (
                         <PunctBlock
                             key={punct.id}
@@ -115,9 +140,9 @@ const ThemeBlock = ({ theme, open, toggle, progress, setPlayerActive, setActiveA
                             progress={progress}
                             setPlayerActive={setPlayerActive}
                             setActiveAudio={setActiveAudio}
+                            allRegularCompleted={allRegularCompleted}
                         />
                     ))}
-
                 </div>
             )}
         </div>

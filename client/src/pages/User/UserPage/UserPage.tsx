@@ -110,7 +110,7 @@ const UserPage = observer(() => {
 
                     <div className="ml-12">
                         <div className="text-3xl font-bold text-gray-800">
-                            {userContext.user.user.name.split(' ')[0]}, привет!
+                            {userContext.user.user.name.split(' ')[1]}, привет!
                         </div>
                         <div className="mt-5 text-xl font-light text-gray-800">
                             Сегодня отличный день, <br/> чтобы узнать что-то новое.

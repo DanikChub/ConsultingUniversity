@@ -117,7 +117,7 @@ const CreateTestModal: React.FC<Props> = ({
     }
 
     if (!test) return null;
-
+    console.log(test)
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fadeIn">
@@ -125,7 +125,7 @@ const CreateTestModal: React.FC<Props> = ({
 
                 {/* header */}
                 <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Редактирование теста</h3>
+                    <h3 className="text-lg font-semibold">Редактирование теста {test.final_test && <span className="font-bold text-blue-500">[Финальный тест]</span>}</h3>
                     <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
                         ✕
                     </button>
@@ -138,6 +138,7 @@ const CreateTestModal: React.FC<Props> = ({
                             title={test.title}
                             description={test.description}
                             time_limit={test.time_limit}
+                            final_test={test.final_test}
                             onChange={updateTest}
                         />
                     </div>

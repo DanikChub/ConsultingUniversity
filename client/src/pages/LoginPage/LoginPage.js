@@ -30,6 +30,8 @@ const LoginPage = () => {
                         navigate(USER_ROUTE);
                     } else if (user.user.role == "ADMIN") {
                         navigate(ADMIN_ROUTE);
+                    } else if (user.user.role == "VIEWER") {
+                        navigate(ADMIN_ROUTE);
                     }
                     
                 })

@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, {useContext, useEffect, useMemo, useState} from 'react'
 import AppContainer from '../../../components/ui/AppContainer'
 import {deleteEvents, getAllEvents} from "../../../entities/event/api/event.api";
 import {useModals} from "../../../hooks/useModals";
+import {Context} from "../../../index";
 
 
 interface EventItem {
@@ -88,25 +89,36 @@ const AdminPage: React.FC = () => {
         }
     }
 
+    const userRole = useContext(Context).user.user.role;
+
     const handleDelete = async () => {
         if (!selected.length) return
+        if (userRole ==  'ADMIN') {
+            const confirmed = await openModal('confirm', {
+                title: `Вы действительно хотите удалить ${selected.length} событий?`,
+                description: "Это действие нельзя отменить",
+                variant: "danger",
+                confirmText: "Удалить",
 
-        const confirmed = await openModal('confirm', {
-            title: `Вы действительно хотите удалить ${selected.length} событий?`,
-            description: "Это действие нельзя отменить",
-            variant: "danger",
-            confirmText: "Удалить",
+            });
 
-        });
+            if (!confirmed) return;
 
-        if (!confirmed) return;
+            const formData = new FormData()
+            selected.forEach((id) => formData.append('ids', id.toString()))
 
-        const formData = new FormData()
-        selected.forEach((id) => formData.append('ids', id.toString()))
+            await deleteEvents(formData)
+            setSelected([])
+            fetchEvents()
+        } else if (userRole == 'VIEWER') {
+            await openModal("alert", {
+                title: "Недостаточно прав доступа",
+                description:
+                    "У вас нет прав для выполнения этого действия. Если вы считаете, что это ошибка, обратитесь к администратору платформы.",
+                buttonText: "Понятно",
+            });
+        }
 
-        await deleteEvents(formData)
-        setSelected([])
-        fetchEvents()
     }
 
     return (

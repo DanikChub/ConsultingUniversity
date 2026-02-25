@@ -58,7 +58,7 @@ const TestAttemptPage = () => {
 
                 {/* Заголовок */}
                 <div className="flex items-center justify-between">
-                    <h1 className="text-3xl font-bold text-gray-800">Результаты попытки #{attempt.attemptId}</h1>
+                    <h1 className="text-3xl font-bold text-gray-800">Результаты попытки #{attempt.attempt_number}</h1>
                     <div
                         className={`flex items-center gap-2 font-semibold ${passed ? 'text-green-600' : 'text-red-600'}`}>
                         {passed ? <FiCheckCircle size={24}/> : <FiXCircle size={24}/>}
@@ -82,7 +82,7 @@ const TestAttemptPage = () => {
                 <div className="space-y-6">
                     {attempt.questions.map((q, idx) => (
                         <div key={q.id} className="p-4 border rounded-lg bg-white space-y-2">
-                            <div className="font-medium text-gray-800">{idx + 1}. Вопрос #{q.id}</div>
+                            <div className="font-medium text-gray-800">{idx + 1}. {q.text}</div>
                             <div className="flex flex-col gap-2 mt-2">
                                 {q.answers.map(answer => {
                                     let label = ''

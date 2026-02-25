@@ -39,6 +39,7 @@ export interface Test {
     id: number;
     title: string | null;
     description: string | null;
+    final_test: boolean | null;
     time_limit: number | null;
     status: TestStatus;
     order_index: number;
@@ -68,6 +69,7 @@ export interface TestAttempt {
     id: number;
     testId: number;
     enrollmentId: number;
+    attempt_number: number;
     score: number;
     passed: boolean;
     createdAt: string;
@@ -92,10 +94,12 @@ export interface SubmitAttemptDto {
 
 export interface AttemptResponse {
     attemptId: number;
+    attempt_number: number;
     score: number;
     passed: 'Complete' | 'Fail'
     questions: {
         id: number;
+        text: string;
         answers: Array<{
             id: number;
             text: string;

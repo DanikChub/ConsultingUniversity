@@ -22,7 +22,7 @@ interface IUser {
 const NavBar: React.FC = observer(() => {
     const { user } = useContext(Context) as { user: IUser };
 
-    const handlerClick = () => {
+    const handleClick = () => {
         localStorage.setItem('token', '');
         user.setUser({});
         user.setIsAuth(false);
@@ -36,23 +36,16 @@ const NavBar: React.FC = observer(() => {
                     <div className="flex justify-between">
                         <div></div>
                         {user.isAuth ? (
-                            user.user.role === 'ADMIN' || user.user.role === 'VIEWER' ? (
-                                <Link
-                                    to={MAIN_ROUTE}
-                                    style={{ marginLeft: '10px' }}
-                                    onClick={handlerClick}
-                                    className="duration-300 flex items-center bg-[#33CCCC] rounded-md px-[12px] py-[6px] text-base font-medium text-[#fff] cursor-pointer transition hover:text-[#000] hover:bg-[#fff]"
-                                >
-                                    Выйти
-                                </Link>
-                            ) : (
-                                <Link
-                                    to={USER_ROUTE}
-                                    className="duration-300 flex items-center bg-[#33CCCC] rounded-md px-[12px] py-[6px] text-base font-medium text-[#fff] cursor-pointer transition-[.2s] hover:text-[#000] hover:bg-[#fff]"
-                                >
-                                    Личный кабинет
-                                </Link>
-                            )
+
+                            <Link
+                                to={MAIN_ROUTE}
+                                style={{ marginLeft: '10px' }}
+                                onClick={handleClick}
+                                className="duration-300 flex items-center bg-[#33CCCC] rounded-md px-[12px] py-[6px] text-base font-medium text-[#fff] cursor-pointer transition hover:text-[#000] hover:bg-[#fff]"
+                            >
+                                Выйти
+                            </Link>
+
                         ) : (
                             <Link
                                 to={AUTH_ROUTE}

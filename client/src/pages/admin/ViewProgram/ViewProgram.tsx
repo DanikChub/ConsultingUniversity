@@ -11,6 +11,7 @@ import {useModals} from "../../../hooks/useModals";
 import type {File} from "../../../entities/file/model/type";
 import {downloadFile} from "../../../shared/lib/download/downloadFile";
 import type {Test} from "../../../entities/test/model/type";
+import {type Enrollment, getAllEnrollmentsByProgram} from "../../../entities/enrollment/api/enrollment.api";
 
 const statusTranslate: Record<string, string> = {
     draft: 'Черновик',
@@ -36,13 +37,15 @@ const ViewProgram: React.FC = () => {
     const [loaded, setLoaded] = useState(false);
     const [openModules, setOpenModules] = useState<Record<number, boolean>>({});
     const [error, setError] = useState<string | null>(null);
+    const [enrollments, setEnrollments] = useState<Enrollment[] | null>(null)
     const navigate = useNavigate();
     const params = useParams<{ id: string }>();
 
     const {openModal} = useModals()
 
     useEffect(() => {
-        const program_id = params.id;
+        const program_id = Number(params.id);
+
         if (!program_id) return;
 
 
@@ -53,6 +56,8 @@ const ViewProgram: React.FC = () => {
 
                 setProgram(data);
 
+                const enrollments_data = await getAllEnrollmentsByProgram(program_id)
+                setEnrollments(enrollments_data)
                 const openState: Record<number, boolean> = {};
                 data.themes?.forEach((t) => (openState[t.id] = true));
                 setOpenModules(openState);
@@ -168,8 +173,8 @@ const ViewProgram: React.FC = () => {
                 {/* Метрики */}
                 <div className="flex flex-wrap gap-6 mt-4 text-gray-700">
 
-                    <div className="flex items-center gap-1"><FaUserAlt /> {program.users_quantity ?? 0} пользователей</div>
-                    <div className="flex items-center gap-1"><FaRubleSign /> {program.price ?? '-'}</div>
+                    <div className="flex items-center gap-2"><FaUserAlt /> {enrollments.length ?? 0} пользователей</div>
+                    <div className="flex items-center gap-2"><FaRubleSign /> {program.price ?? '-'}</div>
                 </div>
 
                 {/* Аккордеон модулей */}

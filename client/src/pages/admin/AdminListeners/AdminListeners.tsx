@@ -11,6 +11,7 @@ import Button from "../../../shared/ui/buttons/Button";
 import AdminPath from "../../../components/ui/AdminPath";
 import AppContainer from "../../../components/ui/AppContainer";
 import SearchInput from "../../../shared/ui/inputs/SearchInput";
+import {useModals} from "../../../hooks/useModals";
 
 interface ContextMenuState {
     visible: boolean;
@@ -28,6 +29,8 @@ const AdminListeners: React.FC = () => {
         handleSearchInput,
         handleClickPagination, destroyUser, activePage
     } = useAdminListeners();
+
+    const {openModal} = useModals();
     
     const [contextMenu, setContextMenu] = useState<ContextMenuState>({
         visible: false,
@@ -57,6 +60,18 @@ const AdminListeners: React.FC = () => {
             setContextMenu({ visible: false, x: 0, y: 0, userId: null, programId: null });
         }
     };
+
+    const handleDestroyUser = async(userId: number) => {
+        const confirmed = await openModal('confirm', {
+            title: 'Вы действительно хотите удалить пользователя?',
+            description: 'Отменить действие будет невозможно',
+            confirmText: 'Удалить',
+            variant: "danger",
+        })
+        if (!confirmed) return;
+
+        await destroyUser(userId)
+    }
 
     return (
         <AppContainer onClick={handleClickOutside}>
@@ -124,7 +139,7 @@ const AdminListeners: React.FC = () => {
                         </button>
                         <button
                             onClick={() => {
-                                if (contextMenu.userId) destroyUser(contextMenu.userId);
+                                if (contextMenu.userId) handleDestroyUser(contextMenu.userId);
                                 setContextMenu({ visible: false, x: 0, y: 0, userId: null, programId: null });
                             }}
 

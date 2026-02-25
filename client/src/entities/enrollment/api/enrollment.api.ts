@@ -22,3 +22,15 @@ export const getEnrollmentByProgram = async (programId: number, userId: number):
         throw error;
     }
 };
+
+
+
+export const getAllEnrollmentsByProgram = async (programId: number): Promise<Enrollment[]> => {
+    try {
+        const {data} = await $authHost.get<Enrollment[]>(`/api/enrollment/getEnrollment/${programId}`);
+        return data;
+    } catch (error: any) {
+        console.error("Error fetching enrollment:", error?.response?.data || error.message);
+        throw error;
+    }
+};

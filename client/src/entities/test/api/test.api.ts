@@ -41,7 +41,7 @@ export const getOneTest = async (
 // обновить поля теста
 export const updateTestFields = async (
     testId: number,
-    fields: Partial<Pick<Test, 'title' | 'description' | 'time_limit' | 'status'>>
+    fields: Partial<Pick<Test, 'title' | 'description' | 'final_test' | 'time_limit' | 'status'>>
 ): Promise<Test> => {
     const { data } = await $authHost.patch<Test>(
         `api/test/${testId}`,

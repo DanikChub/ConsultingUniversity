@@ -153,7 +153,7 @@ const TestOverview = ({}: TestOverviewProps) => {
                                 <tbody>
                                 {attempts.map((attempt, index) => (
                                     <tr key={attempt.id} className="border-b hover:bg-gray-50 transition">
-                                        <td className="px-4 py-2">{index + 1}</td>
+                                        <td className="px-4 py-2">{attempt.attempt_number}</td>
                                         <td className="px-4 py-2">{formatDate(attempt.createdAt)}</td>
                                         <td className="px-4 py-2">{attempt.score}%</td>
                                         <td className="px-4 py-2">
