@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type {Punct} from "../../../entities/punct/model/type";
 import type {Theme} from "../../../entities/theme/model/type";
 import type {File as FileType} from "../../../entities/file/model/type";
-import {deleteFile, moveFile, updateFileName} from "../../../entities/file/api/file.api";
+import {createVideoFile, deleteFile, moveFile, updateFileName, uploadFile} from "../../../entities/file/api/file.api";
 import axios from "axios";
 
 export const useFile = (target: Punct | Theme | null, targetType: 'theme' | 'punct') => {
@@ -10,7 +10,7 @@ export const useFile = (target: Punct | Theme | null, targetType: 'theme' | 'pun
     const renameTimers = useRef<Record<number, NodeJS.Timeout>>({});
 
 
-    const addFile = async (file: File, onProgress?: (p: number) => void) => {
+    const addFile = async (file: FileType, onProgress?: (p: number) => void) => {
         if (!target) return;
 
         const FILE_TYPES: Record<string, string[]> = {
@@ -20,8 +20,7 @@ export const useFile = (target: Punct | Theme | null, targetType: 'theme' | 'pun
         };
 
         const ext = file.name.split('.').pop()?.toLowerCase() || '';
-
-        let type: string = null; // если не нашли совпадение
+        let type: string | null = null;
 
         for (const [key, exts] of Object.entries(FILE_TYPES)) {
             if (exts.includes(ext)) {
@@ -29,84 +28,73 @@ export const useFile = (target: Punct | Theme | null, targetType: 'theme' | 'pun
                 break;
             }
         }
+
         if (!type) return;
-        // создаём временный объект файла для UI
+
+        const tempId = Date.now();
+
         const tempFile: any = {
-            id: Date.now(),
+            id: tempId,
             original_name: file.name,
             size: file.size,
             type,
             status: 'uploading',
             progress: 0,
-            order_index: files.length+1,
+            order_index: files.length + 1,
         };
+
         setFiles(prev => [...prev, tempFile]);
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('type', tempFile.type);
-
-        formData.append('targetType', targetType);
-        formData.append('targetId', `${target.id}`);
-
-
-
-
         try {
-            // используем XMLHttpRequest чтобы отслеживать прогресс
-            const uploadedFile = await new Promise<FileType>((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', `${process.env.REACT_APP_API_URL}api/program/file`);
+            const uploadedFile = await uploadFile(
+                file,
+                type,
+                targetType,
+                target.id,
+                (percent) => {
+                    setFiles(prev =>
+                        prev.map(f =>
+                            f.id === tempId
+                                ? { ...f, progress: percent }
+                                : f
+                        )
+                    );
 
-                xhr.upload.onprogress = (e) => {
-                    if (e.lengthComputable) {
-                        const percent = Math.round((e.loaded / e.total) * 100);
-                        tempFile.progress = percent;
-                        setFiles(prev => prev.map(f => f.id === tempFile.id ? tempFile : f));
-                        if (onProgress) onProgress(percent);
-                    }
-                };
+                    if (onProgress) onProgress(percent);
+                }
+            );
 
-                xhr.onload = () => {
-                    if (xhr.status === 200) {
-                        const response = JSON.parse(xhr.response);
-                        resolve(response.file);
-                    } else {
-                        tempFile.status = 'error';
-                        setFiles(prev => prev.map(f => f.id === tempFile.id ? tempFile : f));
-                        reject(xhr.response);
-                    }
-                };
-
-                xhr.onerror = () => {
-                    tempFile.status = 'error';
-                    setFiles(prev => prev.map(f => f.id === tempFile.id ? tempFile : f));
-                    reject(xhr.response);
-                };
-
-                xhr.send(formData);
-            });
-
-            // обновляем UI на завершённый файл
-            uploadedFile.progress = 100;
-
-            console.log(uploadedFile)
-            setFiles(prev => prev.map(f => f.id === tempFile.id ? uploadedFile : f));
+            setFiles(prev =>
+                prev.map(f =>
+                    f.id === tempId
+                        ? { ...uploadedFile, progress: 100 }
+                        : f
+                )
+            );
 
             return uploadedFile;
 
         } catch (e) {
             console.error('Ошибка загрузки файла', e);
-            tempFile.status = 'error';
-            setFiles(prev => prev.map(f => f.id === tempFile.id ? tempFile : f));
+
+            setFiles(prev =>
+                prev.map(f =>
+                    f.id === tempId
+                        ? { ...f, status: 'error' }
+                        : f
+                )
+            );
         }
     };
+
 
     const addVideo = async (url: string) => {
         if (!target) return;
 
+        const tempId = Date.now();
+
         const tempFile: any = {
-            id: Date.now(),
+            id: tempId,
             original_name: 'VK Video',
             type: 'video',
             storage: 'vk',
@@ -118,32 +106,33 @@ export const useFile = (target: Punct | Theme | null, targetType: 'theme' | 'pun
         setFiles(prev => [...prev, tempFile]);
 
         try {
-            const { data } = await axios.post(
-                `${process.env.REACT_APP_API_URL}api/program/file`,
-                {
-                    targetType,
-                    targetId: target.id,
-                    type: 'video',
-                    url,
-                }
+            const file = await createVideoFile(
+                url,
+                targetType,
+                target.id
             );
-
 
             setFiles(prev =>
-                prev.map(f => (f.id === tempFile.id ? data.file : f))
+                prev.map(f =>
+                    f.id === tempId ? file : f
+                )
             );
 
-            return data.file;
+            return file;
 
         } catch (e) {
             console.error('Ошибка добавления видео', e);
+
             setFiles(prev =>
                 prev.map(f =>
-                    f.id === tempFile.id ? { ...f, status: 'error' } : f
+                    f.id === tempId
+                        ? { ...f, status: 'error' }
+                        : f
                 )
             );
         }
     };
+
 
 
     const destroyFile = async (fileId: number) => {

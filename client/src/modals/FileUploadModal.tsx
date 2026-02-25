@@ -35,11 +35,7 @@ const FileUploadModal = ({ onClose, onSubmit }: Props) => {
         }
     };
 
-    const handleUpload = () => {
-        if (!file) return;
-        setLoading(true);
-        onSubmit(file);   // 👈 просто отдаём файл
-    };
+
 
     return (
 
@@ -157,7 +153,7 @@ const FileUploadModal = ({ onClose, onSubmit }: Props) => {
                         {/* actions */}
                         <button
                             disabled={!file || loading}
-                            onClick={handleUpload}
+                            onClick={handleSubmit}
                             className="mt-5 w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white
                                  hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
                         >
@@ -225,7 +221,7 @@ const FileUploadModal = ({ onClose, onSubmit }: Props) => {
                         {/* Кнопка добавить видео */}
                         <button
                             disabled={!videoUrl || !videoValid || loading}
-                            onClick={() => onSubmit({ type: 'video', url: videoUrl })}
+                            onClick={handleSubmit}
                             className="mt-5 w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white
              hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
                         >
