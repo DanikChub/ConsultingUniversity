@@ -48,6 +48,7 @@ const TestOverview = ({}: TestOverviewProps) => {
     const [attempts, setAttempts] = useState<TestAttempt[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(false)
+    const {openModal} = useModals()
     const enrollmentId = userContext.user.enrollmentId;
     useEffect(() => {
         if (!id) return
@@ -71,7 +72,7 @@ const TestOverview = ({}: TestOverviewProps) => {
 
     console.log(attempts);
 
-    const {openModal} = useModals()
+
     const handleStartTest = async () => {
         const confirm = await openModal('confirm', {
             title: 'Вы уверены что хотите начать тест?',
