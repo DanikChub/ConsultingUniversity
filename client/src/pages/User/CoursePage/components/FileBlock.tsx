@@ -168,7 +168,7 @@ const FileBlockComponent = ({
     return (
         <div
             onClick={handleClick}
-            className={`relative overflow-hidden flex items-center justify-between p-4 rounded-xl cursor-pointer transition shadow-sm
+            className={`relative overflow-hidden flex items-center justify-between p-4 rounded-xl cursor-pointer transition shadow-sm active:scale-[0.98]
             ${animateStage !== "idle" ? "progress-pop" : ""}
             ${animateStage == "idle" ? statusStyles[status] : ""}
             ${isReference ? "max-w-max space-x-4" : ""}`}

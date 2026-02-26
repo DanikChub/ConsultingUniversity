@@ -4,6 +4,7 @@ import type {Test} from "../entities/test/model/type";
 import type {Program} from "../entities/program/model/type";
 import type {ProgramProgress} from "../entities/progress/model/type";
 import type {File as ProgramFile} from "../entities/file/model/type";
+import type {Certificate} from "../entities/certificate/model/type";
 
 export type ModalType =
     | 'uploadFile'
@@ -15,6 +16,8 @@ export type ModalType =
     | 'viewGradeBook'
     | 'alert'
     | 'confirm'
+    | 'certificateDelivery'
+    | "editCertificate"
 
 export type ModalPayloadMap = {
     uploadFile: {};
@@ -55,6 +58,12 @@ export type ModalPayloadMap = {
         cancelText?: string;
         variant?: 'default' | 'danger';
     };
+    certificateDelivery: {
+        certificate: Certificate;
+    };
+    editCertificate: {
+        certificate: Certificate;
+    }
 };
 
 export type ModalResultMap = {
@@ -72,4 +81,7 @@ export type ModalResultMap = {
     // 🔹 НОВОЕ
     alert: void;
     confirm: boolean;
+    certificateDelivery: 'updated' | 'close';
+    certificateEdit: 'updated' | 'close';
+
 };

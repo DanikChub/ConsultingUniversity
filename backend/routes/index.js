@@ -13,6 +13,8 @@ const progressRouter = require('./progressRouter');
 const practicalWorkRouter = require('./practicalWorkRouter');
 const chatRouter = require('./chatRouter');
 const enrollmentRouter = require('./enrollmentRouter');
+const certificateRouter = require('./certificateRouter');
+
 
 router.use('/user', userRouter)
 router.use('/event', eventRouter)
@@ -24,5 +26,6 @@ router.use('/statistic', statisticRouter)
 router.use('/progress', progressRouter)
 router.use('/practical_work', practicalWorkRouter)
 router.use('/enrollment', enrollmentRouter)
+router.use('/certificates', certificateRouter)
 
 module.exports = router;

@@ -82,7 +82,7 @@ const FinishTestPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
                     {!passed && (
                         <button
-                            onClick={() => navigate(TEST_ROUTE)}
+                            onClick={() => navigate(TEST_ROUTE.replace(':id', localStorage.getItem('testId')))}
                             className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
                         >
                             Пройти ещё раз

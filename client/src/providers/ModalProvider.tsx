@@ -10,6 +10,8 @@ import {TestViewModal} from "../modals/TestViewModal";
 import GradeBookModal from "../modals/GradeBookModal";
 import AlertModal from "../modals/AlertModal";
 import ConfirmModal from "../modals/ConfirmModal";
+import CertificateDeliveryModal from "../modals/CertificateDeliveryModal";
+import {EditCertificateModal} from "../modals/EditCertificateModal";
 
 
 type ActiveModal<T extends ModalType = ModalType> = {
@@ -128,6 +130,20 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 />
             )}
 
+            {modal?.type === 'certificateDelivery' && (
+                <CertificateDeliveryModal
+                    certificate={modal.payload.certificate}
+                    onClose={() => close('close')}
+                    onUpdated={() => close('updated')}
+                />
+            )}
+            {modal?.type === 'editCertificate' && (
+                <EditCertificateModal
+                    certificate={modal.payload.certificate}
+                    onClose={() => close('close')}
+                    onUpdated={() => close('updated')}
+                />
+            )}
 
         </ModalContext.Provider>
     );

@@ -11,6 +11,7 @@ import PdfPageLoader from "./components/PdfPageLoader";
 
 import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import {useModals} from "../../../hooks/useModals";
 
 function formatDate(dateString: string) {
     const date = new Date(dateString);
@@ -70,9 +71,16 @@ const TestOverview = ({}: TestOverviewProps) => {
 
     console.log(attempts);
 
+    const {openModal} = useModals()
+    const handleStartTest = async () => {
+        const confirm = await openModal('confirm', {
+            title: 'Вы уверены что хотите начать тест?',
+            description: 'Попытка пойдет в вашу зачетку, отменить это действие будет нельзя.',
+            confirmText: 'Начать'
+        })
 
-    const handleStartTest = () => {
-        // переход на страницу прохождения теста
+        if (!confirm) return
+
         navigate(TEST_ROUTE.replace(":id", `${test.id}`))
     }
 

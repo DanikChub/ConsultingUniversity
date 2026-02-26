@@ -8,6 +8,24 @@ const {sendCompletionEmail} = require("../services/mail.service");
 const STATIC_DIR = path.resolve(__dirname, '..', 'static');
 if (!fs.existsSync(STATIC_DIR)) fs.mkdirSync(STATIC_DIR, { recursive: true });
 
+async function generateCertificateNumber() {
+    const year = new Date().getFullYear();
+
+    const countThisYear = await Certificate.count({
+        where: {
+            createdAt: {
+                [Op.gte]: new Date(`${year}-01-01`),
+                [Op.lt]: new Date(`${year + 1}-01-01`)
+            }
+        }
+    });
+
+    const sequence = String(countThisYear + 1).padStart(6, '0');
+
+    return `DP-${year}-${sequence}`;
+}
+
+
 function calculateProgramProgress(program, userProgressMap, enrollmentId) {
     const byContent = {}
     let totalCount = 0
@@ -86,7 +104,7 @@ async function recalculateEnrollmentProgress(enrollmentId) {
         calculateProgramProgress(program, userProgressMap, enrollmentId)
 
     enrollment.progress_percent = percent
-    if (enrollment.progress_percent == 100) {
+    if (enrollment.progress_percent == 100 && enrollment.status != 'completed') {
         sendCompletionEmail('chabanovdan@gmail.com', 'Даниил Чабанов', 'Тестовая программа потом доделаю')
         enrollment.status = 'completed';
         await Event.create({
@@ -94,6 +112,13 @@ async function recalculateEnrollmentProgress(enrollmentId) {
             name: program.title,
             event_id: program.id,
             type: 'program'
+        });
+        const number = await generateCertificateNumber();
+
+        await Certificate.create({
+            enrollmentId: enrollment.id,
+            certificate_number: number,
+            issued_at: new Date()
         });
         enrollment.completed_at = new Date();
     } else {
@@ -371,6 +396,50 @@ const Enrollment = sequelize.define('enrollment', {
     },
 });
 
+const Certificate = sequelize.define('certificate', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+
+
+
+    certificate_number: {
+        type: DataTypes.STRING,
+        unique: true,
+    },
+
+    status: {
+        type: DataTypes.ENUM(
+            'pending_contact',
+            'contacted',
+            'waiting_delivery',
+            'shipped',
+            'picked_up',
+            'delivered'
+        ),
+        defaultValue: 'pending_contact',
+    },
+
+    delivery_type: {
+        type: DataTypes.ENUM('post', 'pickup'),
+        allowNull: true,
+    },
+
+    address: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+
+    tracking_number: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+
+    issued_at: {
+        type: DataTypes.DATE,
+    }
+});
+
+
+
 const UserContentProgress = sequelize.define('user_content_progress', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 
@@ -487,7 +556,14 @@ TestAttemptAnswer.belongsTo(Question);
 User.belongsToMany(Program, {through: Enrollment})
 Program.belongsToMany(User, {through: Enrollment})
 
+Enrollment.belongsTo(User);
+User.hasMany(Enrollment);
 
+Enrollment.belongsTo(Program);
+Program.hasMany(Enrollment);
+
+Enrollment.hasOne(Certificate, { onDelete: 'cascade' });
+Certificate.belongsTo(Enrollment);
 
 User.hasMany(PracticalWork)
 PracticalWork.belongsTo(User)
@@ -609,5 +685,6 @@ module.exports = {
     PracticalWork,
     TestAttempt,
     TestAttemptAnswer,
-    UserContentProgress
+    UserContentProgress,
+    Certificate
 }
