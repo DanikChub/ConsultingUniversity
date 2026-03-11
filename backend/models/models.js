@@ -296,6 +296,16 @@ const Test = sequelize.define('test', {
         allowNull: false
     },
     order_index: { type: DataTypes.INTEGER },
+    programId: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    punctId: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+
+
 });
 
 const Question = sequelize.define('question', {
@@ -313,6 +323,14 @@ const Answer = sequelize.define('answer', {
     is_correct: { type: DataTypes.BOOLEAN, defaultValue: false },
     order_index: { type: DataTypes.INTEGER },
 });
+
+const TestQuestionLink = sequelize.define('test_question_link', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    order_index: { type: DataTypes.INTEGER }
+}, {
+    timestamps: false
+});
+
 
 
 const TestAttempt = sequelize.define('test_attempt', {
@@ -504,20 +522,71 @@ const PracticalWork = sequelize.define('practical_work', {
     punct_id: {type: DataTypes.INTEGER}
 })
 
-const Messages = sequelize.define('messeges', {
-    id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-    text: {type: DataTypes.TEXT},
-    user_id: {type: DataTypes.INTEGER},
-    role: {type: DataTypes.STRING},
 
-    readAt: {type: DataTypes.DATE, defaultValue: null},
+
+const Chat = sequelize.define('chat', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+
+    userId: { type: DataTypes.INTEGER, allowNull: false },
+    lastMessageAt: {type: DataTypes.DATE},
+    status: {
+        type: DataTypes.ENUM('open', 'closed'),
+        defaultValue: 'open'
+    },
+    lastReadUserMessageId: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    lastReadAdminMessageId: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    }
 })
 
+const Message = sequelize.define('message', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+
+    chatId: { type: DataTypes.INTEGER, allowNull: false },
+
+    senderType: {
+        type: DataTypes.ENUM('USER', 'ADMIN'),
+        allowNull: false
+    },
+
+    senderId: { type: DataTypes.INTEGER, allowNull: true },
+
+    text: { type: DataTypes.TEXT, allowNull: true },
+
+    readAt: { type: DataTypes.DATE, defaultValue: null },
+    deletedAt: { type: DataTypes.DATE, defaultValue: null },
+})
+
+const MessageAttachment = sequelize.define('message_attachment', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+
+    messageId: { type: DataTypes.INTEGER, allowNull: false },
+
+    originalName: { type: DataTypes.STRING },
+    storedName: { type: DataTypes.STRING },
+
+    mimeType: { type: DataTypes.STRING },
+    size: { type: DataTypes.INTEGER },
+
+    storage: {
+        type: DataTypes.ENUM('local', 's3'),
+        defaultValue: 'local'
+    },
+
+    url: { type: DataTypes.STRING }
+})
 
 
 
 Program.hasMany(Theme, { onDelete: 'cascade', hooks: true })
 Theme.belongsTo(Program)
+
+Program.hasOne(Test)
+Test.belongsTo(Program)
 
 Theme.hasMany(File, { onDelete: 'cascade', hooks: true  })
 File.belongsTo(Theme)
@@ -534,8 +603,31 @@ FileAsset.belongsTo(File, { onDelete: 'cascade' })
 Punct.hasMany(Test, { onDelete: 'cascade', hooks: true })
 Test.belongsTo(Punct)
 
-Test.hasMany(Question, { onDelete: 'cascade', hooks: true });
-Question.belongsTo(Test);
+Test.hasMany(Question, {
+    foreignKey: 'testId',
+    as: 'questions',
+    onDelete: 'CASCADE',
+    hooks: true
+});
+Question.belongsTo(Test, {
+    foreignKey: 'testId'
+});
+
+
+Test.belongsToMany(Question, {
+    through: TestQuestionLink,
+    foreignKey: 'testId',
+    otherKey: 'questionId',
+    as: 'finalQuestions',
+    onDelete: 'CASCADE'
+});
+Question.belongsToMany(Test, {
+    through: TestQuestionLink,
+    foreignKey: 'questionId',
+    otherKey: 'testId',
+    onDelete: 'CASCADE'
+});
+
 
 Question.hasMany(Answer, { onDelete: 'cascade', hooks: true });
 Answer.belongsTo(Question);
@@ -552,6 +644,14 @@ TestAttemptAnswer.belongsTo(TestAttempt);
 Question.hasMany(TestAttemptAnswer, { onDelete: 'cascade' });
 TestAttemptAnswer.belongsTo(Question);
 
+Chat.belongsTo(User, { foreignKey: "userId" })
+Chat.hasMany(Message, { foreignKey: "chatId" })
+
+Chat.hasMany(Message)
+Message.belongsTo(Chat)
+
+Message.hasMany(MessageAttachment)
+MessageAttachment.belongsTo(Message)
 
 User.belongsToMany(Program, {through: Enrollment})
 Program.belongsToMany(User, {through: Enrollment})
@@ -670,7 +770,6 @@ Test.addHook('afterDestroy', async (test) => {
 
 module.exports = {
     Event,
-    Messages,
     User,
     Program,
     Theme,
@@ -681,10 +780,14 @@ module.exports = {
     Test,
     Question,
     Answer,
+    Chat,
+    Message,
+    MessageAttachment,
     Enrollment,
     PracticalWork,
     TestAttempt,
     TestAttemptAnswer,
     UserContentProgress,
-    Certificate
+    Certificate,
+    TestQuestionLink
 }

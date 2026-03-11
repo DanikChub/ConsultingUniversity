@@ -1,6 +1,6 @@
 // CoursePage.tsx
 import learn from "../../../assets/imgs/learn.png"
-import React, {useContext, useEffect, useState} from "react"
+import React, {useContext, useEffect, useMemo, useState} from "react"
 import {useNavigate, useParams} from "react-router-dom"
 import { FiArrowLeft, FiCheckCircle, FiClock, FiArchive } from "react-icons/fi"
 
@@ -17,9 +17,12 @@ import {getEnrollmentByProgram} from "../../../entities/enrollment/api/enrollmen
 import CustomAudioPlayer from "../../../components/CustomAudioPlayer/CustomAudioPlayer";
 import type {File} from "../../../entities/file/model/type";
 
-import './CoursePage.css'
+
 import {USER_ROUTE} from "../../../shared/utils/consts";
 import ProgramSkeleton from "./components/ProgramSkeleton";
+import {getProgramFileStats, type ProgramFileStats} from "./hooks/getProgramFileStats";
+import TestBlock from "./components/TestBlock";
+import {isContentCompleted} from "../../../entities/progress/model/selectors";
 
 export default function CoursePage() {
     const { id } = useParams()
@@ -28,7 +31,7 @@ export default function CoursePage() {
     const [loading, setLoading] = useState(true)
     const [openThemes, setOpenThemes] = useState<number[]>([])
     const [progress, setProgress] = useState<ProgramProgress | null>(null)
-
+    const [stats, setStats] = useState<ProgramFileStats | null>(null)
 
 
     const [playerActive, setPlayerActive] = useState(false)
@@ -45,13 +48,34 @@ export default function CoursePage() {
                 setLoading(false);
 
                 const programData = await getOneProgram(Number(id));
+                programData.themes?.forEach(theme => {
+                    theme.puncts?.forEach(punct => {
+
+                        punct.files?.forEach(file => {
+                            file.themeId = theme.id
+                            file.punctId = punct.id
+                        })
+
+                        punct.tests?.forEach(test => {
+                            test.themeId = theme.id
+                            test.punctId = punct.id
+                        })
+
+                    })
+
+                    theme.files?.forEach(file => {
+                        file.themeId = theme.id
+                        file.punctId = null
+                    })
+                })
                 setProgram(programData);
 
                 const enrollment = await getEnrollmentByProgram(programData.id, userContext.user.user.id);
                 userContext.user.setEnrollmentId(enrollment.id);
 
                 const freshProgress = await getEnrollmentProgress(enrollment.id);
-
+                const stats = getProgramFileStats(programData, freshProgress)
+                setStats(stats)
                 // --- Сравниваем со старым прогрессом ---
                 const oldProgress = userContext.user.getEnrollmentProgress(enrollment.id);
                 let changedItems: string[] = [];
@@ -76,6 +100,9 @@ export default function CoursePage() {
                 userContext.user.setEnrollmentProgress(enrollment.id, freshProgress);
                 setProgress(freshProgress);
 
+
+
+
             } catch (e) {
                 alert(e.response.data.message);
             } finally {
@@ -85,6 +112,31 @@ export default function CoursePage() {
 
         load();
     }, [id]);
+
+    useEffect(() => {
+        if (!program || !progress) return;
+
+        const lastOpened = userContext.user.getLastOpened(userContext.user.enrollmentId);
+        console.log(lastOpened)
+        if (lastOpened) {
+            // 1️⃣ Открываем нужную тему
+            setOpenThemes([lastOpened.themeId]);
+
+            // 2️⃣ Скроллим к нужному элементу
+            setTimeout(() => {
+                const elementId = `${lastOpened.type}-${lastOpened.id}`;
+                const el = document.getElementById(elementId);
+
+                if (el) {
+                    el.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+                }
+            }, 300);
+        }
+    }, [program, progress]);
+
 
     useEffect(() => {
         if (progress?.percent !== undefined) {
@@ -125,7 +177,28 @@ export default function CoursePage() {
         }
     }
     const percent = Math.round(progress?.percent ?? 0)
-    const status = statusStyles['published']
+
+
+    const traslatorFileType = {
+        docx: 'Лекции',
+        pdf: 'Презентации',
+        video: 'Видео',
+        audio: 'Аудио',
+        tests: 'Тесты'
+    }
+
+    const finalLocked = useMemo(() => {
+        if (!program || !progress) return true
+
+        const tests =
+            program.themes
+                ?.flatMap(t => t.puncts ?? [])
+                .flatMap(p => p.tests ?? [])
+                .filter(t => !t.final_test) ?? []
+
+        return tests.some(t => !isContentCompleted(progress, "test", t.id))
+    }, [program, progress])
+
 
 
     if (!loading) return <ProgramSkeleton/>
@@ -157,7 +230,7 @@ export default function CoursePage() {
                     <div className="flex flex-col lg:flex-row items-center lg:items-stretch">
 
                         {/* 🖼 Cover */}
-                        <div className="relative lg:w-[320px] w-full max-h-[250px] flex-shrink-0">
+                        <div className="relative lg:w-[320px] w-full max-h-[350px] flex-shrink-0">
 
                             {program.img ? (
                                 <img
@@ -168,9 +241,9 @@ export default function CoursePage() {
                             ) : (
                                 <div
                                     className="w-full h-full min-h-[220px] flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100 lg:rounded-l-3xl">
-                                <span className="text-4xl font-bold text-indigo-300">
-                                    {program.title?.charAt(0)}
-                                </span>
+                                    <span className="text-4xl font-bold text-indigo-300">
+                                        {program.title?.charAt(0)}
+                                    </span>
                                 </div>
                             )}
 
@@ -189,21 +262,43 @@ export default function CoursePage() {
                                         {program.title}
                                     </h1>
 
-                                    <div
-                                        className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${status.color}`}>
-                                        {status.icon}
-                                        {status.label}
-                                    </div>
-
 
                                 </div>
 
-                                {program.short_title && (
-                                    <div className="text-sm text-gray-400">
-                                        Внутреннее название: {program.short_title}
-                                    </div>
-                                )}
+
                             </div>
+
+                            <div className="space-y-4">
+
+                                {/* 🎯 Главный блок — тесты */}
+
+
+                                {/* 📚 Материалы — компактная строка */}
+                                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600 px-2">
+                                    {stats.tests.total > 0 && (
+                                        <span>{stats.tests.completed}/{stats.tests.total} Тестов</span>
+                                    )}
+
+                                    {stats.video.total > 0 && (
+                                        <span>{stats.video.completed}/{stats.video.total} Видео</span>
+                                    )}
+
+                                    {stats.audio.total > 0 && (
+                                        <span>{stats.audio.completed}/{stats.audio.total} Аудио</span>
+                                    )}
+
+                                    {stats.pdf.total > 0 && (
+                                        <span>{stats.pdf.completed}/{stats.pdf.total} Презентации</span>
+                                    )}
+
+                                    {stats.docx.total > 0 && (
+                                        <span>{stats.docx.completed}/{stats.docx.total} Лекции</span>
+                                    )}
+
+                                </div>
+
+                            </div>
+
 
                             {/* 📊 Progress */}
                             <div className="max-w-xl space-y-2">
@@ -252,6 +347,12 @@ export default function CoursePage() {
                         setActiveAudio={setActiveAudio}
                     />
                 ))}
+
+                <TestBlock
+                    test={program.test}
+                    progress={progress}
+                    locked={finalLocked}
+                />
             </div>
 
             {playerActive && activeAudio && (

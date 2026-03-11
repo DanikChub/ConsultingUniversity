@@ -1,198 +1,262 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import AppContainer from '../../../components/ui/AppContainer'
-import { getUsersWithLastMessages } from '../../../entities/user/api/user.api'
-import { CHAR_PAGE_ROUTE } from '../../../shared/utils/consts'
-import SearchInput from "../../../shared/ui/inputs/SearchInput";
+import React, { useEffect, useMemo, useState, useContext } from "react"
+import AppContainer from "../../../components/ui/AppContainer"
+import SearchInput from "../../../shared/ui/inputs/SearchInput"
+import type { Chat as ChatType } from "../../../entities/chat/model/type"
+import { closeChat, getAllChats } from "../../../entities/chat/api/chat.api"
+import { CHAT_PAGE_ROUTE } from "../../../shared/utils/consts"
+import {useNavigate, useSearchParams} from "react-router-dom"
+import { Context } from "../../../index"
+import {API_URL} from "../../../shared/config/api";
+import Chat from "../../../widgets/chat/Chat";
+import {useSocket} from "../../../hooks/useSocket";
 
-interface ChatUser {
-    id: number
-    name: string
-    role: 'admin' | 'user'
-    organization: string
-    message: string
-    createdAt: string
-    numberUnReadMessages?: number
-}
-
-const formatDate = (date: string) => {
-    if (!date) return '-'
-    return new Date(date).toLocaleDateString('ru-RU')
+const formatDate = (date: string | null) => {
+    if (!date) return "-"
+    return new Date(date).toLocaleDateString("ru-RU")
 }
 
 const ChatUsersPage: React.FC = () => {
-    const [users, setUsers] = useState<ChatUser[]>([])
-    const [loading, setLoading] = useState<boolean>(true)
-    const [activeTab, setActiveTab] = useState<'inbox' | 'outbox' | ''>('')
-    const [search, setSearch] = useState<string>('')
+    const socket = useSocket()
 
+    const [chats, setChats] = useState<ChatType[]>([])
+    const [loading, setLoading] = useState(true)
+    const [activeStatus, setActiveStatus] = useState<"open" | "closed" | "">("")
+    const [search, setSearch] = useState("")
+    const [page, setPage] = useState(1)
+    const [activeChatId, setActiveChatId] = useState<number | null>(null);
+    const [totalPages, setTotalPages] = useState(1)
+    const [queryParams] = useSearchParams();
     const navigate = useNavigate()
 
-    useEffect(() => {
-        fetchUsers()
-    }, [])
+    /*
+    ============================
+        LOAD CHATS
+    ============================
+    */
 
-    const fetchUsers = async () => {
+    useEffect(() => {
+        setActiveChatId(queryParams.get('chatId'))
+    }, []);
+
+    useEffect(() => {
+        fetchChats()
+    }, [page, activeStatus])
+
+    const fetchChats = async () => {
         try {
-            const data = await getUsersWithLastMessages()
-            setUsers(data)
-        } catch (error: any) {
-            alert(
-                error?.response?.data?.message ||
-                error?.message ||
-                'Ошибка загрузки пользователей'
-            )
+            setLoading(true)
+            const data = await getAllChats(page, 20, activeStatus || undefined)
+
+            setChats(data.rows)
+            setTotalPages(data.pages)
+        } catch (e: any) {
+            alert("Ошибка загрузки чатов")
         } finally {
             setLoading(false)
         }
     }
 
-    const filteredUsers = useMemo(() => {
-        let result = [...users]
+    /*
+    ============================
+        SOCKET REALTIME
+    ============================
+    */
 
-        if (activeTab === 'inbox') {
-            result = result.filter((u) => u.role === 'user')
-        }
+    useEffect(() => {
+        if (!socket) return
 
-        if (activeTab === 'outbox') {
-            result = result.filter((u) => u.role === 'admin')
-        }
+        // админ присоединяется к комнате админов
+        socket.emit("join_admins")
 
-        if (search.trim()) {
-            result = result.filter(
-                (u) =>
-                    u.name.toLowerCase().includes(search.toLowerCase()) ||
-                    u.organization?.toLowerCase().includes(search.toLowerCase()) ||
-                    u.message?.toLowerCase().includes(search.toLowerCase())
+        socket.on("chat_updated", (payload: any) => {
+            console.log(payload);
+            setChats(prev => {
+                const updated = prev.map(chat => {
+                    if (chat.id !== payload.chatId) return chat
+
+                    return {
+                        ...chat,
+                        unreadCount: payload.unreadCount,
+                        lastMessageAt: payload.lastMessageAt,
+                        messages: payload.lastMessage
+                            ? [payload.lastMessage]
+                            : chat.messages
+                    }
+                })
+
+                return updated.sort(
+                    (a, b) =>
+                        new Date(b.lastMessageAt).getTime() -
+                        new Date(a.lastMessageAt).getTime()
+                )
+            })
+        })
+
+        socket.on("chat_read_updated", ({ chatId, unreadCount }) => {
+            setChats(prev =>
+                prev.map(chat =>
+                    chat.id === chatId
+                        ? { ...chat, unreadCount }
+                        : chat
+                )
             )
-        }
+        })
 
-        return result
-    }, [users, activeTab, search])
+        socket.on("new_chat", (chat: ChatType) => {
+            setChats(prev => [chat, ...prev])
+        })
+
+        return () => {
+            socket.off("chat_read_updated")
+            socket.off("chat_updated")
+            socket.off("new_chat")
+        }
+    }, [socket])
+
+    /*
+    ============================
+        SEARCH
+    ============================
+    */
+
+    const filteredChats = useMemo(() => {
+        if (!search.trim()) return chats
+        return chats.filter(chat =>
+            String(chat.userId).includes(search)
+        )
+    }, [chats, search])
+
+    /*
+    ============================
+        CLOSE CHAT
+    ============================
+    */
+
+    const handleCloseChat = async (chatId: number) => {
+        if (!window.confirm("Закрыть чат?")) return
+
+        try {
+            await closeChat(chatId)
+
+            setChats(prev =>
+                prev.map(chat =>
+                    chat.id === chatId
+                        ? { ...chat, status: "closed" }
+                        : chat
+                )
+            )
+        } catch {
+            alert("Ошибка закрытия чата")
+        }
+    }
+
+    const handleSetActiveChatId = (newChatId) => {
+        setActiveChatId(newChatId)
+    }
 
     return (
         <AppContainer>
             <div className="mx-auto px-4 py-8">
 
-                {/* Header */}
                 <div className="mb-8 flex justify-between items-center">
-                    <h1 className="text-2xl font-bold text-gray-800">
-                        Сообщения
+                    <h1 className="text-2xl font-bold">
+                        Чаты пользователей
                     </h1>
-
-                    <div className="flex gap-3">
-                        <button
-                            onClick={() =>
-                                setActiveTab(activeTab === 'inbox' ? '' : 'inbox')
-                            }
-                            className={`px-4 py-2 rounded-xl text-sm transition ${
-                                activeTab === 'inbox'
-                                    ? 'bg-blue-500 text-white shadow'
-                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                            }`}
-                        >
-                            Входящие
-                        </button>
-
-                        <button
-                            onClick={() =>
-                                setActiveTab(activeTab === 'outbox' ? '' : 'outbox')
-                            }
-                            className={`px-4 py-2 rounded-xl text-sm transition ${
-                                activeTab === 'outbox'
-                                    ? 'bg-blue-500 text-white shadow'
-                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                            }`}
-                        >
-                            Отправленные
-                        </button>
-                    </div>
                 </div>
 
-                {/* Search */}
                 <div className="mb-6">
                     <SearchInput
-                        className="mt-7"
-                        value=''
-                        onChange={e => console.log(e)}
-                        placeholder="Поиск..."
+                        value={search}
+                        onChange={setSearch}
+                        placeholder="Поиск по userId..."
                     />
                 </div>
 
-                {/* Content */}
                 {loading ? (
-                    <div className="text-gray-500">Загрузка...</div>
-                ) : filteredUsers.length === 0 ? (
-                    <div className="text-gray-400">Нет сообщений</div>
+                    <div>Загрузка...</div>
+                ) : filteredChats.length === 0 ? (
+                    <div>Нет чатов</div>
                 ) : (
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div className="grid grid-cols-2">
 
-                        {filteredUsers.map((user) => {
-                            const hasUnread = user.numberUnReadMessages && user.numberUnReadMessages > 0
+                        <div className="bg-white rounded-l-2xl  shadow-sm border divide-y">
+                            {filteredChats.map(chat => {
+                                const hasUnread = chat.unreadCount > 0
+                                const lastMessage = chat.messages?.[0]
 
-                            return (
-                                <div
-                                    key={user.id}
-                                    className={`grid grid-cols-[40px_1.5fr_1.5fr_2fr_120px] items-center px-6 py-4 border-b last:border-none hover:bg-gray-50 transition ${
-                                        hasUnread ? 'bg-blue-50' : ''
-                                    }`}
-                                >
-                                    {/* Checkbox */}
-                                    <div>
-                                        <input
-                                            type="checkbox"
-                                            className="w-4 h-4"
-                                        />
-                                    </div>
 
-                                    {/* Name */}
-                                    <div className="flex items-center gap-2">
-                                        <Link
-                                            to={CHAR_PAGE_ROUTE.replace(':id', user.id.toString())}
-                                            className={`hover:underline ${
-                                                hasUnread
-                                                    ? 'font-semibold text-gray-900'
-                                                    : 'text-gray-700'
-                                            }`}
-                                        >
-                                            {user.name}
-                                        </Link>
-
-                                        {hasUnread ?
-                                            <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                                                {user.numberUnReadMessages}
-                                              </span>
-                                            :
-                                            ''
-                                        }
-                                    </div>
-
-                                    {/* Organization */}
-                                    <div className="text-gray-600 text-sm truncate">
-                                        {user.organization || '-'}
-                                    </div>
-
-                                    {/* Message */}
+                                return (
                                     <div
-                                        className={`text-sm truncate ${
-                                            hasUnread
-                                                ? 'font-semibold text-gray-800'
-                                                : 'text-gray-500'
-                                        }`}
+                                        key={chat.id}
+                                        onClick={() =>
+                                            handleSetActiveChatId(chat.id)
+                                        }
+                                        className={`
+                                        flex items-center gap-4 px-6 py-4
+                                        cursor-pointer transition
+                                        hover:bg-gray-50
+                                        ${hasUnread ? "bg-blue-50" : ""}
+                                        ${chat.status === "closed" ? "opacity-60" : ""}
+                                    `}
                                     >
-                                        {user.message?.length > 50
-                                            ? user.message.slice(0, 50) + '...'
-                                            : user.message}
-                                    </div>
+                                        {/* Avatar */}
+                                        <div className="relative w-12 h-12 flex-shrink-0">
+                                            {chat.user?.img ? (
+                                                <img
+                                                    src={process.env.REACT_APP_API_URL + chat.user.img}
+                                                    alt={chat.user.name}
+                                                    className="w-12 h-12 rounded-full object-cover border"
+                                                />
+                                            ) : (
+                                                <div
+                                                    className="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold text-lg">
+                                                    {chat.user?.name?.[0]?.toUpperCase() || "U"}
+                                                </div>
+                                            )}
 
-                                    {/* Date */}
-                                    <div className="text-sm text-gray-400 text-right">
-                                        {formatDate(user.createdAt)}
+                                            {/* Online indicator */}
+                                            {/*{chat.user?.isOnline && (*/}
+                                            {/*    <div*/}
+                                            {/*        className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white"></div>*/}
+                                            {/*)}*/}
+                                        </div>
+
+                                        {/* Main info */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between">
+                                                <div className="font-semibold text-gray-800 truncate">
+                                                    {chat.user?.name}
+                                                </div>
+
+                                                <div className="text-xs text-gray-400 whitespace-nowrap">
+                                                    {formatDate(chat.lastMessageAt)}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between mt-1">
+                                                <div className="text-sm text-gray-500 truncate max-w-[80%]">
+                                                    {lastMessage?.text
+                                                        ? lastMessage.text
+                                                        : lastMessage?.message_attachments?.length > 0
+                                                            ? "📎 Вложение"
+                                                            : "Нет сообщений"}
+                                                </div>
+
+                                                {hasUnread && (
+                                                    <span
+                                                        className="ml-3 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                                                        {chat.unreadCount}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            )
-                        })}
+                                )
+                            })}
+                        </div>
+                        <Chat chatId={activeChatId} own="ADMIN"/>
                     </div>
+
                 )}
             </div>
         </AppContainer>

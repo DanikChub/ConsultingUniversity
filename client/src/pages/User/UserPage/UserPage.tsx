@@ -8,7 +8,7 @@ import LoadingAlert from '../../../components/ui/LoadingAlert';
 import { Context } from '../../../index';
 import { getOneProgram } from '../../../entities/program/api/program.api';
 import { setUserProfileImg } from '../../../entities/user/api/user.api';
-import { getUnreadCount } from '../../../entities/chat/api/chat.api';
+
 import statement from '../../../assets/imgs/statement.png';
 import learn from '../../../assets/imgs/learn.png';
 import how from '../../../assets/imgs/how.png';
@@ -32,11 +32,8 @@ const UserPage = observer(() => {
         setProgram(userProgram);
         setProgress(userProgram.enrollment.progress_percent ?? 0);
 
+        setLoading(true)
 
-        getUnreadCount(userContext.user.user.id, 'USER')
-            .then((data) => setUnreadMessages(data.unreadCount))
-            .catch((e) => console.error(e))
-            .finally(() => setLoading(true))
     }, []);
 
     const handleProfileImgClick = (e: ChangeEvent<HTMLInputElement>) => {
@@ -226,20 +223,12 @@ const UserPage = observer(() => {
                                             {program.title}
                                         </h1>
 
-                                        <div
-                                            className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${status.color}`}>
-                                            {status.icon}
-                                            {status.label}
-                                        </div>
+
 
 
                                     </div>
 
-                                    {program.short_title && (
-                                        <div className="text-sm text-gray-400">
-                                            Внутреннее название: {program.short_title}
-                                        </div>
-                                    )}
+
                                 </div>
 
                                 {/* 📊 Progress */}

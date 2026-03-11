@@ -22,6 +22,8 @@ export const useTestEditor = (targetId: number, mode: 'create' | 'edit') => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const isFinal = test?.final_test ?? false;
+
     /* ------------------ HELPERS ------------------ */
     const handleError = (e: unknown, fallback = 'Ошибка запроса') => {
         console.error(e);
@@ -47,21 +49,33 @@ export const useTestEditor = (targetId: number, mode: 'create' | 'edit') => {
             let fullTest: Test | null = null;
 
             if (mode === 'create') {
-                const created = await safeRequest(() => createTest(targetId), 'Не удалось создать тест');
+                const created = await safeRequest(
+                    () => createTest({ punctId: targetId, final_test: false }),
+                    'Не удалось создать тест'
+                );
                 if (!created || !mounted) return;
 
-                fullTest = await safeRequest(() => getOneTest(created.id), 'Не удалось загрузить тест');
+                fullTest = await safeRequest(
+                    () => getOneTest(created.id),
+                    'Не удалось загрузить тест'
+                );
             }
 
             if (mode === 'edit') {
-                fullTest = await safeRequest(() => getOneTest(targetId), 'Не удалось загрузить тест');
+                fullTest = await safeRequest(
+                    () => getOneTest(targetId),
+                    'Не удалось загрузить тест'
+                );
             }
 
             if (!fullTest || !mounted) return;
 
             setTest({
                 ...fullTest,
-                questions: fullTest.questions.map(q => ({ ...q, answers: q.answers ?? [] })),
+                questions: (fullTest.questions ?? []).map(q => ({
+                    ...q,
+                    answers: q.answers ?? []
+                })),
             });
 
             setLoading(false);
@@ -76,6 +90,8 @@ export const useTestEditor = (targetId: number, mode: 'create' | 'edit') => {
     const answerDebounces = useRef<Map<number, ReturnType<typeof debounce>>>(new Map());
 
     const debouncedUpdateTestFields = (testId: number, fields: Partial<Test>) => {
+        if (isFinal) return;
+
         if (!testDebounces.current.has(testId)) {
             testDebounces.current.set(
                 testId,
@@ -89,6 +105,8 @@ export const useTestEditor = (targetId: number, mode: 'create' | 'edit') => {
     };
 
     const debouncedUpdateQuestionFields = (questionId: number, fields: Partial<Pick<Question, 'text' | 'type'>>) => {
+        if (isFinal) return;
+
         if (!questionDebounces.current.has(questionId)) {
             questionDebounces.current.set(
                 questionId,
@@ -106,6 +124,8 @@ export const useTestEditor = (targetId: number, mode: 'create' | 'edit') => {
     );
 
     const debouncedUpdateAnswerFields = (answerId: number, fields: Partial<Pick<Answer, 'text' | 'is_correct'>>) => {
+        if (isFinal) return;
+
         const prev = answerPendingFields.current.get(answerId) || {};
         answerPendingFields.current.set(answerId, { ...prev, ...fields });
 
@@ -139,13 +159,13 @@ export const useTestEditor = (targetId: number, mode: 'create' | 'edit') => {
 
     /* ------------------ UPDATE FUNCTIONS ------------------ */
     const updateTest = (fields: Partial<Test>) => {
-        if (!test) return;
+        if (!test || isFinal) return;
         setTest(prev => ({ ...prev!, ...fields, status: 'draft' }));
         debouncedUpdateTestFields(test.id, fields);
     };
 
     const updateQuestion = (questionId: number, fields: Partial<Pick<Question, 'text' | 'type'>>) => {
-        if (!test) return;
+        if (!test || isFinal) return;
         setTest(prev => ({
             ...prev!,
             questions: prev!.questions.map(q =>
@@ -156,12 +176,12 @@ export const useTestEditor = (targetId: number, mode: 'create' | 'edit') => {
     };
 
     const updateAnswer = (answerId: number, fields: Partial<Pick<Answer, 'text' | 'is_correct'>>) => {
-        if (!test) return;
+        if (!test || isFinal) return;
         setTest(prev => ({
             ...prev!,
             questions: prev!.questions.map(q => ({
                 ...q,
-                answers: q.answers.map(a => a.id === answerId ? { ...a, ...fields, status: 'draft' } : a),
+                answers: q.answers.map(a => a.id === answerId ? { ...a, ...fields } : a),
             })),
         }));
         debouncedUpdateAnswerFields(answerId, fields);
@@ -169,7 +189,7 @@ export const useTestEditor = (targetId: number, mode: 'create' | 'edit') => {
 
     /* ------------------ CRUD FUNCTIONS ------------------ */
     const addQuestion = async () => {
-        if (!test) return;
+        if (!test || isFinal) return;
         const q = await safeRequest(() => createQuestion(test.id), 'Не удалось добавить вопрос');
         if (!q) return;
         setTest(prev => ({ ...prev!, questions: [...prev!.questions, { ...q, answers: [] }], status: 'draft' }));
@@ -177,18 +197,13 @@ export const useTestEditor = (targetId: number, mode: 'create' | 'edit') => {
     };
 
     const removeQuestion = async (questionId: number) => {
-        if (!test) return;
+        if (!test || isFinal) return;
         setTest(prev => ({ ...prev!, questions: prev!.questions.filter(q => q.id !== questionId) }));
-        const ok = await safeRequest(() => deleteQuestion(questionId), 'Не удалось удалить вопрос');
-        if (!ok) {
-            const prevTest = await getOneTest(test.id);
-            if (prevTest) setTest(prevTest);
-        }
-        setActiveQuestionIndex(prev => Math.max(0, Math.min(prev, test.questions.length - 2)));
+        await safeRequest(() => deleteQuestion(questionId), 'Не удалось удалить вопрос');
     };
 
     const addAnswer = async (questionId: number) => {
-        if (!test) return;
+        if (!test || isFinal) return;
         const answer = await safeRequest(() => createAnswer(questionId), 'Не удалось добавить ответ');
         if (!answer) return;
         setTest(prev => ({
@@ -196,22 +211,19 @@ export const useTestEditor = (targetId: number, mode: 'create' | 'edit') => {
             questions: prev!.questions.map(q =>
                 q.id === questionId ? { ...q, answers: [...q.answers, answer] } : q
             ),
-            status: 'draft',
         }));
     };
 
     const removeAnswer = async (answerId: number) => {
-        if (!test) return;
+        if (!test || isFinal) return;
         setTest(prev => ({
             ...prev!,
-            questions: prev!.questions.map(q => ({ ...q, answers: q.answers.filter(a => a.id !== answerId) })),
-            status: 'draft',
+            questions: prev!.questions.map(q => ({
+                ...q,
+                answers: q.answers.filter(a => a.id !== answerId)
+            })),
         }));
-        const ok = await safeRequest(() => deleteAnswer(answerId), 'Не удалось удалить ответ');
-        if (!ok) {
-            const prevTest = await getOneTest(test.id);
-            if (prevTest) setTest(prevTest);
-        }
+        await safeRequest(() => deleteAnswer(answerId), 'Не удалось удалить ответ');
     };
 
     const removeTest = async () => {
@@ -221,8 +233,7 @@ export const useTestEditor = (targetId: number, mode: 'create' | 'edit') => {
     };
 
     const publishCurrentTest = async (): Promise<Test | null> => {
-        if (!test) return null;
-        setError(null);
+        if (!test) return;
 
         try {
             await publishTest(test.id);
@@ -230,18 +241,21 @@ export const useTestEditor = (targetId: number, mode: 'create' | 'edit') => {
             setTest(publishedTest);
             return publishedTest;
         } catch (e: any) {
-            const message = e?.response?.data?.message || e?.response?.data?.error || 'Тест не прошёл проверку перед публикацией';
-            console.error(e);
+            const message =
+                e?.response?.data?.message ||
+                e?.response?.data?.error ||
+                'Тест не прошёл проверку перед публикацией';
+
             setError(message);
-            return null;
+            return;
         }
     };
 
-    /* ------------------ RETURN ------------------ */
     return {
         test,
         loading,
         error,
+        isFinal,
         clearError: () => setError(null),
         activeQuestionIndex,
         setActiveQuestionIndex,
@@ -254,7 +268,6 @@ export const useTestEditor = (targetId: number, mode: 'create' | 'edit') => {
         removeAnswer,
         removeTest,
         publishCurrentTest,
-
         testDebounces,
         questionDebounces,
         answerDebounces

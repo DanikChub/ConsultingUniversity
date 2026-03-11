@@ -18,4 +18,5 @@ export interface Program {
     number_of_test: number;
     number_of_videos: number;
     themes?: Theme[];
+    test?: Test;
 }

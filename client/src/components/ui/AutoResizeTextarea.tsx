@@ -7,6 +7,7 @@ type AutoResizeTextareaProps = {
     minRows?: number;
     maxRows?: number;
     className?: string;
+    onPaste?: (e: ClipboardEvent<HTMLTextAreaElement>) => void;
 };
 
 const AutoResizeTextarea: React.FC<AutoResizeTextareaProps> = ({
@@ -15,7 +16,8 @@ const AutoResizeTextarea: React.FC<AutoResizeTextareaProps> = ({
                                                                    placeholder = 'Введите сообщение…',
                                                                    minRows = 1,
                                                                    maxRows = 6,
-                                                                   className = ''
+                                                                   className = '',
+                                                                   onPaste
                                                                }) => {
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -44,6 +46,7 @@ const AutoResizeTextarea: React.FC<AutoResizeTextareaProps> = ({
 
     return (
         <textarea
+            onPaste={onPaste}
             ref={textareaRef}
             value={value}
             onChange={onChange}

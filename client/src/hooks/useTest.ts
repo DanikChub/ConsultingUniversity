@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import type {Punct, File as FileType, Theme} from '../entities/program/model/type';
 
 import type {Test} from "../entities/test/model/type";
-import {createPunct, deleteFile} from "../entities/program/api/program.api";
+
 import {createTest, deleteTest} from "../entities/test/api/test.api";
 import theme = require("tailwindcss/defaultTheme");
+import type {Punct} from "../entities/punct/model/type";
 
 export const useTest = (punct: Punct) => {
     const [tests, setTests] = useState<Test[]>(() => punct?.tests || []);
@@ -14,7 +14,7 @@ export const useTest = (punct: Punct) => {
         if (!punct) return;
 
         try {
-            const newTest = await createTest(punct.id);
+            const newTest = await createTest({punctId: punct.id});
             setTests(prev => [...prev, newTest]);
         } catch (e) {
             console.error('Ошибка создания пункта', e);

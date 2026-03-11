@@ -21,11 +21,25 @@ export const publishTest = async (
     return data;
 };
 
-// создать болванку теста
+// Определяем тип для входящего объекта
+interface CreateTestParams {
+    punctId?: number;
+    programId?: number;
+    final_test?: boolean;
+}
+// Функция с типизацией аргумента и возвращаемого значения
 export const createTest = async (
-    punctId: number
+    params: CreateTestParams
 ): Promise<Test> => {
-    const { data } = await $authHost.post<Test>('api/test', { punctId });
+    const { punctId, programId, final_test } = params;
+
+    // Отправляем на сервер все необходимые поля
+    const { data } = await $authHost.post<Test>('api/test', {
+        punctId,
+        programId,
+        final_test
+    });
+
     return data;
 };
 
@@ -167,21 +181,5 @@ export const getTestAttempt = async (
 };
 
 
-
-
-
-export const updateTestStatistic = async (user_id, test_id, punctsStatistic) => {
-   
-    const {data} = await $authHost.post('api/test/updateTest', {user_id, test_id, punctsStatistic} )
-
-    return data;
-}
-
-export const getTestStatistic = async (user_id, test_id) => {
-   
-    const {data} = await $authHost.post('api/test/getStatistic', {user_id, test_id} )
-
-    return data;
-}
 
 

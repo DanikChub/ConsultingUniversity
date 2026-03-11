@@ -907,6 +907,7 @@ class ProgramController {
                     include: [
                       {
                         model: Question,
+                        as: 'questions',
                         include: [Answer],
                       },
                     ],
@@ -926,6 +927,17 @@ class ProgramController {
                 ]
               }
             ]
+          },
+          {
+            model: Test,
+            order: [['order_index', 'ASC']],
+            include: [
+              {
+                model: Question,
+                as: 'finalQuestions',
+                include: [Answer],
+              },
+            ],
           }
         ]
       });

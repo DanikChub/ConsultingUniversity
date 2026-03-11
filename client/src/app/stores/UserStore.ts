@@ -14,6 +14,12 @@ export default class UserStore {
     private _user: User | {} = {};
     private _enrollmentId: number | null = null;
     private _enrollmentProgress: Record<number, ProgramProgress> = {}; // ключ = enrollmentId
+    private _lastOpenedByEnrollment: Record<number, {
+        type: 'file' | 'test'
+        id: number
+        themeId: number
+        punctId?: number
+    }> = {};
     private _progressChanges = [];
 
     constructor() {
@@ -105,5 +111,13 @@ export default class UserStore {
 
             this._enrollmentProgress[enrollmentId] = { ...prog };
         });
+    }
+
+    setLastOpened(enrollmentId: number, data) {
+        this._lastOpenedByEnrollment[enrollmentId] = data
+    }
+
+    getLastOpened(enrollmentId: number) {
+        return this._lastOpenedByEnrollment[enrollmentId]
     }
 }

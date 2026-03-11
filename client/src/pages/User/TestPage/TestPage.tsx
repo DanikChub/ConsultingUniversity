@@ -142,6 +142,8 @@ const TestPage: React.FC = () => {
             ? (timeLeft / initialTime) * 100
             : 0;
 
+    let arr = new Array(40)
+    console.log(arr)
     return (
         <UserContainer loading={true}>
 
@@ -157,11 +159,21 @@ const TestPage: React.FC = () => {
             </button>
 
             {/* Заголовок */}
-            <h1 className="text-3xl font-bold mb-4 text-gray-800">{test.title}</h1>
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-800 text-left">
+                    {test.title}
+                </h1>
+
+                {test.description && (
+                    <p className="mt-3 text-gray-600 text-base leading-relaxed">
+                        {test.description}
+                    </p>
+                )}
+            </div>
 
             {/* Таймер */}
             {timeLeft !== null && (
-                <div className="mb-8 bg-white rounded-2xl shadow-md p-5">
+                <div className="mb-6 bg-white rounded-2xl shadow-md p-5">
 
                     <div className="flex justify-between items-center mb-2">
                         <span className="text-sm text-gray-500">
@@ -186,12 +198,12 @@ const TestPage: React.FC = () => {
             )}
 
             {/* Навигация по вопросам */}
-            <div className="flex flex-wrap gap-2 mb-8">
-                {test.questions.map((_, i) => (
+            <div className="flex flex-wrap gap-2 mb-6">
+                {arr.map((_, i) => (
                     <button
                         key={i}
                         onClick={() => setNumberQuestion(i)}
-                        className={`w-10 h-10 rounded-full font-semibold transition ${
+                        className={`w-10 h-10 rounded-md font-semibold transition ${
                             numberQuestion === i
                                 ? 'bg-blue-600 text-white'
                                 : userAnswers[i]?.length

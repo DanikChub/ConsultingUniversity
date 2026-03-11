@@ -1,6 +1,7 @@
 import {useRef} from "react";
 import type {Program} from "../../../entities/program/model/type";
 import {destroyImg, updateImg, updateProgram} from "../../../entities/program/api/program.api";
+import {createTest, deleteTest} from "../../../entities/test/api/test.api";
 
 export const useEditProgram = (
     programId: number,
@@ -48,5 +49,31 @@ export const useEditProgram = (
         }
     };
 
-    return { updateField, updateProgramImage, deleteProgramImage };
+    const createFinalTest = async () => {
+        try {
+            const newTest = await createTest({
+                programId: programId,
+                final_test: true
+            });
+            setProgram((prev) => (prev ? { ...prev, test: newTest } : prev));
+        } catch(err) {
+            console.error("Ошибка создания теста:", err);
+        }
+
+    }
+
+    const destroyFinalTest = async (testId: number) => {
+        try {
+            setProgram((prev) => (prev ? { ...prev, test: null } : prev));
+            await deleteTest(testId);
+
+        } catch(err) {
+            console.error("Ошибка удаления теста:", err);
+        }
+
+    }
+
+
+
+    return { updateField, updateProgramImage, deleteProgramImage, createFinalTest, destroyFinalTest };
 };

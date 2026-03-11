@@ -31,7 +31,7 @@ const ThemeList: React.FC<Props> = ({ program}) => {
     }, [program]);
 
     return (
-        <div className='MakeProgram_Themes'>
+        <div>
             {themes.map((theme, themeIndex) => {
                 const isHide = hideThemes.has(theme.id);
 

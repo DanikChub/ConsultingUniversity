@@ -5,7 +5,7 @@ import { getStatistic } from '../../../entities/statistic/api/statistic.api';
 
 import { Context } from '../../../index';
 
-import './StatementPage.css'
+
 import UserContainer from "../../../components/ui/UserContainer";
 import {FiArrowLeft, FiCheckCircle} from "react-icons/fi";
 import type {Program} from "../../../entities/program/model/type";

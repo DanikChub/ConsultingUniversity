@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, {useEffect, useMemo} from 'react';
 import { useTestEditor } from '../hooks/useTestEditor';
 
 import Modal from '../components/ui/Modal';
@@ -15,7 +15,7 @@ interface Props {
     onDelete?: (fileId: number) => Promise<void>;
     onClose: () => void;
     onSubmit?: (test: Test) => void;
-    mode: 'create' | 'edit'
+    mode: 'create' | 'edit';
 }
 
 const CreateTestModal: React.FC<Props> = ({
@@ -23,9 +23,10 @@ const CreateTestModal: React.FC<Props> = ({
                                               onDelete,
                                               onClose,
                                               onSubmit,
-                                              mode
+                                              mode,
                                           }) => {
     const {
+        isFinal,
         test,
         loading,
         error,
@@ -48,6 +49,10 @@ const CreateTestModal: React.FC<Props> = ({
         questionDebounces,
         answerDebounces
     } = useTestEditor(targetId, mode);
+
+    useEffect(() => {
+        console.log(test)
+    }, [test]);
 
     /* ---------------- SAFE ACTIVE QUESTION ---------------- */
 
@@ -117,7 +122,7 @@ const CreateTestModal: React.FC<Props> = ({
     }
 
     if (!test) return null;
-    console.log(test)
+
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fadeIn">
@@ -138,7 +143,6 @@ const CreateTestModal: React.FC<Props> = ({
                             title={test.title}
                             description={test.description}
                             time_limit={test.time_limit}
-                            final_test={test.final_test}
                             onChange={updateTest}
                         />
                     </div>
@@ -152,8 +156,8 @@ const CreateTestModal: React.FC<Props> = ({
                                 questions={test.questions}
                                 activeIndex={activeQuestionIndex}
                                 onSelect={setActiveQuestionIndex}
-                                onAdd={addQuestion}
-                                onRemove={removeQuestion}
+                                onAdd={!isFinal ? addQuestion : undefined}
+                                onRemove={!isFinal ? removeQuestion : undefined}
                             />
                         </aside>
 
@@ -166,6 +170,7 @@ const CreateTestModal: React.FC<Props> = ({
                                     onAddAnswer={addAnswer}
                                     onChangeAnswer={updateAnswer}
                                     onRemoveAnswer={removeAnswer}
+                                    readOnly={isFinal}
                                 />
                             ) : (
                                 <div className="h-full flex items-center justify-center text-gray-400">
@@ -185,10 +190,8 @@ const CreateTestModal: React.FC<Props> = ({
 
                         <div className="flex gap-2 ml-auto">
 
-                            <Button
-                                variant="red"
-                                onClick={handleDelete}
-                            >
+
+                            <Button variant="red" onClick={handleDelete}>
                                 Удалить
                             </Button>
 
@@ -200,6 +203,7 @@ const CreateTestModal: React.FC<Props> = ({
                             >
                                 Проверить тест
                             </Button>
+
                         </div>
                     </div>
                 </div>

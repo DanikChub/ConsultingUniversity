@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import {
     FiCheckCircle,
     FiClock,
@@ -11,20 +11,39 @@ import { TEST_OVERVIEW_ROUTE } from "../../../../shared/utils/consts"
 import type { ProgramProgress } from "../../../../entities/progress/model/type"
 import { getContentStatus } from "../../../../entities/progress/model/selectors"
 import { useModals } from "../../../../hooks/useModals"
+import type { Test } from "../../../../entities/test/model/type"
+import React, {useContext, useEffect, useState} from "react"
+import { Context } from "../../../../index"
 
 interface TestBlockProps {
-    test: {
-        id: number
-        title?: string
-        final_test?: boolean
-    }
+    test: Test
     progress: ProgramProgress | null
     locked?: boolean
 }
 
 const TestBlock = ({ test, progress, locked = false }: TestBlockProps) => {
-
+    const userContext = useContext(Context)
     const { openModal } = useModals()
+    const navigate = useNavigate()
+
+    const enrollmentId = userContext.user.enrollmentId
+    const lastOpened = userContext.user.getLastOpened(enrollmentId)
+    const [highlight, setHighlight] = useState(false)
+    const isLast =
+        lastOpened?.type === "test" &&
+        lastOpened?.id === test.id
+
+    useEffect(() => {
+        if (isLast) {
+            setHighlight(true)
+
+            const timer = setTimeout(() => {
+                setHighlight(false)
+            }, 4000)
+
+            return () => clearTimeout(timer)
+        }
+    }, [isLast])
 
     const getStatus = () => {
         if (!progress) return "not_started"
@@ -94,12 +113,32 @@ const TestBlock = ({ test, progress, locked = false }: TestBlockProps) => {
         })
     }
 
+    const handleClick = () => {
+        userContext.user.setLastOpened(enrollmentId, {
+            type: "test",
+            id: test.id,
+            themeId: test.themeId,
+            punctId: test.punctId
+        })
+
+        navigate(TEST_OVERVIEW_ROUTE.replace(":id", `${test.id}`))
+    }
+
+    const baseClasses = `
+        group
+        w-full
+        flex items-center justify-between
+        px-5 py-4
+        rounded-2xl
+        transition-all
+        active:scale-[0.99]
+        ${statusColor[status]}
+        ${highlight ? "ring-2 ring-blue-200 shadow-lg scale-[1.01]" : ""}
+    `
+
     const content = (
         <>
-            {/* Левая часть */}
             <div className="flex items-center gap-4 flex-1">
-
-                {/* Иконка */}
                 <div
                     className={`
                         w-10 h-10
@@ -112,14 +151,12 @@ const TestBlock = ({ test, progress, locked = false }: TestBlockProps) => {
                             ? "border-gray-300 text-gray-400"
                             : "border-gray-200 text-blue-600"
                     }
-                        group-hover:scale-105
                         transition
                     `}
                 >
                     {locked ? <MdLock /> : <FiClipboard />}
                 </div>
 
-                {/* Текст */}
                 <div>
                     <div className="text-sm font-semibold text-gray-900">
                         {test.final_test
@@ -131,20 +168,17 @@ const TestBlock = ({ test, progress, locked = false }: TestBlockProps) => {
                         {test.title}
                     </div>
                 </div>
+                {highlight && (
+                    <span className="ml-3 text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full animate-pulse">
+                        Вы остановились здесь
+                    </span>
+                )}
             </div>
 
-            {/* Правая часть */}
             <div className="flex items-center gap-4">
                 {renderStatus()}
-
                 {!locked && (
-                    <FiChevronRight
-                        className="
-                            text-gray-400
-                            group-hover:translate-x-1
-                            transition
-                        "
-                    />
+                    <FiChevronRight className="text-gray-400 transition" />
                 )}
             </div>
         </>
@@ -153,18 +187,9 @@ const TestBlock = ({ test, progress, locked = false }: TestBlockProps) => {
     if (locked) {
         return (
             <div
+                id={`test-${test.id}`}
                 onClick={handleClickLocked}
-                className={`
-                    group
-                    w-full
-                    flex items-center justify-between
-                    px-5 py-4
-                    rounded-2xl
-                    transition-all
-                    cursor-not-allowed
-                    opacity-80
-                    ${statusColor[status]}
-                `}
+                className={`${baseClasses} cursor-not-allowed opacity-80`}
             >
                 {content}
             </div>
@@ -172,22 +197,13 @@ const TestBlock = ({ test, progress, locked = false }: TestBlockProps) => {
     }
 
     return (
-        <Link
-            to={TEST_OVERVIEW_ROUTE.replace(":id", `${test.id}`)}
-            className={`
-                group
-                w-full
-                flex items-center justify-between
-                px-5 py-4
-                rounded-2xl
-                transition-all
-                
-                active:scale-[0.99]
-                ${statusColor[status]}
-            `}
+        <div
+            id={`test-${test.id}`}
+            onClick={handleClick}
+            className={`${baseClasses} cursor-pointer`}
         >
             {content}
-        </Link>
+        </div>
     )
 }
 

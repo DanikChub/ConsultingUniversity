@@ -11,7 +11,7 @@ export default function ScrollManager() {
     // При обычном переходе — скроллим вверх
     window.scrollTo({
       top: 0,
-      behavior: "smooth",
+
     });
 
   }, [location.pathname, navigationType]);

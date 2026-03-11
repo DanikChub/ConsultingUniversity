@@ -4,12 +4,10 @@ interface Props {
     title: string;
     description?: string;
     time_limit?: number | null;
-    final_test?: boolean | null;
     onChange: (fields: {
         title?: string;
         description?: string;
         time_limit?: number | null;
-        final_test?: boolean | null;
     }) => void;
 }
 
@@ -17,7 +15,6 @@ const TestHeader: React.FC<Props> = ({
                                          title,
                                          description,
                                          time_limit,
-                                         final_test,
                                          onChange,
                                      }) => {
 
@@ -78,20 +75,7 @@ const TestHeader: React.FC<Props> = ({
                 />
             </div>
 
-            <div className="flex items-center">
-                <label className="block text-xs font-medium text-gray-500 mr-2">
-                    Финальный тест
-                </label>
-                <input
-                    type="checkbox"
-                    checked={final_test}
-                    onChange={e =>
-                        onChange({
-                            final_test: !final_test ? true : false
-                        })
-                    }
-                />
-            </div>
+
         </div>
 
     );

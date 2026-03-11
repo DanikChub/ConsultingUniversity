@@ -26,11 +26,11 @@ const Button: React.FC<ButtonProps> = ({
   const { openModal } = useModals();
 
   const baseStyles =
-      "flex items-center gap-2 px-4 py-1 max-w-max bg-[#D9D9D9] rounded-[7px] font-medium text-sm text-gray-700 hover:text-white transition-colors duration-200";
+      "flex items-center gap-2 px-4 py-1 max-w-max bg-gray-100 rounded-[7px] font-medium text-sm text-gray-700 hover:text-white transition-colors duration-200";
 
   const variantStyles = {
     red: "hover:bg-red-600",
-    blue: "hover:bg-[#2D91CB]",
+    blue: "hover:bg-blue-600",
   };
 
   const handleNoAccess = async () => {

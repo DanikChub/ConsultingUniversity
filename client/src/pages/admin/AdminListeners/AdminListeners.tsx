@@ -1,6 +1,6 @@
 import React, {useRef, useState} from "react";
 import LeftMenu from "../../../components/LeftMenu/LeftMenu";
-import { ADMIN_REGISTRATE_USER } from "../../../shared/utils/consts";
+import {ADMIN_REGISTRATE_USER, CHAT_PAGE_ROUTE, CHAT_USERS_PAGE_ROUTE} from "../../../shared/utils/consts";
 import { useNavigate, Link } from "react-router-dom";
 
 import { useAdminListeners } from "../../../hooks/useAdminListeners";
@@ -12,6 +12,7 @@ import AdminPath from "../../../components/ui/AdminPath";
 import AppContainer from "../../../components/ui/AppContainer";
 import SearchInput from "../../../shared/ui/inputs/SearchInput";
 import {useModals} from "../../../hooks/useModals";
+import {createChat} from "../../../entities/chat/api/chat.api";
 
 interface ContextMenuState {
     visible: boolean;
@@ -105,15 +106,33 @@ const AdminListeners: React.FC = () => {
                 />
                 {contextMenu.visible && (
                     <div
-                        style={{ position: "absolute",
+                        style={{
+                            position: "absolute",
                             top: contextMenu.y + "px",
-                            left: contextMenu.x + "px", }}
+                            left: contextMenu.x + "px",
+                        }}
                         className="bg-white z-50 w-[220px] rounded-md overflow-hidden"
                     >
                         <button
                             onClick={() => {
+                                async function createChatAsync(userId) {
+                                    const chat = await createChat(userId)
+                                    navigate(CHAT_USERS_PAGE_ROUTE + `?chatId=${chat.id}`)
+
+                                }
+                                if (contextMenu.userId) {
+                                    createChatAsync(contextMenu.userId)
+                                }
+                                setContextMenu({visible: false, x: 0, y: 0, userId: null, programId: null});
+                            }}
+                            className="w-full bg-[#D9D9D9] hover:bg-[#2D91CB] hover:text-white py-2 px-3 transition text-left text-sm"
+                        >
+                            Написать слушателю
+                        </button>
+                        <button
+                            onClick={() => {
                                 if (contextMenu.userId) navigate(`/admin/listeners/${contextMenu.userId}`);
-                                setContextMenu({ visible: false, x: 0, y: 0, userId: null, programId: null });
+                                setContextMenu({visible: false, x: 0, y: 0, userId: null, programId: null});
                             }}
                             className="w-full bg-[#D9D9D9] hover:bg-[#2D91CB] hover:text-white py-2 px-3 transition text-left text-sm"
                         >
@@ -122,7 +141,7 @@ const AdminListeners: React.FC = () => {
                         <button
                             onClick={() => {
                                 if (contextMenu.userId) navigate(`/admin/programs/${contextMenu.programId}`);
-                                setContextMenu({ visible: false, x: 0, y: 0, userId: null, programId: null });
+                                setContextMenu({visible: false, x: 0, y: 0, userId: null, programId: null});
                             }}
                             className="w-full bg-[#D9D9D9] hover:bg-[#2D91CB] hover:text-white py-2 px-3 transition text-left text-sm"
                         >
@@ -131,7 +150,7 @@ const AdminListeners: React.FC = () => {
                         <button
                             onClick={() => {
                                 if (contextMenu.userId) handleEdit(contextMenu.userId);
-                                setContextMenu({ visible: false, x: 0, y: 0, userId: null, programId: null });
+                                setContextMenu({visible: false, x: 0, y: 0, userId: null, programId: null});
                             }}
                             className="w-full bg-[#D9D9D9] hover:bg-[#2D91CB] hover:text-white py-2 px-3 transition text-left text-sm"
                         >
@@ -140,7 +159,7 @@ const AdminListeners: React.FC = () => {
                         <button
                             onClick={() => {
                                 if (contextMenu.userId) handleDestroyUser(contextMenu.userId);
-                                setContextMenu({ visible: false, x: 0, y: 0, userId: null, programId: null });
+                                setContextMenu({visible: false, x: 0, y: 0, userId: null, programId: null});
                             }}
 
                             className="w-full bg-[#D9D9D9] hover:bg-red-600 hover:text-white py-2 px-3 transition text-left text-sm"

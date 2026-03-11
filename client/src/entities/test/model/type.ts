@@ -44,7 +44,7 @@ export interface Test {
     status: TestStatus;
     order_index: number;
     punctId: number;
-
+    themeId?: number;
     questions: Question[];
 }
 

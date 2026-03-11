@@ -16,6 +16,7 @@ interface Props {
         fields: Partial<Pick<Answer, 'text' | 'is_correct'>>
     ) => void;
     onRemoveAnswer: (answerId: number) => void;
+    readOnly?: boolean;
 }
 
 const QuestionEditor: React.FC<Props> = ({
@@ -24,6 +25,7 @@ const QuestionEditor: React.FC<Props> = ({
                                              onAddAnswer,
                                              onChangeAnswer,
                                              onRemoveAnswer,
+                                             readOnly
                                          }) => {
     return (
         <div className="space-y-6">
@@ -34,6 +36,7 @@ const QuestionEditor: React.FC<Props> = ({
                     Текст вопроса
                 </label>
                 <AutoResizeTextarea
+                    disabled={readOnly}
                     className="mt-1 w-full rounded-lg border px-3 py-2 min-h-[100px] resize-none focus:ring-2 focus:ring-blue-500 outline-none"
                     value={question?.text}
                     onChange={val => onChangeQuestion(question.id, { text: val })}
@@ -47,12 +50,11 @@ const QuestionEditor: React.FC<Props> = ({
                     <h4 className="text-sm font-semibold text-gray-700">
                         Ответы
                     </h4>
-                    <Button
-
-                        onClick={() => onAddAnswer(question.id)}
-                    >
-                        Добавить ответ
-                    </Button>
+                    {!readOnly && (
+                        <Button onClick={() => onAddAnswer(question.id)}>
+                            Добавить ответ
+                        </Button>
+                    )}
                 </div>
 
                 {question?.answers.length === 0 && (
@@ -68,6 +70,7 @@ const QuestionEditor: React.FC<Props> = ({
                             className="flex items-center gap-2 rounded-lg border px-3 py-1"
                         >
                             <input
+                                disabled={readOnly}
                                 type="checkbox"
                                 checked={answer.is_correct}
                                 onChange={e =>
@@ -78,20 +81,22 @@ const QuestionEditor: React.FC<Props> = ({
                             />
 
                             <AutoResizeTextarea
+                                disabled={readOnly}
                                 className="mt-1 w-full rounded-lg border-none px-1 min-h-[20px] resize-none  outline-none"
                                 value={answer.text}
                                 onChange={val => onChangeAnswer(answer.id, { text: val })}
                                 placeholder="Текст ответа"
                             />
-
-                            <button
-                                onClick={() =>
-                                    onRemoveAnswer(answer.id)
-                                }
-                                className="text-red-500 text-sm"
-                            >
-                                ✕
-                            </button>
+                            {!readOnly && (
+                                <button
+                                    onClick={() =>
+                                        onRemoveAnswer(answer.id)
+                                    }
+                                    className="text-red-500 text-sm"
+                                >
+                                    ✕
+                                </button>
+                            )}
                         </li>
                     ))}
                 </ul>

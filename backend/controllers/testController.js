@@ -4,11 +4,22 @@ const {
     Answer,
     UserContentProgress,
     TestAttemptAnswer,
-    TestAttempt
+    TestAttempt,
+    TestQuestionLink,
+    Theme,
+    Punct
 } = require("../models/models");
-
+const sequelize = require('../db');
 const ApiError = require('../error/ApiError');
 const { Op } = require('sequelize');
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
 
 async function markTestAsDraftIfPublished(testId) {
     await Test.update(
@@ -28,33 +39,147 @@ class TestController {
 
 
     async createTest(req, res) {
-        try {
-            const { punctId } = req.body;
+        const t = await sequelize.transaction();
 
-            if (!punctId) {
-                return res.status(400).json({ message: 'punctId is required' });
+        try {
+            const { punctId, programId, final_test } = req.body;
+
+            console.log(punctId, programId, final_test)
+
+            // ============================================================
+            // ОБЫЧНЫЙ ТЕСТ (как раньше)
+            // ============================================================
+            if (!final_test) {
+
+                if (!punctId) {
+                    await t.rollback();
+                    return res.status(400).json({ message: 'punctId is required' });
+                }
+
+                const lastIndex = await Test.max('order_index', {
+                    where: { punctId },
+                    transaction: t
+                });
+
+                const test = await Test.create({
+                    punctId,
+                    title: 'Новый тест',
+                    description: '',
+                    time_limit: null,
+                    status: 'draft',
+                    order_index: (lastIndex ?? -1) + 1,
+                    final_test: false
+                }, { transaction: t });
+
+                await t.commit();
+                return res.json(test);
             }
 
-            // order_index — последний
-            const lastIndex = await Test.max('order_index', {
-                where: { punctId }
+            // ============================================================
+            // ИТОГОВЫЙ ТЕСТ
+            // ============================================================
+
+
+            if (!programId) {
+                await t.rollback();
+                return res.status(400).json({ message: 'programId is required for final test' });
+            }
+
+            const existingFinal = await Test.findOne({
+                where: {
+                    programId,
+                    final_test: true
+                },
+                transaction: t
             });
 
-            const test = await Test.create({
-                punctId,
-                title: 'Новый тест',
-                description: '',
+            if (existingFinal) {
+                await t.rollback();
+                return res.status(400).json({ message: 'Final test already exists for this program' });
+            }
+
+            // создаём финальный тест
+            const finalTest = await Test.create({
+                programId,
+                title: 'Итоговое тестирование',
+                description: 'Итоговый тест формируется автоматически из тестов всех модулей',
                 time_limit: null,
                 status: 'draft',
-                order_index: (lastIndex ?? -1) + 1
+                final_test: true,
+                order_index: 9999
+            }, { transaction: t });
+
+            // ============================================================
+            // Получаем ВСЮ вложенность Program → Theme → Punct → Test
+            // ============================================================
+            const themes = await Theme.findAll({
+                where: { programId },
+                include: {
+                    model: Punct,
+                    include: {
+                        model: Test,
+                        required: false,
+                        separate: true,
+                        order: [['order_index', 'ASC']],
+                        where: {
+                            [Op.or]: [
+                                { final_test: false },
+                                { final_test: null }
+                            ]
+                        },
+                        include: {
+                            model: Question,
+                            as: 'questions',
+                            include: [Answer]
+                        }
+                    }
+                },
+                transaction: t
             });
 
-            return res.json(test);
+            let questionOrder = 0;
+
+
+            for (const theme of themes) {
+
+                for (const punct of theme.puncts || []) {
+                    console.log('\n ###############',punct)
+                    for (const test of punct.tests || []) {
+                        console.log('\n ###############',test.questions)
+                        const questions = test.questions || [];
+                        if (!questions.length) continue;
+
+
+
+                        const shuffled = shuffle([...questions]);
+
+
+                        // берём максимум 5
+                        const selected = shuffled.slice(0, 5);
+
+                        for (const question of selected) {
+
+                            await TestQuestionLink.create({
+                                testId: finalTest.id,
+                                questionId: question.id,
+                                order_index: questionOrder++
+                            }, { transaction: t });
+
+                        }
+                    }
+                }
+            }
+
+            await t.commit();
+            return res.json(finalTest);
+
         } catch (e) {
+            await t.rollback();
             console.error(e);
             return res.status(500).json({ message: 'Failed to create test' });
         }
     }
+
 
     async updateTestFields(req, res) {
         try {
@@ -279,37 +404,91 @@ class TestController {
     // -------------------------------
     // GET ONE TEST
     // -------------------------------
+
+
     async getOne(req, res, next) {
         try {
-            const test = await Test.findOne({
-                where: {id: req.params.id},
-                include: [
-                    {
-                        model: Question,
-                        as: 'questions', // <- если ассоциация создает alias, укажи его, иначе убери
-                        separate: true,
-                        order: [['order_index', 'ASC']],
-                        include: [
-                            {
-                                model: Answer,
-                                as: 'answers', // <- если ассоциация создает alias, укажи его
-                                separate: true,
-                                order: [['order_index', 'ASC']],
-                            },
-                        ],
-                    },
-                ],
 
-            });
-            if (!test) return next(ApiError.notFound('Тест не найден'));
+            const test = await Test.findByPk(req.params.id);
 
-            return res.json(test);
+            if (!test) {
+                return next(ApiError.notFound('Тест не найден'));
+            }
+
+            let fullTest;
+
+            if (test.final_test) {
+
+                const finalTest = await Test.findByPk(req.params.id, {
+                    include: [
+                        {
+                            model: Question,
+                            as: 'finalQuestions',
+                            through: { attributes: ['order_index'] },
+                            include: [
+                                {
+                                    model: Answer,
+                                    as: 'answers',
+                                    separate: true,
+                                    order: [['order_index', 'ASC']]
+                                }
+                            ]
+                        }
+                    ],
+                    order: [
+                        [{ model: Question, as: 'finalQuestions' }, TestQuestionLink, 'order_index', 'ASC']
+                    ]
+                });
+
+                if (!finalTest) {
+                    return next(ApiError.notFound('Тест не найден'));
+                }
+
+                // 🔥 НОРМАЛИЗАЦИЯ
+                const normalized = finalTest.toJSON();
+
+                normalized.questions = normalized.finalQuestions ?? [];
+                delete normalized.finalQuestions;
+
+                fullTest = normalized;
+
+            } else {
+
+                const regularTest = await Test.findOne({
+                    where: { id: req.params.id },
+                    include: [
+                        {
+                            model: Question,
+                            as: 'questions',
+                            separate: true,
+                            order: [['order_index', 'ASC']],
+                            include: [
+                                {
+                                    model: Answer,
+                                    as: 'answers',
+                                    separate: true,
+                                    order: [['order_index', 'ASC']]
+                                }
+                            ]
+                        }
+                    ]
+                });
+
+                if (!regularTest) {
+                    return next(ApiError.notFound('Тест не найден'));
+                }
+
+                fullTest = regularTest.toJSON();
+            }
+
+            return res.json(fullTest);
 
         } catch (e) {
             console.error(e);
             return next(ApiError.badRequest("Ошибка при получении теста"));
         }
     }
+
 
 
     async publishTest(req, res) {
@@ -320,6 +499,7 @@ class TestController {
                 include: [
                     {
                         model: Question,
+                        as: 'questions',
                         include: [Answer],
                     },
                 ],

@@ -96,14 +96,21 @@ const TestAttemptPage = () => {
                                         bgClass = 'bg-red-50 text-red-700'
                                     } else if (!answer.is_selected && answer.is_correct) {
                                         label = 'Правильный ответ'
-                                        bgClass = 'bg-green-100 text-green-900/70'
+                                        bgClass = 'bg-yellow-100 text-yellow-900/70'
                                     }
 
                                     return (
-                                        <div key={answer.id}
-                                             className={`flex justify-between px-3 py-2 rounded ${bgClass}`}>
-                                            <span>{answer.text}</span>
-                                            <span className="font-medium mr-2">{label}</span>
+                                        <div
+                                            key={answer.id}
+                                            className={`flex items-center px-3 py-2 rounded ${bgClass}`}
+                                        >
+                                              <span className="flex-1">
+                                                {answer.text}
+                                              </span>
+
+                                              <span className="w-48 text-right font-medium">
+                                                    {label}
+                                              </span>
                                         </div>
                                     )
                                 })}

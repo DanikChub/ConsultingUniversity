@@ -7,15 +7,12 @@ import {
     ADMIN_DOCUMENTS_ROUTE,
     CHAT_USERS_PAGE_ROUTE, ADMIN_ADMINISTRATORS_ROUTE
 } from '../../shared/utils/consts';
-import {getAllUserUnreadCount, getUnreadMessagesCount} from '../../entities/chat/api/chat.api'; // предположим, есть такой API
+
 
 const LeftMenu: React.FC = () => {
     const [unreadMessages, setUnreadMessages] = useState<string>('0');
 
-    useEffect(() => {
-        // получаем количество непрочитанных сообщений
-        getAllUserUnreadCount().then(data => setUnreadMessages(data.unreadCount));
-    }, []);
+
 
     const menuItems = [
         { name: 'Главная', path: ADMIN_ROUTE, end: true },

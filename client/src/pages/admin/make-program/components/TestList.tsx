@@ -3,6 +3,7 @@ import { FaPlus, FaTrashAlt, FaClipboardList } from "react-icons/fa";
 import type { Punct } from "../../../../entities/program/model/type";
 import { useModals } from "../../../../hooks/useModals";
 import { useTest } from "../../../../hooks/useTest";
+import ButtonRemove from "../../../../shared/ui/buttons/ButtonRemove";
 
 type Props = {
     punct: Punct;
@@ -66,18 +67,8 @@ const TestList: React.FC<Props> = ({ punct }) => {
                                 </div>
                             </div>
                         </div>
+                        <ButtonRemove onClick={() => destroyTest(test.id)} message="Вы уверены, что хотите удалить тест?"/>
 
-                        <button
-                            type="button"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                destroyTest(test.id);
-                            }}
-                            className="text-red-500 hover:text-red-700 transition-colors p-1 rounded-md"
-                            title="Удалить тест"
-                        >
-                            <FaTrashAlt size={14} />
-                        </button>
                     </div>
                 );
             })}

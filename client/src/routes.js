@@ -34,7 +34,7 @@ import {
     ADMIN_DOCUMENTS_ROUTE,
     ADMIN_VIEW_PRACTICAL_WORKS_ROUTE,
     EXPERT_ROUTE,
-    CHAR_PAGE_ROUTE,
+    CHAT_PAGE_ROUTE,
     CHAT_USERS_PAGE_ROUTE,
     USER_CHAT_ROUTE,
     ADMIN_REGISTRATE_ADMIN, TEST_OVERVIEW_ROUTE, TEST_ATTEMPT_ROUTE, PDF_ROUTE, ADMIN_CHANGE_ADMIN
@@ -50,19 +50,17 @@ import FinishTestPage from './pages/User/FinishTestPage/FinishTestPage'
 import VideoPage from './pages/User/VideoPage/VideoPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage/ForgotPasswordPage'
 import ViewProgram from './pages/admin/ViewProgram/ViewProgram'
-import ViewTest from './pages/admin/ViewTest/ViewTest'
 import PracticalWorkPage from './pages/User/PracticalWorkPage/PracticalWorkPage'
 import LectionPage from './pages/User/LectionPage/LectionPage'
 import AdminPracticalPage from './pages/admin/AdminPracticalPage/AdminPracticalPage'
 import StatementPage from './pages/User/StatementPage/StatementPage'
 import AdminOnePracticalPage from './pages/admin/AdminOnePracticalPage/AdminOnePracticalPage'
-import ViewLection from './pages/admin/ViewLection/ViewLection'
 import AdminUserPage from './pages/admin/AdminUserPage/AdminUserPage'
 import AdminStatementPage from './pages/admin/AdminStatementPage/AdminStatementPage'
 import AdministratorsPage from './pages/admin/AdministratorsPage/AdministratorsPage'
 import AdminDocumentsPage from './pages/admin/AdminDocumentsPage/AdminCertificatesPage'
 import ViewPracticalWorkPage from './pages/admin/ViewPracticalWorkPage/ViewPracticalWorkPage'
-import ChatPage from './pages/admin/ChatPage/ChatPage'
+import AdminChatPage from './pages/admin/ChatPage/AdminChatPage'
 import ChatUsersPage from './pages/admin/ChatUsersPage/ChatUsersPage'
 import UserChatPage from './pages/User/UserChatPage/UserChatPage'
 import RegistrateAdmin from "./pages/admin/RegistrateAdmin/RegistrateAdmin";
@@ -161,14 +159,6 @@ export const adminRoutes = [
         Component: <ViewPracticalWorkPage/>
     },
     {
-        path: ADMIN_VIEW_TEST,
-        Component: <ViewTest/>
-    },
-    {
-        path: ADMIN_VIEW_LECTION,
-        Component: <ViewLection/>
-    },
-    {
         path: ADMIN_PRACTICAL_WORKS_ROUTE,
         Component: <AdminPracticalPage/>
     },
@@ -189,8 +179,8 @@ export const adminRoutes = [
         Component: <AdminDocumentsPage/>
     },
     {
-        path: CHAR_PAGE_ROUTE,
-        Component: <ChatPage/>
+        path: CHAT_PAGE_ROUTE,
+        Component: <AdminChatPage/>
     }
     ,
     {
@@ -250,14 +240,7 @@ export const viewerRoutes = [
         path: ADMIN_VIEW_PRACTICAL_WORKS_ROUTE,
         Component: <ViewPracticalWorkPage/>
     },
-    {
-        path: ADMIN_VIEW_TEST,
-        Component: <ViewTest/>
-    },
-    {
-        path: ADMIN_VIEW_LECTION,
-        Component: <ViewLection/>
-    },
+
     {
         path: ADMIN_PRACTICAL_WORKS_ROUTE,
         Component: <AdminPracticalPage/>
@@ -279,8 +262,8 @@ export const viewerRoutes = [
         Component: <AdminDocumentsPage/>
     },
     {
-        path: CHAR_PAGE_ROUTE,
-        Component: <ChatPage/>
+        path: CHAT_PAGE_ROUTE,
+        Component: <AdminChatPage/>
     }
     ,
     {

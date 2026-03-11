@@ -14,10 +14,10 @@ interface PunctBlockProps {
     progress: ProgramProgress | null
     setPlayerActive: (active: boolean) => void
     setActiveAudio: (track: File) => void
-    allRegularCompleted: boolean;
+
 }
 
-const PunctBlock = ({ punct, progress, setPlayerActive, setActiveAudio, allRegularCompleted }: PunctBlockProps) => {
+const PunctBlock = ({ punct, progress, setPlayerActive, setActiveAudio }: PunctBlockProps) => {
 
     const allItemsCount =
         (punct.files?.length || 0) +
@@ -74,17 +74,14 @@ const PunctBlock = ({ punct, progress, setPlayerActive, setActiveAudio, allRegul
 
                 {punct.tests?.map(test => {
 
-                    const isFinal = test.final_test
 
-                    // 🔥 финальный тест блокируем если обычные не завершены
-                    const locked = isFinal && !allRegularCompleted
 
                     return (
                         <TestBlock
                             key={test.id}
                             test={test}
                             progress={progress}
-                            locked={locked}
+
 
                         />
                     )

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import AppContainer from "../../../components/ui/AppContainer";
-
+import {FiEdit, FiEdit3} from "react-icons/fi"
 import { getUserById } from "../../../entities/user/api/user.api";
 import { getEnrollmentProgress } from "../../../entities/progress/api/progress.api";
 import { getAllTestAttempts } from "../../../entities/test/api/test.api";
@@ -25,6 +25,9 @@ import {getOneProgram} from "../../../entities/program/api/program.api";
 import {useModals} from "../../../hooks/useModals";
 import type {File as FileType} from "../../../entities/file/model/type";
 import {downloadFile} from "../../../shared/lib/download/downloadFile";
+import Button from "../../../shared/ui/buttons/Button";
+import {CHAT_PAGE_ROUTE, CHAT_USERS_PAGE_ROUTE} from "../../../shared/utils/consts";
+import {createChat} from "../../../entities/chat/api/chat.api";
 
 /* ================= TYPES ================= */
 
@@ -85,6 +88,8 @@ const AdminUserPage = () => {
     const [progress, setProgress] = useState<ProgramProgress | null>(null)
     const [program, setProgram] = useState<Program | null>(null)
     const { openModal } = useModals();
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!id) return;
@@ -191,6 +196,11 @@ const AdminUserPage = () => {
     };
 
 
+    const handleSendClick = async () => {
+        const chat = await createChat(user.id)
+        navigate(CHAT_USERS_PAGE_ROUTE + `?chatId=${chat.id}`)
+
+    }
 
 
     if (loading) {
@@ -240,11 +250,18 @@ const AdminUserPage = () => {
                     <div className="flex-1 space-y-4">
 
                         {/* Имя и роль */}
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-800 text-left">{user.name}</h1>
-                            <div className="flex items-center gap-2 text-gray-600 text-sm mt-3">
-                                <FiUser/> <span>{user.role}</span>
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <h1 className="text-3xl font-bold text-gray-800 text-left">{user.name}</h1>
+                                <div className="flex items-center gap-2 text-gray-600 text-sm mt-3">
+                                    <FiUser/> <span>{user.role}</span>
+                                </div>
                             </div>
+
+                            <Button className="ml-4" onClick={handleSendClick}>
+                                <FiEdit/>
+                                <span>Написать</span>
+                            </Button>
                         </div>
 
                         {/* Основная информация */}
@@ -295,6 +312,7 @@ const AdminUserPage = () => {
 
                         </div>
                     </div>
+
                 </div>
 
 

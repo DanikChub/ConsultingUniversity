@@ -5,9 +5,10 @@ interface Props {
     onChange: (value: string) => void;
     placeholder?: string;
     className?: string;
+    disabled?: boolean;
 }
 
-export const AutoResizeTextarea: FC<Props> = ({ value, onChange, placeholder, className }) => {
+export const AutoResizeTextarea: FC<Props> = ({ value, onChange, placeholder, className, disabled }) => {
     const ref = useRef<HTMLTextAreaElement>(null);
 
     const resize = () => {
@@ -21,6 +22,7 @@ export const AutoResizeTextarea: FC<Props> = ({ value, onChange, placeholder, cl
 
     return (
         <textarea
+            disabled={disabled}
             ref={ref}
             value={value}
             onChange={e => onChange(e.target.value)}
