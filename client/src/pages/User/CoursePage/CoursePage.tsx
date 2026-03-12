@@ -347,12 +347,15 @@ export default function CoursePage() {
                         setActiveAudio={setActiveAudio}
                     />
                 ))}
+                {
+                    program?.test &&
+                    <TestBlock
+                        test={program.test}
+                        progress={progress}
+                        locked={finalLocked}
+                    />
+                }
 
-                <TestBlock
-                    test={program.test}
-                    progress={progress}
-                    locked={finalLocked}
-                />
             </div>
 
             {playerActive && activeAudio && (
