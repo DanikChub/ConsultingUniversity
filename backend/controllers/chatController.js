@@ -23,7 +23,8 @@ async function emitChatUpdated(io, chatId) {
 
     const lastMessage = chat.messages?.[0] || null
 
-    const unreadCount = await Message.count({
+    // непрочитанные админом
+    const unreadAdmin = await Message.count({
         where: {
             chatId: chat.id,
             senderType: "USER",
@@ -31,16 +32,33 @@ async function emitChatUpdated(io, chatId) {
         }
     })
 
-    const payload = {
+    // непрочитанные пользователем
+    const unreadUser = await Message.count({
+        where: {
+            chatId: chat.id,
+            senderType: "ADMIN",
+            id: { [Op.gt]: chat.lastReadUserMessageId || 0 }
+        }
+    })
+
+    const payloadAdmin = {
         chatId: chat.id,
-        unreadCount: unreadCount,
+        unreadCount: unreadAdmin,
         lastMessageAt: chat.lastMessageAt,
         status: chat.status,
         lastMessage
     }
 
-    io.to("admins").emit("chat_updated", payload)
-    io.to(`user:${chat.userId}`).emit("chat_updated", payload)
+    const payloadUser = {
+        chatId: chat.id,
+        unreadCount: unreadUser,
+        lastMessageAt: chat.lastMessageAt,
+        status: chat.status,
+        lastMessage
+    }
+
+    io.to("admins").emit("chat_updated", payloadAdmin)
+    io.to(`user:${chat.userId}`).emit("chat_updated", payloadUser)
 }
 
 class ChatController {

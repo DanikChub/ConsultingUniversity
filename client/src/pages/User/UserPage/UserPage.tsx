@@ -17,6 +17,7 @@ import user_img from '../../../assets/imgs/user.png';
 import { COURSE_ROUTE, STATEMENT_ROUTE, USER_CHAT_ROUTE } from '../../../shared/utils/consts';
 import {FiArchive, FiCheckCircle, FiClock} from "react-icons/fi";
 import UserPageSkeleton from "./components/UserPageSkeleton";
+import {useSocket} from "../../../hooks/useSocket";
 
 const UserPage = observer(() => {
     const userContext = useContext(Context);
@@ -25,6 +26,12 @@ const UserPage = observer(() => {
     const [progress, setProgress] = useState<number>(0);
     const [unreadMessages, setUnreadMessages] = useState<number | null>(null);
     const [alertLoading, setAlertLoading] = useState(false);
+
+    const socket = useSocket()
+
+    useEffect(() => {
+        console.log(unreadMessages)
+    }, [unreadMessages]);
 
     useEffect(() => {
         setLoading(false)
@@ -35,6 +42,24 @@ const UserPage = observer(() => {
         setLoading(true)
 
     }, []);
+
+    useEffect(() => {
+        if (!socket) return
+
+        socket.emit("join_user", userContext.user.user.id)
+
+        socket.on("chat_updated", (payload: any) => {
+            console.log(payload.unreadCount)
+            setUnreadMessages(payload.unreadCount)
+        })
+
+
+        return () => {
+            socket.off("chat_updated")
+            socket.off("chat_read_updated")
+        }
+
+    }, [socket])
 
     const handleProfileImgClick = (e: ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.[0]) return;
@@ -153,7 +178,7 @@ const UserPage = observer(() => {
                             </defs>
                         </svg>
 
-                        {unreadMessages !== 0 && (
+                        {unreadMessages && unreadMessages > 0 && (
                             <div className="absolute -right-2.5 -bottom-2.5 w-11 h-11 bg-red-600 rounded-full flex items-center justify-center">
                                 <span className="text-white font-bold text-2xl">{unreadMessages}</span>
                             </div>
@@ -161,7 +186,13 @@ const UserPage = observer(() => {
                     </div>
 
                     <Link to={USER_CHAT_ROUTE} className="ml-8 font-medium text-xl text-gray-800">
-                        Написать <br /> преподавателю
+                        {
+                            unreadMessages && unreadMessages > 0 ?
+                                <div>Прочитать <br/> сообщение</div>
+                                :
+                                <div>Написать <br/> преподавателю</div>
+                        }
+
                     </Link>
                 </div>
 
