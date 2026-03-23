@@ -66,6 +66,7 @@ const NavBar: React.FC = observer(() => {
                 <div className="max-w-[1500px] px-[40px] w-full m-auto">
                     <div className="flex justify-between items-center">
                         <a
+                            target="_blank"
                             href="https://xn--34-6kchqrlk8db.xn--p1ai/"
                             className="flex items-center"
                         >
@@ -94,30 +95,35 @@ const NavBar: React.FC = observer(() => {
                             Главная
                         </Link>
                         <a
+                            target="_blank"
                             href="https://xn--34-6kchqrlk8db.xn--p1ai/programs.html"
                             className="text-[#fff] ml-0 mr-[30px] font-normal no-underline"
                         >
                             Программы
                         </a>
                         <a
+                            target="_blank"
                             href="https://xn--34-6kchqrlk8db.xn--p1ai/about.html"
                             className="text-[#fff] ml-0 mr-[30px] font-normal no-underline"
                         >
                             О нас
                         </a>
                         <a
+                            target="_blank"
                             href="https://xn--34-6kchqrlk8db.xn--p1ai/contacts.html"
                             className="text-[#fff] ml-0 mr-[30px] font-normal no-underline"
                         >
                             Контакты
                         </a>
                         <a
+                            target="_blank"
                             href="https://bk.kv34.ru/"
                             className="text-[#fff] ml-0 mr-[30px] font-normal no-underline"
                         >
                             ИПС "Консалтинг"
                         </a>
                         <a
+                            target="_blank"
                             href="https://xn--34-6kchqrlk8db.xn--p1ai/check.html"
                             className="text-[#fff] ml-0 mr-[30px] font-normal no-underline"
                         >

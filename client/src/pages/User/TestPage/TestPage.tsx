@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useRef } from 'react';
+import React, { useContext, useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import UserContainer from '../../../components/ui/UserContainer';
 import { getOneTest, submitTestAttempt } from '../../../entities/test/api/test.api';
@@ -6,8 +6,7 @@ import { FINISH_TEST_ROUTE } from '../../../shared/utils/consts';
 import type { Test } from '../../../entities/test/model/type';
 import { FiArrowLeft } from "react-icons/fi";
 import { Context } from "../../../index";
-import {useModals} from "../../../hooks/useModals";
-import finishTestPage from "../FinishTestPage/FinishTestPage";
+import { useModals } from "../../../hooks/useModals";
 
 function shuffle<T>(array: T[]): T[] {
     const arr = [...array];
@@ -29,8 +28,7 @@ const TestPage: React.FC = () => {
     const [initialTime, setInitialTime] = useState<number | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
-    const {openModal} = useModals()
-
+    const { openModal } = useModals();
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     const userContext = useContext(Context);
@@ -44,13 +42,13 @@ const TestPage: React.FC = () => {
             setTest(data);
 
             if (data.time_limit) {
-                setTimeLeft(data.time_limit*60);
-                setInitialTime(data.time_limit*60);
+                setTimeLeft(data.time_limit * 60);
+                setInitialTime(data.time_limit * 60);
             }
         });
     }, [params.id]);
 
-    // ⏳ Таймер
+    // Таймер
     useEffect(() => {
         if (!initialTime || submitting) return;
 
@@ -60,7 +58,7 @@ const TestPage: React.FC = () => {
 
                 if (prev <= 1) {
                     if (timerRef.current) clearInterval(timerRef.current);
-                    finishTest();   // ← теперь гарантированно вызывается
+                    finishTest();
                     return 0;
                 }
 
@@ -89,7 +87,6 @@ const TestPage: React.FC = () => {
     };
 
     const finishTest = async () => {
-        console.log('отправлено')
         if (!test || submitting) return;
         setSubmitting(true);
 
@@ -105,7 +102,7 @@ const TestPage: React.FC = () => {
                 enrollmentId: Number(enrollmentId),
                 answers: answersPayload,
             });
-            console.log('отправлено')
+
             navigate(`${FINISH_TEST_ROUTE}?attempt_id=${result.attemptId}`);
         } catch (err) {
             console.error('Ошибка при отправке теста', err);
@@ -116,19 +113,24 @@ const TestPage: React.FC = () => {
 
     const handleFinishTest = async () => {
         const confirm = await openModal('confirm', {
-            title: 'Вы уверены что хотите заврешить тест?',
+            title: 'Вы уверены что хотите завершить тест?',
             description: 'Проверьте все ответы, после завершения поменять их будет нельзя',
             confirmText: 'Завершить',
             cancelText: 'Проверить ответы'
-        })
+        });
 
-        if (!confirm) return
-        finishTest()
-    }
+        if (!confirm) return;
+        finishTest();
+    };
+    // ✅ правильный массив для навигации
+    const questionIndexes = useMemo(
+        () => test ? Array.from({ length: test.questions.length }) : [],
+        [test]
+    );
 
     if (!test) return <UserContainer loading={true}>Загрузка...</UserContainer>;
 
-    const allAnswered = test.questions.every((_, i) => (userAnswers[i]?.length ?? 0) > 0);
+
     const showFinishButton = numberQuestion === test.questions.length - 1;
 
     const formatTime = (seconds: number) => {
@@ -142,8 +144,6 @@ const TestPage: React.FC = () => {
             ? (timeLeft / initialTime) * 100
             : 0;
 
-    let arr = new Array(40)
-    console.log(arr)
     return (
         <UserContainer loading={true}>
 
@@ -174,7 +174,6 @@ const TestPage: React.FC = () => {
             {/* Таймер */}
             {timeLeft !== null && (
                 <div className="mb-6 bg-white rounded-2xl shadow-md p-5">
-
                     <div className="flex justify-between items-center mb-2">
                         <span className="text-sm text-gray-500">
                             Оставшееся время
@@ -197,9 +196,9 @@ const TestPage: React.FC = () => {
                 </div>
             )}
 
-            {/* Навигация по вопросам */}
+            {/* Навигация */}
             <div className="flex flex-wrap gap-2 mb-6">
-                {arr.map((_, i) => (
+                {questionIndexes.map((_, i) => (
                     <button
                         key={i}
                         onClick={() => setNumberQuestion(i)}
@@ -219,7 +218,6 @@ const TestPage: React.FC = () => {
             {/* Вопрос */}
             {punct && (
                 <div className="bg-white rounded-2xl shadow-lg p-6">
-
                     <div className="text-xl font-semibold mb-4">
                         {punct.text}
                     </div>

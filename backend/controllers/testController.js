@@ -543,17 +543,33 @@ class TestController {
         try {
             const { testId } = req.params;
             const { enrollmentId, answers } = req.body;
-            // answers: [{ questionId, selected_answer_ids: [] }]
-            console.log(enrollmentId)
+
             const test = await Test.findByPk(testId, {
-                include: {
-                    model: Question,
-                    include: [Answer],
-                }
+                include: [
+                    {
+                        model: Question,
+                        as: 'questions',
+                        include: [Answer],
+                    },
+                    {
+                        model: Question,
+                        as: 'finalQuestions',
+                        include: [Answer],
+                    }
+                ]
             });
 
             if (!test) {
                 return res.status(404).json({ message: 'Тест недоступен' });
+            }
+
+            // ✅ универсальный источник вопросов
+            const questions = test.questions?.length
+                ? test.questions
+                : test.finalQuestions || [];
+
+            if (!questions.length) {
+                return res.status(400).json({ message: 'В тесте нет вопросов' });
             }
 
             // номер попытки
@@ -572,20 +588,22 @@ class TestController {
 
             let correctCount = 0;
 
-            for (const question of test.questions) {
+            for (const question of questions) {
                 const userAnswer = answers.find(a => a.questionId === question.id);
+
                 const correctAnswers = question.answers
                     .filter(a => a.is_correct)
                     .map(a => a.id)
-                    .sort();
+                    .sort((a, b) => a - b);
 
-                const selected = (userAnswer?.selected_answer_ids || []).sort();
+                const selected = (userAnswer?.selected_answer_ids || [])
+                    .sort((a, b) => a - b);
 
                 const isCorrect =
                     JSON.stringify(correctAnswers) === JSON.stringify(selected);
 
                 if (isCorrect) correctCount++;
-                console.log(selected)
+
                 await TestAttemptAnswer.create({
                     testAttemptId: attempt.id,
                     questionId: question.id,
@@ -594,9 +612,10 @@ class TestController {
                 });
             }
 
-            const score = Math.round(
-                (correctCount / test.questions.length) * 100
-            );
+            // ✅ защита от NaN
+            const score = questions.length
+                ? Math.round((correctCount / questions.length) * 100)
+                : 0;
 
             const passed = score >= 70;
 
@@ -606,7 +625,7 @@ class TestController {
 
             await attempt.save();
 
-            // 🔥 обновляем UserContentProgress
+            // 🔥 обновляем прогресс
             let progress = await UserContentProgress.findOne({
                 where: {
                     enrollmentId,
@@ -616,7 +635,6 @@ class TestController {
             });
 
             if (!progress) {
-                // первый раз — создаём
                 progress = await UserContentProgress.create({
                     enrollmentId,
                     contentType: 'test',
@@ -626,7 +644,6 @@ class TestController {
                     completedAt: passed ? new Date() : null
                 });
             } else {
-                // уже есть прогресс — обновляем только если score выше
                 if (score > (progress.score ?? 0)) {
                     progress.status = passed ? 'completed' : 'failed';
                     progress.score = score;
@@ -682,10 +699,18 @@ class TestController {
                 include: [
                     {
                         model: Test,
-                        include: {
-                            model: Question,
-                            include: [Answer]
-                        }
+                        include: [
+                            {
+                                model: Question,
+                                as: 'questions',
+                                include: [Answer]
+                            },
+                            {
+                                model: Question,
+                                as: 'finalQuestions',
+                                include: [Answer]
+                            }
+                        ]
                     },
                     {
                         model: TestAttemptAnswer
@@ -697,14 +722,20 @@ class TestController {
                 return res.status(404).json({ message: 'Попытка не найдена' });
             }
 
+            // ✅ универсальный источник вопросов
+            const test = attempt.Test || attempt.test;
+
+            const questionsSource = test.questions?.length
+                ? test.questions
+                : test.finalQuestions || [];
+
             // создаём map ответов пользователя
             const answerMap = {};
             attempt.test_attempt_answers.forEach(a => {
                 answerMap[a.questionId] = a;
             });
 
-            const questions = attempt.test.questions.map(question => {
-
+            const questions = questionsSource.map(question => {
                 const userAnswer = answerMap[question.id];
                 const selectedIds = userAnswer?.selected_answers || [];
 
@@ -720,7 +751,6 @@ class TestController {
                     }))
                 };
             });
-
 
             return res.json({
                 attemptId: attempt.id,
