@@ -56,7 +56,7 @@
 .content_welcome_text {
     margin-top: 20px;
     font-weight: 200;
-    font-size: 18px;
+    font-size: 1.125rem;
     color: #2C3E50;
 }
 .statement {
@@ -72,13 +72,13 @@
 .statement_title {
     margin-top: 25px;
     font-weight: 500;
-    font-size: 20px;
+    font-size: 1.25rem;
     color: #2C3E50;
 }
 .statement_link {
     margin-top: 5px;
     font-weight: 300;
-    font-size: 16px;
+    font-size: 1rem;
     color: #2C3E50;
     cursor: pointer;
 
@@ -91,7 +91,7 @@
     margin-top: 64px;
 }
 .content_program_title {
-    font-size: 24px;
+    font-size: 1.5rem;
     font-weight: 600;
     color: #2C3E50;
 }
@@ -158,7 +158,7 @@
 }
 .content_program_well_title {
     font-weight: 600;
-    font-size: 18px;
+    font-size: 1.125rem;
     width: 60%;
     color: #2C3E50;
 }
@@ -185,7 +185,7 @@
     left: 0;
 }
 .content_program_well_procent {
-    font-size: 20px;
+    font-size: 1.25rem;
     font-weight: 200;
     color: #2C3E50;
     margin-left: 7px;
@@ -200,7 +200,7 @@
 }
 .how_check_text {
     margin-left: 12px;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 200;
     color: #60bf40;
 }
@@ -224,7 +224,7 @@
 }
 .left_menu_item {
     display: block;
-    font-size: 20px;
+    font-size: 1.25rem;
     font-weight: 400;
     color: #2C3E50;
     width: 100%;

@@ -18,7 +18,7 @@
 }
 
 .check_text {
-    font-size: 16px;
+    font-size: 1rem;
 }
 
 
@@ -42,13 +42,13 @@
 .about_us_title {
     text-align: center;
     font-weight: 800;
-    font-size: 24px;
+    font-size: 1.5rem;
     color: #2C3E50;
 }
 .about_us_text {
     margin-top: 32px;
     color: #2C3E50;
-    font-size: 16px;
+    font-size: 1rem;
     line-height: 1.8;
 }
 
@@ -80,7 +80,7 @@
     justify-content: end;
     align-items: center;
     font-weight: 600;
-    font-size: 16px;
+    font-size: 1rem;
     color: #2C3E50;
     width: 30%;
     text-align: end;
@@ -106,20 +106,20 @@
     color: #2980B9;
 }
 .about_project_product_content_subtitle {
-    font-size: 20px;
+    font-size: 1.25rem;
     font-weight: 400;
     color: #2C3E50;
 }
 .about_project_text {
     margin-top: 75px;
     color: #2C3E50;
-    font-size: 16px;
+    font-size: 1rem;
 }
 .adventages {
     margin-top: 62px;
 }
 .adventages_title {
-    font-size: 24px;
+    font-size: 1.5rem;
     color: #2C3E50;
 }
 
@@ -140,7 +140,7 @@
     padding: 38px;
 }
 .adventages_item_text {
-    font-size: 16px;
+    font-size: 1rem;
     color: #2C3E50;
 }
 
@@ -154,7 +154,7 @@
     margin-top: 90px;
 }
 .examples_title {
-    font-size: 24px;
+    font-size: 1.5rem;
     color: #2C3E50;
 }
 .examples_items {
@@ -169,7 +169,7 @@
     max-height: 30px;
 }
 .examples_item_text {
-    font-size: 16px;
+    font-size: 1rem;
     margin-left: 36px;
 }
 
@@ -207,7 +207,7 @@
    margin-left: 40px;
 }
 .why_text {
-    font-size: 16px;
+    font-size: 1rem;
     color: #2C3E50;
 }
 

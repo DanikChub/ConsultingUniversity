@@ -30,7 +30,7 @@
 }
 
 .check_text {
-    font-size: 16px;
+    font-size: 1rem;
 }
 
 
@@ -59,7 +59,7 @@
 .how_title {
     color: #2C3E50;
     font-weight: 700;
-    font-size: 24px;
+    font-size: 1.5rem;
     text-align: center;
 }
 .how_inner {
@@ -113,5 +113,5 @@ span.underline {
     margin-top: 140px;
     color: #2C3E50;
     font-weight: 400;
-    font-size: 16px;
+    font-size: 1rem;
 }

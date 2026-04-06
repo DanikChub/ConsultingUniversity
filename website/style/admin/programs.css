@@ -7,7 +7,7 @@
     border-bottom: 1px solid #B8B8B8;
 }
 .tabs_nav_link {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 600;
     padding: 20px;
 
@@ -71,14 +71,14 @@
 
 }
 .admin_program_item_title {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 400;
     color: #2C3E50;
 }
 .admin_program_item_peoples {
     
     color: #898989;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 500;
 }
 .admin_program_item_price {
@@ -88,7 +88,7 @@
     border-top: 1px solid #AEAEAE;
     padding: 16px 28px;
     color: #898989;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 500;
     width: 100%;
 }

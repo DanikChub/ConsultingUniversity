@@ -4,7 +4,7 @@
 
 .admin_table tr th {
     font-weight: 600;
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #2C3E50;
     text-align: left;
 }
@@ -17,7 +17,7 @@
 
 .admin_table tr td {
     font-weight: 400;
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #2C3E50;
     
 }
@@ -55,12 +55,12 @@
 
 .admin_path {
     font-weight: 400;
-    font-size: 16px;
+    font-size: 1rem;
     color: #2C3E50;
 }
 .admin_button {
     display: block;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 500;
     padding: 5px 10px;
     color: #525459;
@@ -103,14 +103,14 @@
     width: 10%;
     text-align: right;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #334557;
 }
 .add_input {
     margin-left: 30px;
     border: none;
     outline: none;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 400;
     width: 80%;
 }

@@ -18,7 +18,7 @@
 }
 
 .check_text {
-    font-size: 16px;
+    font-size: 1rem;
 }
 
 
@@ -42,7 +42,7 @@
 }
 
 .contacts_title {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 600;
     color: #2C3E50;
 }
@@ -54,12 +54,12 @@
     margin-top: 48px;
 }
 .contacts_item_title {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 600;
     color: #2C3E50;
 }
 .contacts_item_subtitle {
     margin-top: 12px;
-    font-size: 16px;
+    font-size: 1rem;
     color: #2C3E50;
 }

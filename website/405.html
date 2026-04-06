@@ -64,7 +64,7 @@
                <div class="footer_item">
                    <div class="footer_item_title">О нас</div>
                    <a href="./405.html" class="footer_item_link">Контакты</a>
-                   <a href="https://bk.kv34.ru/" class="footer_item_link">ИПС “Консалтинг”</a>
+                   <a target="_blank" href="https://bk.kv34.ru/" class="footer_item_link">ИПС “Консалтинг”</a>
                    <a href="./405.html" class="footer_item_link">Документы</a>
                </div>
                <div class="footer_item">
@@ -77,7 +77,7 @@
                    <div class="footer_item_title">Помощь</div>
                    <a href="./405.html" class="footer_item_link">Правила работы</a>
                    <a href="./index.html#questions" class="footer_item_link">Вопросы и ответы</a>
-                   <a href="./files/pdfs/politic.pdf" class="footer_item_link">Политика конфиденциальности </a>
+                   <a target="_blank" href="./files/pdfs/politic.pdf" class="footer_item_link">Политика конфиденциальности </a>
                </div>
            </div>
            <div class="footer_contacts">
@@ -99,6 +99,17 @@
            </div>
         </div>
    </footer>
+
+    <div class="cookie_banner" id="cookieBanner">
+        <div class="cookie_banner_text">
+            Мы используем cookie и рекомендательные технологии для улучшения работы сайта.
+        </div>
+
+        <button class="cookie_banner_button" id="cookieAccept">
+            Хорошо
+        </button>
+    </div>
+    <script src="./js/cookie.js"></script>
     <script>
         (function(w,d,u){
                 var s=d.createElement('script');s.async=true;s.src=u+'?'+(Date.now()/60000|0);

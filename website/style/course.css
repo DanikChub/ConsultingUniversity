@@ -17,7 +17,7 @@
     width: 80%;
 }
 .block_title {
-    font-size: 20px;
+    font-size: 1.25rem;
     font-weight: 600;
     color: #2C3E50;
 }
@@ -29,7 +29,7 @@
 }
 .block_statistic_item {
     font-weight: 300;
-    font-size: 20px;
+    font-size: 1.25rem;
     color: #2C3E50;
 }
 .block_statistic_item_value {
@@ -73,13 +73,13 @@
     width: 85%;
 }
 .course_item_marker {
-    font-size: 16px;
+    font-size: 1rem;
     color: #2C3E50;
     font-weight: 500;
 }
 .course_item_title {
     margin-left: 5px;
-    font-size: 16px;
+    font-size: 1rem;
     color: #2C3E50;
     font-weight: 500;
 }
@@ -111,7 +111,7 @@
 }
 .course_item_hide_title {
     font-weight: 400;
-    font-size: 16px;
+    font-size: 1rem;
     color: #2C3E50;
 }
 .course_item_hide_materials {

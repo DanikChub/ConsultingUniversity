@@ -46,7 +46,7 @@
 }
 .admin_statisitcs_item_title {
     margin-top: 10px;
-    font-size: 20px;
+    font-size: 1.25rem;
     font-weight: 400;
     color: #2C3E50;
 }
@@ -85,13 +85,13 @@
 }
 .admin_program_title {
     font-weight: 500;
-    font-size: 18px;
+    font-size: 1.125rem;
     color: #000;
 }
 .admin_program_listeners {
     margin-top: 11px;
     color: #898989FA;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 400;
 }
 
