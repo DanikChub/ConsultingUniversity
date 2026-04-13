@@ -7,38 +7,40 @@ import UserPasswordInput from '../../../widgets/user-registration/UserPasswordIn
 import PhoneInput from '../../../widgets/user-registration/PhoneInput';
 import SubmitSection from '../../../widgets/user-registration/SubmitSection';
 
+import UserRoleSelect from "../../../widgets/user-registration/UserRoleSelect";
+import AdminSignatureInput from "../../../widgets/user-registration/AdminSignatureInput";
+import AdminPhotoInput from "../../../widgets/user-registration/AdminPhotoInput";
 
 import myGif from '../../../assets/imgs/spinner.gif';
-import UserRoleSelect from "../../../widgets/user-registration/UserRoleSelect";
 
 const RegistrateUser: React.FC = () => {
     const form = useUserForm();
 
     return (
         <AppContainer>
-            {form.loaded ?
+            {form.loaded ? (
                 <div className="mt-[30px] w-full">
-
                     <UserNameInput {...form} />
-                    <UserRoleSelect {...form}/>
+                    <UserRoleSelect {...form} />
                     <UserEmailInput {...form} />
                     <UserPasswordInput {...form} />
                     <PhoneInput {...form} />
 
-
+                    <AdminSignatureInput {...form} />
+                    <AdminPhotoInput {...form} />
 
                     <div className="login_form_message">{form.serverMessage}</div>
 
                     <SubmitSection {...form} />
                 </div>
-                :
+            ) : (
                 <div className="relative w-full h-full">
-                    <img src={myGif} className="absolute top-1/2 left-1/2 -traslate-x-1/2 -translate-y-1/2"/>
+                    <img
+                        src={myGif}
+                        className="absolute top-1/2 left-1/2 -traslate-x-1/2 -translate-y-1/2"
+                    />
                 </div>
-
-            }
-
-
+            )}
         </AppContainer>
     );
 };

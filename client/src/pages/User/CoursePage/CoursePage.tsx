@@ -336,8 +336,9 @@ export default function CoursePage() {
 
             {/* Themes */}
             <div className="space-y-4 mt-[50px]">
-                {program.themes?.map(theme => (
+                {program.themes?.map((theme, i) => (
                     <ThemeBlock
+                        map_order_index={i+1}
                         key={theme.id}
                         theme={theme}
                         open={openThemes.includes(theme.id)}

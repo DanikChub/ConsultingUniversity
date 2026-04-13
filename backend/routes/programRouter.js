@@ -12,6 +12,7 @@ router.post('/', checkRole('ADMIN'), ProgramController.create); // Создат�
 router.post('/:id/import', checkRole('ADMIN'), ProgramController.importProgramZip);
 router.patch('/:id', checkRole('ADMIN'), ProgramController.updatePartial); // Частичное обновление программы
 router.get('/', checkRole(['ADMIN', 'VIEWER']), ProgramController.getAll); // Получить все программы
+router.post('/:id/duplicate', checkRole('ADMIN'), ProgramController.duplicateProgram);
 
 router.patch('/:id/img', checkRole('ADMIN'), ProgramController.updateImage); // Получить все программы
 router.delete('/:id/img', checkRole('ADMIN'), ProgramController.destroyImage); // Получить все программы

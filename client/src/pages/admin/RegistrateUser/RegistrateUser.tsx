@@ -10,7 +10,12 @@ import ProgramSelector from '../../../widgets/user-registration/ProgramSelector'
 import DiplomSection from '../../../widgets/user-registration/DiplomSection';
 import SubmitSection from '../../../widgets/user-registration/SubmitSection';
 
-import './RegistrateUser.css'
+import UserPassportInput from '../../../widgets/user-registration/UserPassportInput';
+import UserEducationDocumentInput from '../../../widgets/user-registration/UserEducationDocumentInput';
+import UserSnilsInput from '../../../widgets/user-registration/UserSnilsInput';
+import UserDocumentsSection from '../../../widgets/user-registration/UserDocumentsSection';
+
+import './RegistrateUser.css';
 
 import myGif from '../../../assets/imgs/spinner.gif';
 
@@ -19,9 +24,8 @@ const RegistrateUser: React.FC = () => {
 
     return (
         <AppContainer>
-            {form.loaded ?
+            {form.loaded ? (
                 <div className="add_input_items">
-
                     <UserNameInput {...form} />
                     <UserEmailInput {...form} />
                     <UserPasswordInput {...form} />
@@ -30,18 +34,23 @@ const RegistrateUser: React.FC = () => {
                     <ProgramSelector {...form} />
                     <DiplomSection {...form} />
 
+                    <UserPassportInput {...form} />
+                    <UserEducationDocumentInput {...form} />
+                    <UserSnilsInput {...form} />
+                    <UserDocumentsSection {...form} />
+
                     <div className="login_form_message">{form.serverMessage}</div>
 
                     <SubmitSection {...form} />
                 </div>
-                :
+            ) : (
                 <div className="relative w-full h-full">
-                    <img src={myGif} className="absolute top-1/2 left-1/2 -traslate-x-1/2 -translate-y-1/2"/>
+                    <img
+                        src={myGif}
+                        className="absolute top-1/2 left-1/2 -traslate-x-1/2 -translate-y-1/2"
+                    />
                 </div>
-
-            }
-
-
+            )}
         </AppContainer>
     );
 };

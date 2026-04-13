@@ -1,5 +1,6 @@
 import {$authHost, $host} from "../../../shared/api/axios";
 import { jwtDecode } from "jwt-decode";
+import type {UserDocument} from "../model/type";
 
 
 export const login = async (email, password) => {
@@ -68,30 +69,127 @@ export const getAllUsersWithPage = async (page, sort_type, sort_down) => {
     return data;
 }
 
-export const registrateUser = async (email, password, role, name, number, organization, programs_id, diplom, inn, address) => {
-    const {data} = await $authHost.post('api/user/registration', {email, password, role, name, number, organization, programs_id, diplom, inn, address})
 
-    return data
+export const registrateAdmin = async (
+    email: string,
+    password: string,
+    role: string,
+    name: string,
+    number: string,
+    admin_signature?: string | null
+) => {
+    const { data } = await $authHost.post('api/user/registrationAdmin', {
+        email,
+        password,
+        role,
+        name,
+        number,
+        admin_signature
+    });
+
+    return data;
+};
+
+export const remakeAdmin = async (
+    id: number | string,
+    email: string,
+    password: string,
+    role: string,
+    name: string,
+    number: string,
+    admin_signature?: string | null
+) => {
+    const { data } = await $authHost.post('api/user/remakeAdmin', {
+        id,
+        email,
+        password,
+        role,
+        name,
+        number,
+        admin_signature
+    });
+
+    return data;
+};
+
+
+
+export interface UserPayload {
+    id?: number;
+    email: string;
+    password?: string;
+    role?: string;
+    name: string;
+    number: string;
+    organization?: string | null;
+    programs_id: number[];
+    diplom?: boolean | null;
+    inn?: string | null;
+    address?: string | null;
+
+    passport?: string | null;
+    education_document?: string | null;
+    snils?: string | null;
 }
 
-export const registrateAdmin = async (email, password, role, name, number) => {
-    const {data} = await $authHost.post('api/user/registrationAdmin', {email, password, role, name, number})
-
-    return data
+export interface AddUserDocumentsResponse {
+    message: string;
+    documents: UserDocument[];
 }
 
-export const remakeUser = async (id, email, password, role, name, number, organization, programs_id, diplom, inn, address) => {
-    const {data} = await $authHost.post('api/user/remake', {id, email, password, role, name, number, organization, programs_id, diplom, inn, address})
-
-    return data
+export interface DeleteUserDocumentResponse {
+    message: string;
 }
 
-export const remakeAdmin = async (id, email, password, role, name, number) => {
-    const {data} = await $authHost.post('api/user/remakeAdmin', {id, email, password, role, name, number})
+export const registrateUser = async (payload: UserPayload) => {
+    const { data } = await $authHost.post("api/user/registration", payload);
+    return data;
+};
 
-    return data
-}
+export const remakeUser = async (payload: UserPayload) => {
+    const { data } = await $authHost.post("api/user/remake", payload);
+    return data;
+};
 
+export const addUserDocuments = async (
+    userId: number,
+    files: File[]
+): Promise<AddUserDocumentsResponse> => {
+    const formData = new FormData();
+
+    files.forEach((file) => {
+        formData.append("documents", file);
+    });
+
+    const { data } = await $authHost.post(
+        `api/user/addUserDocuments/${userId}`,
+        formData,
+        {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        }
+    );
+
+    return data;
+};
+
+export const deleteUserDocument = async (
+    documentId: number
+): Promise<DeleteUserDocumentResponse> => {
+    const { data } = await $authHost.post(
+        `api/user/deleteUserDocument/${documentId}`
+    );
+
+    return data;
+};
+
+export const getUserDocuments = async (
+    userId: number
+): Promise<UserDocument[]> => {
+    const { data } = await $authHost.get(`api/user/getUserDocuments/${userId}`);
+    return data;
+};
 
 export const deleteUser = async (id) => {
     const {data} = await $authHost.post('api/user/delete', {id})

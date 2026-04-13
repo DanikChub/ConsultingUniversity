@@ -6,7 +6,8 @@ const {
     Messages,
     Enrollment,
     Program,
-    Event
+    Event,
+    UserDocument
 } = require('../models/models');
 const { Op, fn, Sequelize } = require('sequelize');
 const sequelize = require('../db');
@@ -15,12 +16,16 @@ const path = require("path");
 const uuid = require("uuid");
 const fs = require("fs");
 
+
+
+
 const generateJwt = (id, email, role) => {
     return jwt.sign({ id, email, role }, process.env.SECRET_KEY, { expiresIn: '24h' });
 };
 
 const STATIC_DIR = path.resolve(__dirname, '..', 'static');
 if (!fs.existsSync(STATIC_DIR)) fs.mkdirSync(STATIC_DIR, { recursive: true });
+const USER_DOCS_DIR = path.resolve(STATIC_DIR, 'user-documents');
 
 function safeFilename(originalName) {
     const ext = originalName && originalName.includes('.') ? '.' + originalName.split('.').pop() : '';
@@ -53,25 +58,32 @@ class UserController {
                 programs_id,
                 diplom,
                 inn,
-                address
+                address,
+                passport,
+                education_document,
+                snils,
             } = req.body;
 
             // --- валидация ---
             if (!email) return next(ApiError.badRequest('Некорректный email'));
             if (!password) return next(ApiError.badRequest('Некорректный пароль'));
             if (!number) return next(ApiError.badRequest('Некорректный номер'));
-            if (!Array.isArray(programs_id) || programs_id.length === 0)
+            if (!Array.isArray(programs_id) || programs_id.length === 0) {
                 return next(ApiError.badRequest('Отсутствует программа у пользователя'));
+            }
 
             const [emailExists, phoneExists] = await Promise.all([
-                User.findOne({ where: { email } }),
-                User.findOne({ where: { number } }),
+                User.findOne({ where: { email }, transaction: t }),
+                User.findOne({ where: { number }, transaction: t }),
             ]);
 
-            if (emailExists)
+            if (emailExists) {
                 return next(ApiError.badRequest('Пользователь с таким email уже существует'));
-            if (phoneExists)
+            }
+
+            if (phoneExists) {
                 return next(ApiError.badRequest('Пользователь с таким телефоном уже существует'));
+            }
 
             // --- создаём пользователя ---
             const hashPassword = await bcrypt.hash(password, 5);
@@ -86,6 +98,9 @@ class UserController {
                 diplom,
                 inn,
                 address,
+                passport: passport || null,
+                education_document: education_document || null,
+                snils: snils || null,
             }, { transaction: t });
 
             // --- создаём enrollment'ы ---
@@ -95,7 +110,7 @@ class UserController {
                 status: 'active',
             }));
 
-            console.log(enrollments, Enrollment)
+            console.log(enrollments, Enrollment);
 
             await Enrollment.bulkCreate(enrollments, { transaction: t });
 
@@ -122,7 +137,7 @@ class UserController {
 
     async registrationAdmin(req, res, next) {
         try {
-            const { email, password, role, name, number, organization, programs_id, diplom, inn, address } = req.body;
+            const { email, password, role, name, number, organization, programs_id, diplom, inn, address, admin_signature } = req.body;
 
             if (!email) return next(ApiError.badRequest('Некорректный email'));
             if (!password) return next(ApiError.badRequest('Некорректный пароль'));
@@ -145,7 +160,8 @@ class UserController {
                 organization,
                 diplom,
                 inn,
-                address
+                address,
+                admin_signature
             });
 
             await Event.create({
@@ -221,6 +237,9 @@ class UserController {
                 diplom,
                 inn,
                 address,
+                passport,
+                education_document,
+                snils,
             } = req.body;
 
             const user = await User.findByPk(id, { transaction: t });
@@ -228,8 +247,9 @@ class UserController {
 
             if (!email) return next(ApiError.badRequest('Некорректный email'));
             if (!number) return next(ApiError.badRequest('Некорректный номер'));
-            if (!Array.isArray(programs_id))
+            if (!Array.isArray(programs_id)) {
                 return next(ApiError.badRequest('programs_id должен быть массивом'));
+            }
 
             // уникальность
             const [emailExists, phoneExists] = await Promise.all([
@@ -237,10 +257,13 @@ class UserController {
                 User.findOne({ where: { number }, transaction: t }),
             ]);
 
-            if (emailExists && emailExists.id !== user.id)
+            if (emailExists && emailExists.id !== user.id) {
                 return next(ApiError.badRequest('Пользователь с таким email уже существует'));
-            if (phoneExists && phoneExists.id !== user.id)
+            }
+
+            if (phoneExists && phoneExists.id !== user.id) {
                 return next(ApiError.badRequest('Пользователь с таким телефоном уже существует'));
+            }
 
             // обновляем пользователя
             user.email = email;
@@ -253,10 +276,13 @@ class UserController {
             user.address = address;
             user.diplom = diplom;
 
+            user.passport = passport !== undefined ? passport : user.passport;
+            user.education_document = education_document !== undefined ? education_document : user.education_document;
+            user.snils = snils !== undefined ? snils : user.snils;
+
             await user.save({ transaction: t });
 
             // --- Enrollment логика ---
-
             const existingEnrollments = await Enrollment.findAll({
                 where: { userId: user.id },
                 transaction: t,
@@ -310,7 +336,7 @@ class UserController {
     // ======================== REMAKE ADMIN ========================
     async remakeAdmin(req, res, next) {
         try {
-            const { id, email, password, role, name, number } = req.body;
+            const { id, email, password, role, name, number, admin_signature } = req.body;
             const user = await User.findOne({ where: { id } });
             if (!user) return next(ApiError.badRequest('Пользователь не найден'));
             if (!email) return next(ApiError.badRequest('Некорректный email'));
@@ -323,6 +349,12 @@ class UserController {
             if (role) {
                 user.role = role;
             }
+
+            user.admin_signature = admin_signature !== undefined
+                ? admin_signature
+                : user.admin_signature;
+
+
             await user.save();
             return res.json({ user });
 
@@ -441,6 +473,22 @@ class UserController {
                                 'completed_at',
                             ],
                         },
+                        required: false,
+                    },
+                    {
+                        model: UserDocument,
+                        as: 'documents',
+                        attributes: [
+                            'id',
+                            'original_name',
+                            'file_name',
+                            'file_path',
+                            'mime_type',
+                            'size',
+                            'document_type',
+                            'createdAt',
+                            'updatedAt',
+                        ],
                         required: false,
                     },
                 ],
@@ -717,6 +765,116 @@ class UserController {
         } catch (e) {
             console.error('setUserProfileImg error:', e);
             return next(ApiError.internal('Ошибка установления фото пользователя'));
+        }
+    }
+
+    async addUserDocuments(req, res, next) {
+        try {
+            const { id } = req.params;
+
+            const user = await User.findByPk(id);
+            if (!user) return next(ApiError.badRequest('Пользователь не найден'));
+
+            if (!req.files || !req.files.documents) {
+                return next(ApiError.badRequest('Файлы не переданы'));
+            }
+
+            if (!fs.existsSync(USER_DOCS_DIR)) {
+                fs.mkdirSync(USER_DOCS_DIR, { recursive: true });
+            }
+
+            const uploaded = Array.isArray(req.files.documents)
+                ? req.files.documents
+                : [req.files.documents];
+
+            const allowedMimes = [
+                'image/png',
+                'image/jpeg',
+                'application/pdf',
+            ];
+
+            const createdDocuments = [];
+
+            for (const file of uploaded) {
+                if (!allowedMimes.includes(file.mimetype)) {
+                    return next(ApiError.badRequest('Допустимы только файлы PNG, JPG, PDF'));
+                }
+
+                const ext = path.extname(file.name);
+                const fileName = `${uuid.v4()}${ext}`;
+                const savePath = path.join(USER_DOCS_DIR, fileName);
+
+                await file.mv(savePath);
+
+                const createdDoc = await UserDocument.create({
+                    userId: user.id,
+                    original_name: file.name,
+                    file_name: fileName,
+                    file_path: `user-documents/${fileName}`,
+                    mime_type: file.mimetype,
+                    size: file.size,
+                });
+
+                createdDocuments.push(createdDoc);
+            }
+
+            return res.json({
+                message: 'Документы загружены',
+                documents: createdDocuments,
+            });
+        } catch (e) {
+            console.error(e);
+            return next(ApiError.internal('Ошибка загрузки документов'));
+        }
+    }
+
+    // ======================== DELETE USER DOCUMENT ========================
+    async deleteUserDocument(req, res, next) {
+        try {
+            const { id } = req.params;
+
+            const document = await UserDocument.findByPk(id);
+            if (!document) return next(ApiError.badRequest('Документ не найден'));
+
+            if (document.file_path) {
+                const filePath = path.join(STATIC_DIR, document.file_path);
+
+                try {
+                    if (fs.existsSync(filePath)) {
+                        await fs.promises.unlink(filePath);
+                        console.log('🗑 User document deleted:', filePath);
+                    }
+                } catch (err) {
+                    console.warn('Не удалось удалить файл документа:', filePath, err);
+                }
+            }
+
+            await document.destroy();
+
+            return res.json({ message: 'Документ удалён' });
+        } catch (e) {
+            console.error(e);
+            return next(ApiError.internal('Ошибка удаления документа'));
+        }
+    }
+
+    // ======================== GET USER DOCUMENTS ========================
+    async getUserDocuments(req, res, next) {
+        try {
+            const { id } = req.params;
+
+            const user = await User.findByPk(id);
+            if (!user) return next(ApiError.badRequest('Пользователь не найден'));
+
+            const documents = await UserDocument.findAll({
+                where: { userId: id },
+                order: [['createdAt', 'DESC']],
+            });
+
+            return res.json(documents);
+        } catch (e) {
+            console.error(e);
+            return next(ApiError.internal('Ошибка получения документов'));
         }
     }
 }

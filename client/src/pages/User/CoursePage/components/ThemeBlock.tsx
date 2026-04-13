@@ -14,6 +14,7 @@ interface ThemeBlockProps {
     progress: ProgramProgress | null
     setPlayerActive: (active: boolean) => void
     setActiveAudio: (track: File) => void
+    map_order_index: number
 }
 
 const ThemeBlock = ({
@@ -22,7 +23,8 @@ const ThemeBlock = ({
                         toggle,
                         progress,
                         setPlayerActive,
-                        setActiveAudio
+                        setActiveAudio,
+                        map_order_index
                     }: ThemeBlockProps) => {
 
     // ---------------------------
@@ -94,7 +96,7 @@ const ThemeBlock = ({
 
                         <div className="flex items-center gap-3">
                             <h3 className="font-semibold text-lg text-gray-800">
-                                {theme.title}
+                                {map_order_index}. {theme.title}
                             </h3>
 
                             {isThemeCompleted && (
@@ -178,6 +180,7 @@ const ThemeBlock = ({
                             }}
                         >
                             <PunctBlock
+                                map_order_index={index+1}
                                 punct={punct}
                                 progress={progress}
                                 setPlayerActive={setPlayerActive}

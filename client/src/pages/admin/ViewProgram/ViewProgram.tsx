@@ -183,21 +183,35 @@ const ViewProgram: React.FC = () => {
 
                 {/* Аккордеон модулей */}
                 <div className="mt-6 space-y-3">
-                    {program.themes?.sort((a, b) => a.order_index - b.order_index).map((theme) => {
+                    {program.themes?.sort((a, b) => a.order_index - b.order_index).map((theme, theme_index) => {
                         const open = openModules[theme.id] || false;
 
 
                         return (
 
-                            <div key={theme.id} className="bg-gray-50 rounded-lg border border-gray-200" >
+                            <div key={theme.id} className="bg-gray-50 rounded-lg border border-gray-200">
                                 <div
                                     className="flex justify-between items-center p-3 cursor-pointer hover:bg-gray-100 transition"
                                     onClick={() => toggleModule(theme.id)}
                                 >
-                                    <div className="text-lg font-semibold text-gray-800 tracking-tight">
-                                        {theme.title}
+                                    <div className="flex items-center gap-3">
+                                        {/* НОМЕР */}
+                                        <div className="text-md font-bold text-gray-500 w-6 text-right">
+                                            {theme_index + 1}.
+                                        </div>
+
+                                        {/* НАЗВАНИЕ */}
+                                        <div className="text-lg font-semibold text-gray-800 tracking-tight">
+                                            {theme.title}
+                                        </div>
                                     </div>
-                                    {open ? <MdExpandLess className="w-6 h-6"/> : <MdExpandMore className="w-6 h-6"/>}
+
+                                    {/* ИКОНКА */}
+                                    {open ? (
+                                        <MdExpandLess className="w-6 h-6"/>
+                                    ) : (
+                                        <MdExpandMore className="w-6 h-6"/>
+                                    )}
                                 </div>
                                 <div className="flex flex-wrap gap-2 mt-1 p-4">
                                     {theme.files?.map((file) => (
@@ -224,7 +238,7 @@ const ViewProgram: React.FC = () => {
                                     ))}
                                 </div>
                                 {!open && (
-                                    <div className="pl-6 pr-3 pb-3 space-y-2">
+                                    <div className="pl-10 pr-3 pb-3 space-y-2">
                                         {theme.puncts
                                             ?.sort((a, b) => a.order_index - b.order_index)
                                             .map((punct, i) => (
@@ -245,7 +259,8 @@ const ViewProgram: React.FC = () => {
 
                                                             {/* Описание */}
                                                             {punct.description && (
-                                                                <div className="mt-1 text-sm text-gray-500 leading-relaxed">
+                                                                <div
+                                                                    className="mt-1 text-sm text-gray-500 leading-relaxed">
                                                                     {punct.description}
                                                                 </div>
                                                             )}
@@ -275,14 +290,16 @@ const ViewProgram: React.FC = () => {
                                                                     active:scale-[0.98]
                                                                   "
                                                                 >
-                                                                    <div className="text-base">{fileIcon(file.type)}</div>
+                                                                    <div
+                                                                        className="text-base">{fileIcon(file.type)}</div>
 
                                                                     <span className="truncate max-w-[200px]">
                                                                         {file.original_name}
                                                                       </span>
 
                                                                     {file.status === "uploading" && (
-                                                                        <span className="text-xs text-blue-500 animate-pulse">
+                                                                        <span
+                                                                            className="text-xs text-blue-500 animate-pulse">
                                                                           Загрузка...
                                                                         </span>
                                                                     )}
@@ -327,12 +344,13 @@ const ViewProgram: React.FC = () => {
                                                                       group-hover:scale-105
                                                                       transition
                                                                     ">
-                                                                        <FiClipboard className="text-lg" />
+                                                                        <FiClipboard className="text-lg"/>
                                                                     </div>
 
                                                                     {/* Название */}
                                                                     <div className="flex-1">
-                                                                        <div className="text-sm font-semibold text-green-900">
+                                                                        <div
+                                                                            className="text-sm font-semibold text-green-900">
                                                                             {test.title || `Тест ${test.id}`}
                                                                         </div>
                                                                         <div className="text-xs text-green-700/70">
@@ -341,10 +359,12 @@ const ViewProgram: React.FC = () => {
                                                                     </div>
 
                                                                     {/* Правая часть */}
-                                                                    <div className="flex items-center gap-2 text-green-700 text-sm font-medium">
-                                                                        <FiPlay className="text-base" />
+                                                                    <div
+                                                                        className="flex items-center gap-2 text-green-700 text-sm font-medium">
+                                                                        <FiPlay className="text-base"/>
                                                                         <span>просмотр</span>
-                                                                        <FiChevronRight className="opacity-60 group-hover:translate-x-1 transition" />
+                                                                        <FiChevronRight
+                                                                            className="opacity-60 group-hover:translate-x-1 transition"/>
                                                                     </div>
                                                                 </button>
                                                             ))}

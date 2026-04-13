@@ -1,4 +1,5 @@
-const { Program,
+const {
+  Program,
   Theme,
   Punct,
   Test,
@@ -6,7 +7,12 @@ const { Program,
   Statistic,
   ThemeStatistic,
   PunctStatistic,
-  File, FileAsset, Question, Answer, Event
+  File,
+  FileAsset,
+  Question,
+  Answer,
+  Event,
+  TestQuestionLink
 } = require("../models/models");
 const sequelize = require('../db'); 
 const ApiError = require('../error/ApiError')
@@ -98,6 +104,153 @@ function validateParsedThemes(parsedThemes) {
     if (boolCount > 1) return `В модуле "${theme.title}" ${boolCount} тестов! (В каждой теме может быть только один тест)`;
   }
   return null;
+}
+
+async function cloneStaticFile(filename, copiedFiles = []) {
+  if (!filename) return null;
+
+  const sourcePath = path.join(STATIC_DIR, filename);
+
+  if (!fs.existsSync(sourcePath)) {
+    throw new Error(`Исходный файл не найден: ${filename}`);
+  }
+
+  const ext = path.extname(filename);
+  const newFilename = `${uuid.v4()}${ext}`;
+  const targetPath = path.join(STATIC_DIR, newFilename);
+
+  await fs.promises.copyFile(sourcePath, targetPath);
+  copiedFiles.push(newFilename);
+
+  return newFilename;
+}
+
+async function cloneProgramImage(sourceProgram, transaction, copiedFiles = []) {
+  if (!sourceProgram.img) return null;
+  return await cloneStaticFile(sourceProgram.img, copiedFiles);
+}
+
+async function cloneFileEntity(sourceFile, targetIds, transaction, copiedFiles = []) {
+  let newStoredName = null;
+
+  if (sourceFile.storage === 'local' && sourceFile.stored_name) {
+    newStoredName = await cloneStaticFile(sourceFile.stored_name, copiedFiles);
+  }
+
+  const newFile = await File.create({
+    original_name: sourceFile.original_name,
+    stored_name: newStoredName,
+    mime_type: sourceFile.mime_type,
+    type: sourceFile.type,
+    size: sourceFile.size,
+    url: sourceFile.url,
+    order_index: sourceFile.order_index,
+    status: sourceFile.status || 'idle',
+    storage: sourceFile.storage || 'local',
+    themeId: targetIds.themeId || null,
+    punctId: targetIds.punctId || null,
+  }, { transaction });
+
+  if (sourceFile.file_asset) {
+    await FileAsset.create({
+      fileId: newFile.id,
+      type: sourceFile.file_asset.type,
+      content: sourceFile.file_asset.content,
+    }, { transaction });
+  }
+
+  return newFile;
+}
+
+async function clonePunctTest(sourceTest, newPunctId, transaction) {
+  const newTest = await Test.create({
+    title: sourceTest.title,
+    description: sourceTest.description,
+    final_test: sourceTest.final_test,
+    time_limit: sourceTest.time_limit,
+    status: 'draft',
+    order_index: sourceTest.order_index,
+    punctId: newPunctId,
+    programId: null,
+  }, { transaction });
+
+  const questions = [...(sourceTest.questions || [])].sort(
+      (a, b) => (a.order_index || 0) - (b.order_index || 0)
+  );
+
+  for (const sourceQuestion of questions) {
+    const newQuestion = await Question.create({
+      text: sourceQuestion.text,
+      type: sourceQuestion.type,
+      order_index: sourceQuestion.order_index,
+      testId: newTest.id,
+    }, { transaction });
+
+    const answers = [...(sourceQuestion.answers || [])].sort(
+        (a, b) => (a.order_index || 0) - (b.order_index || 0)
+    );
+
+    for (const sourceAnswer of answers) {
+      await Answer.create({
+        text: sourceAnswer.text,
+        is_correct: sourceAnswer.is_correct,
+        order_index: sourceAnswer.order_index,
+        questionId: newQuestion.id,
+      }, { transaction });
+    }
+  }
+
+  return newTest;
+}
+
+async function cloneProgramLevelTest(sourceTest, newProgramId, transaction) {
+  const newTest = await Test.create({
+    title: sourceTest.title,
+    description: sourceTest.description,
+    final_test: sourceTest.final_test,
+    time_limit: sourceTest.time_limit,
+    status: 'draft',
+    order_index: sourceTest.order_index,
+    programId: newProgramId,
+    punctId: null,
+  }, { transaction });
+
+  const finalQuestions = [...(sourceTest.finalQuestions || [])].sort((a, b) => {
+    const aOrder = a.test_question_link?.order_index ?? a.order_index ?? 0;
+    const bOrder = b.test_question_link?.order_index ?? b.order_index ?? 0;
+    return aOrder - bOrder;
+  });
+
+  for (let i = 0; i < finalQuestions.length; i++) {
+    const sourceQuestion = finalQuestions[i];
+
+    const newQuestion = await Question.create({
+      text: sourceQuestion.text,
+      type: sourceQuestion.type,
+      order_index: sourceQuestion.order_index ?? i,
+    }, { transaction });
+
+    const answers = [...(sourceQuestion.answers || [])].sort(
+        (a, b) => (a.order_index || 0) - (b.order_index || 0)
+    );
+
+    for (const sourceAnswer of answers) {
+      await Answer.create({
+        text: sourceAnswer.text,
+        is_correct: sourceAnswer.is_correct,
+        order_index: sourceAnswer.order_index,
+        questionId: newQuestion.id,
+      }, { transaction });
+    }
+
+    await TestQuestionLink.create({
+      testId: newTest.id,
+      questionId: newQuestion.id,
+      order_index: sourceQuestion.test_question_link?.order_index ?? i,
+    }, { transaction });
+  }
+
+  return newTest;
 }
 
 class ProgramController {
@@ -1279,7 +1432,213 @@ class ProgramController {
     }
   }
 
+  async duplicateProgram(req, res, next) {
+    const t = await sequelize.transaction();
+    const copiedFiles = [];
 
+    try {
+      const { id } = req.params;
+
+      const sourceProgram = await Program.findOne({
+        where: { id },
+        include: [
+          {
+            model: Theme,
+            separate: true,
+            order: [['order_index', 'ASC']],
+            include: [
+              {
+                model: Punct,
+                separate: true,
+                order: [['order_index', 'ASC']],
+                include: [
+                  {
+                    model: File,
+                    separate: true,
+                    order: [['order_index', 'ASC']],
+                    include: [FileAsset],
+                  },
+                  {
+                    model: Test,
+                    separate: true,
+                    order: [['order_index', 'ASC']],
+                    include: [
+                      {
+                        model: Question,
+                        as: 'questions',
+                        include: [Answer],
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                model: File,
+                separate: true,
+                order: [['order_index', 'ASC']],
+                include: [FileAsset],
+              },
+            ],
+          },
+          {
+            model: Test,
+            include: [
+              {
+                model: Question,
+                as: 'finalQuestions',
+                include: [Answer],
+                through: { attributes: ['order_index'] },
+              },
+            ],
+          },
+        ],
+      });
+
+      if (!sourceProgram) {
+        await t.rollback();
+        return next(ApiError.notFound('Программа не найдена'));
+      }
+
+      const newImg = await cloneProgramImage(sourceProgram, t, copiedFiles);
+
+      const newProgram = await Program.create({
+        admin_id: sourceProgram.admin_id,
+        title: sourceProgram.title ? `${sourceProgram.title} - копия` : 'Новая программа - копия',
+        short_title: sourceProgram.short_title ? `${sourceProgram.short_title} - копия` : null,
+        number_of_practical_work: sourceProgram.number_of_practical_work || 0,
+        number_of_test: sourceProgram.number_of_test || 0,
+        number_of_videos: sourceProgram.number_of_videos || 0,
+        img: newImg,
+        price: sourceProgram.price,
+        status: 'draft',
+      }, { transaction: t });
+
+      for (const sourceTheme of sourceProgram.themes || []) {
+        const newTheme = await Theme.create({
+          title: sourceTheme.title,
+          order_index: sourceTheme.order_index,
+          programId: newProgram.id,
+        }, { transaction: t });
+
+        for (const sourceThemeFile of sourceTheme.files || []) {
+          await cloneFileEntity(
+              sourceThemeFile,
+              { themeId: newTheme.id, punctId: null },
+              t,
+              copiedFiles
+          );
+        }
+
+        for (const sourcePunct of sourceTheme.puncts || []) {
+          const newPunct = await Punct.create({
+            title: sourcePunct.title,
+            description: sourcePunct.description,
+            order_index: sourcePunct.order_index,
+            themeId: newTheme.id,
+          }, { transaction: t });
+
+          for (const sourcePunctFile of sourcePunct.files || []) {
+            await cloneFileEntity(
+                sourcePunctFile,
+                { themeId: null, punctId: newPunct.id },
+                t,
+                copiedFiles
+            );
+          }
+
+          for (const sourceTest of sourcePunct.tests || []) {
+            await clonePunctTest(sourceTest, newPunct.id, t);
+          }
+        }
+      }
+
+      if (sourceProgram.test) {
+        await cloneProgramLevelTest(sourceProgram.test, newProgram.id, t);
+      }
+
+      await Event.create({
+        event_text: 'Создана копия программы',
+        name: newProgram.title,
+        event_id: newProgram.id,
+        type: 'program',
+      }, { transaction: t });
+
+      await t.commit();
+
+      const fullProgram = await Program.findOne({
+        where: { id: newProgram.id },
+        include: [
+          {
+            model: Theme,
+            separate: true,
+            order: [['order_index', 'ASC']],
+            include: [
+              {
+                model: Punct,
+                separate: true,
+                order: [['order_index', 'ASC']],
+                include: [
+                  {
+                    model: File,
+                    separate: true,
+                    order: [['order_index', 'ASC']],
+                    include: [FileAsset],
+                  },
+                  {
+                    model: Test,
+                    separate: true,
+                    order: [['order_index', 'ASC']],
+                    include: [
+                      {
+                        model: Question,
+                        as: 'questions',
+                        include: [Answer],
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                model: File,
+                separate: true,
+                order: [['order_index', 'ASC']],
+                include: [FileAsset],
+              },
+            ],
+          },
+          {
+            model: Test,
+            include: [
+              {
+                model: Question,
+                as: 'finalQuestions',
+                include: [Answer],
+                through: { attributes: ['order_index'] },
+              },
+            ],
+          },
+        ],
+      });
+
+      return res.json(fullProgram);
+    } catch (e) {
+      await t.rollback();
+
+      for (const filename of copiedFiles) {
+        try {
+          const fullPath = path.join(STATIC_DIR, filename);
+          if (fs.existsSync(fullPath)) {
+            await fs.promises.unlink(fullPath);
+          }
+        } catch (cleanupErr) {
+          console.warn('Ошибка очистки скопированного файла:', cleanupErr);
+        }
+      }
+
+      console.error('duplicateProgram error:', e);
+      return next(ApiError.internal('Ошибка копирования программы'));
+    }
+  }
 
 }
 

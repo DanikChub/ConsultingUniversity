@@ -1,7 +1,20 @@
 import { Program } from "../../program/model/type";
 
 interface ProgramWithProgress extends Program {
-    progress: number | null; // сервер может прислать null
+    progress: number | null;
+}
+
+export interface UserDocument {
+    id: number;
+    userId?: number;
+    original_name: string;
+    file_name: string;
+    file_path: string;
+    mime_type?: string | null;
+    size?: number | null;
+    document_type?: string | null;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface User {
@@ -10,44 +23,52 @@ export interface User {
     number?: string | null;
     name: string;
     password?: string | null;
-    role?: string; // "USER" | "ADMIN" | ...
-    programs_id: number[]; // DataTypes.ARRAY(DataTypes.INTEGER)
+    role?: string;
+    programs_id: number[];
     diplom?: boolean | null;
     address?: string | null;
     organization?: string | null;
     inn?: string | null;
     statistic?: number | null;
-    graduation_date?: string | null; // ISO date string
+    graduation_date?: string | null;
     forgot_pass_code?: string | null;
     img: string;
-    // дополнительные поля, которые фронт может ожидать
-    yellow_value?: string; // используется в поиске подсветки
-    createdAt?:string;
-    programs?: ProgramWithProgress[]
-  }
 
-// User для этой страницы
+    passport?: string | null;
+    education_document?: string | null;
+    snils?: string | null;
+    documents?: UserDocument[];
+
+    yellow_value?: string;
+    createdAt?: string;
+    programs?: ProgramWithProgress[];
+}
+
 export interface UserWithProgress {
     id: number;
     email?: string | null;
     number?: string | null;
     name: string;
     password?: string | null;
-    role?: string; // "USER" | "ADMIN" | ...
-    programs_id: number[]; // DataTypes.ARRAY(DataTypes.INTEGER)
+    role?: string;
+    programs_id: number[];
     diplom?: boolean | null;
     address?: string | null;
     organization?: string | null;
     inn?: string | null;
     statistic?: number | null;
-    graduation_date?: string | null; // ISO date string
+    graduation_date?: string | null;
     forgot_pass_code?: string | null;
 
-    yellow_value?: string; // используется в поиске подсветки
-    createdAt?:string;
-    programs: ProgramWithProgress[]; // используем расширенный тип
-}
+    passport?: string | null;
+    education_document?: string | null;
+    snils?: string | null;
+    documents?: UserDocument[];
 
+    yellow_value?: string;
+    createdAt?: string;
+    programs: ProgramWithProgress[];
+}
 
 export interface UsersAPIResponse {
     count: number;

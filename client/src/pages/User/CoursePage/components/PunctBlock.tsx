@@ -14,10 +14,10 @@ interface PunctBlockProps {
     progress: ProgramProgress | null
     setPlayerActive: (active: boolean) => void
     setActiveAudio: (track: File) => void
-
+    map_order_index: number
 }
 
-const PunctBlock = ({ punct, progress, setPlayerActive, setActiveAudio }: PunctBlockProps) => {
+const PunctBlock = ({ punct, progress, setPlayerActive, setActiveAudio, map_order_index }: PunctBlockProps) => {
 
     const allItemsCount =
         (punct.files?.length || 0) +
@@ -42,7 +42,7 @@ const PunctBlock = ({ punct, progress, setPlayerActive, setActiveAudio }: PunctB
             <div className="flex items-start justify-between gap-4">
                 <div>
                     <h4 className="font-semibold text-gray-800">
-                        {punct.title}
+                        {map_order_index}. {punct.title}
                     </h4>
 
                     {punct.description && (

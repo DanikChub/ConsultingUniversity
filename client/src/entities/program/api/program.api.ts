@@ -43,7 +43,10 @@ export const createProgram = async (admin_id: number): Promise<Program> => {
     return data;
 };
 
-
+export const duplicateProgram = async (id: number) => {
+    const { data } = await $authHost.post(`api/program/${id}/duplicate`);
+    return data;
+};
 
 export const importProgram = (
     programId: number,

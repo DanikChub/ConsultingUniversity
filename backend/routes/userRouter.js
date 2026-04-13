@@ -24,4 +24,9 @@ router.get('/search/:page', checkRole(['ADMIN', 'VIEWER']), userController.searc
 router.post('/setGraduationDate/', userController.setGraduationDate)
 router.post('/setUserProfileImg/', userController.setUserProfileImg)
 
+router.post('/addUserDocuments/:id', checkRole('ADMIN'), userController.addUserDocuments);
+router.post('/deleteUserDocument/:id', checkRole('ADMIN'), userController.deleteUserDocument);
+router.get('/getUserDocuments/:id', checkRole(['ADMIN', 'VIEWER']), userController.getUserDocuments);
+
+
 module.exports = router;

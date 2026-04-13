@@ -1,7 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import {getAllPrograms, getAllPublishedPrograms, getOneProgram} from '../entities/program/api/program.api';
-import { getUserById, registrateAdmin, registrateUser, remakeAdmin, remakeUser } from '../entities/user/api/user.api';
+import { getAllPublishedPrograms } from '../entities/program/api/program.api';
+import {
+    addUserDocuments,
+    deleteUserDocument,
+    getUserById,
+    registrateAdmin,
+    registrateUser,
+    remakeAdmin,
+    remakeUser,
+    setUserProfileImg
+} from '../entities/user/api/user.api';
+import { UserDocument } from '../entities/user/model/type';
 import { ADMIN_ADMINISTRATORS_ROUTE, ADMIN_LISTENERS_ROUTE } from '../shared/utils/consts';
 
 export const useUserForm = () => {
@@ -15,11 +25,22 @@ export const useUserForm = () => {
     const [diplom, setDiplom] = useState(false);
     const [role, setRole] = useState('ADMIN');
 
+    const [passport, setPassport] = useState('');
+    const [educationDocument, setEducationDocument] = useState('');
+    const [snils, setSnils] = useState('');
+
+    const [documents, setDocuments] = useState<File[]>([]);
+    const [existingDocuments, setExistingDocuments] = useState<UserDocument[]>([]);
+
     const [programInput, setProgramInput] = useState('');
-    const [programs, setPrograms] = useState([]);
-    const [filteredPrograms, setFilteredPrograms] = useState([]);
-    const [selectedPrograms, setSelectedPrograms] = useState([]);
-    const [userProgramId, setUserProgramId] = useState([]);
+    const [programs, setPrograms] = useState<any[]>([]);
+    const [filteredPrograms, setFilteredPrograms] = useState<any[]>([]);
+    const [selectedPrograms, setSelectedPrograms] = useState<any[]>([]);
+    const [userProgramId, setUserProgramId] = useState<number[]>([]);
+
+    const [adminSignature, setAdminSignature] = useState('');
+    const [profileImg, setProfileImg] = useState<File | null>(null);
+    const [currentProfileImg, setCurrentProfileImg] = useState<string | null>(null);
 
     const [validate, setValidate] = useState(false);
     const [serverMessage, setServerMessage] = useState('');
@@ -30,33 +51,16 @@ export const useUserForm = () => {
     const [queryParams] = useSearchParams();
     const navigate = useNavigate();
 
-    const [loaded, setLoaded] = useState(true)
-
-    // ========== VALIDATION ==========
-    const validateEmail = (email: string) =>
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.toLowerCase());
-
-    const validatePhone = (phone: string) =>
-        /^\+?[0-9]{10,15}$/.test(phone.replace(/\D/g, ''));
-
-    const validateInn = (inn: string) =>
-        /^[0-9]{10,12}$/.test(inn.replace(/\D/g, ''));
+    const [loaded, setLoaded] = useState(true);
 
     const validateFields = useCallback(() => {
         if (!name || !email || !phone) return false;
-        // if (!validateEmail(email)) return false;
-        // if (!validatePhone(phone)) return false;
-        // if (org && !validateInn(inn)) return false;
-        // if (!queryParams.get('admin') && !userProgramId[0]) return false;
-        // if (!params.id && !password) return false;
         return true;
-    }, [name, email, phone, org, inn, userProgramId, password]);
+    }, [name, email, phone]);
 
-    // ========== LOAD ==========
     useEffect(() => {
-
         (async () => {
-            setLoaded(false)
+            setLoaded(false);
             try {
                 const all = await getAllPublishedPrograms();
                 setPrograms(all);
@@ -65,63 +69,63 @@ export const useUserForm = () => {
                 if (params.id) {
                     const user = await getUserById(params.id);
 
-                    setName(user.name);
-                    setEmail(user.email);
-                    setPhone(user.number);
+                    setName(user.name || '');
+                    setEmail(user.email || '');
+                    setPhone(user.number || '');
                     setOrg(user.organization || '');
                     setInn(user.inn || '');
                     setDiplom(user.diplom || false);
                     setAddress(user.address || '');
-                    setUserProgramId(user.programs_id);
 
-                    if (user.role != 'USER') {
-                        setRole(user.role)
+                    setPassport(user.passport || '');
+                    setEducationDocument(user.education_document || '');
+                    setSnils(user.snils || '');
+                    setExistingDocuments(user.documents || []);
+                    setAdminSignature(user.admin_signature || '');
+                    setCurrentProfileImg(user.img || null);
+
+                    if (user.role !== 'USER') {
+                        setRole(user.role);
                     }
 
-                    console.log(user)
                     if (!queryParams.get('admin')) {
-
-                        setSelectedPrograms(user.programs);
-
+                        setSelectedPrograms(user.programs || []);
+                        setUserProgramId(user.programs ? user.programs.map((p: any) => p.id) : []);
                     }
                 }
-                setLoaded(true)
 
-
+                setLoaded(true);
             } catch (err) {
                 console.error('Load error:', err);
+            } finally {
+                setLoaded(true);
             }
         })();
-    }, [params.id]);
+    }, [params.id, queryParams]);
 
-    // ========== PROGRAM HANDLERS ==========
     const handleChangeProgram = useCallback((value: string) => {
         setProgramInput(value);
         setDatalistActive(value.length > 0);
+
         let filtered;
         if (value) {
             filtered = programs
-                .filter(p => p.title.toLowerCase().includes(value.toLowerCase()))
-                .map(p => ({ ...p, yellow_value: value }));
+                .filter((p: any) => p.title.toLowerCase().includes(value.toLowerCase()))
+                .map((p: any) => ({ ...p, yellow_value: value }));
         } else {
-            filtered = programs
-
+            filtered = programs;
         }
-
 
         setFilteredPrograms(filtered);
     }, [programs]);
 
     const handleSelectRole = (newRole: 'ADMIN' | 'VIEWER') => {
-        console.log(newRole)
-        setRole(newRole)
-    }
+        setRole(newRole);
+    };
 
-    const handleSelectProgram = useCallback((program) => {
+    const handleSelectProgram = useCallback((program: any) => {
         setSelectedPrograms([program]);
-
         setUserProgramId([program.id]);
-        console.log(program.id)
         setDatalistActive(false);
     }, []);
 
@@ -130,47 +134,151 @@ export const useUserForm = () => {
         setUserProgramId([]);
     }, []);
 
-    // ========== DIPLOM ==========
     const handleDiplomCheck = (checked: boolean) => {
         setDiplom(checked);
         if (checked) setAddress('');
     };
 
-    // ========== SAVE ==========
+    const handleDocumentsChange = (files: FileList | null) => {
+        if (!files) return;
+
+        const filesArray = Array.from(files);
+        setDocuments((prev) => [...prev, ...filesArray]);
+    };
+
+    const removeNewDocument = (index: number) => {
+        setDocuments((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    const handleDeleteExistingDocument = async (documentId: number) => {
+        try {
+            await deleteUserDocument(documentId);
+            setExistingDocuments((prev) => prev.filter((doc) => doc.id !== documentId));
+        } catch (err: any) {
+            setServerMessage(err?.response?.data?.message || 'Ошибка удаления документа');
+        }
+    };
+
     const createUser = useCallback(async () => {
         setValidate(false);
-        console.log('создается до')
+        setServerMessage('');
+
         if (!validateFields()) {
             setValidate(true);
             return;
         }
-        
+
         try {
             if (params.id) {
                 if (queryParams.get('admin')) {
-                    console.log(role)
-                    await remakeAdmin(params.id, email, password, role, name, phone);
+                    await remakeAdmin(
+                        params.id,
+                        email,
+                        password,
+                        role,
+                        name,
+                        phone,
+                        adminSignature
+                    );
+
+                    if (profileImg) {
+                        const formData = new FormData();
+                        formData.append('img', profileImg);
+                        formData.append('id', String(params.id));
+                        await setUserProfileImg(formData);
+                    }
+
                     navigate(ADMIN_ADMINISTRATORS_ROUTE);
                 } else {
-                    await remakeUser(params.id, email, password, 'USER', name, phone, org, userProgramId, diplom, inn, address);
+                    await remakeUser({
+                        id: Number(params.id),
+                        email,
+                        password,
+                        role: 'USER',
+                        name,
+                        number: phone,
+                        organization: org,
+                        programs_id: userProgramId,
+                        diplom,
+                        inn,
+                        address,
+                        passport,
+                        education_document: educationDocument,
+                        snils,
+                    });
+
+                    if (documents.length > 0) {
+                        await addUserDocuments(Number(params.id), documents);
+                    }
+
+                    if (profileImg) {
+                        const formData = new FormData();
+                        formData.append('img', profileImg);
+                        formData.append('id', String(params.id));
+                        await setUserProfileImg(formData);
+                    }
+
                     navigate(ADMIN_LISTENERS_ROUTE);
                 }
             } else {
                 if (queryParams.get('admin')) {
-                    await registrateAdmin(email, password, role, name, phone);
+                    await registrateAdmin(
+                        email,
+                        password,
+                        role,
+                        name,
+                        phone,
+                        adminSignature
+                    );
+
                     navigate(ADMIN_ADMINISTRATORS_ROUTE);
                 } else {
-                    await registrateUser(email, password, 'USER', name, phone, org, userProgramId, diplom, inn, address);
+                    await registrateUser({
+                        email,
+                        password,
+                        role: 'USER',
+                        name,
+                        number: phone,
+                        organization: org,
+                        programs_id: userProgramId,
+                        diplom,
+                        inn,
+                        address,
+                        passport,
+                        education_document: educationDocument,
+                        snils,
+                    });
+
                     navigate(ADMIN_LISTENERS_ROUTE);
                 }
             }
         } catch (err: any) {
             setServerMessage(err?.response?.data?.message || 'Ошибка сервера');
         }
-    }, [params.id, email, password, name, role, phone, org, userProgramId, diplom, inn, address]);
+    }, [
+        params.id,
+        queryParams,
+        email,
+        password,
+        role,
+        name,
+        phone,
+        org,
+        userProgramId,
+        diplom,
+        inn,
+        address,
+        passport,
+        educationDocument,
+        snils,
+        documents,
+        adminSignature,
+        profileImg,
+        navigate,
+        validateFields
+    ]);
 
     return {
-        // DATA
         role, handleSelectRole,
         name, setName,
         email, setEmail,
@@ -182,19 +290,32 @@ export const useUserForm = () => {
         diplom, setDiplom,
         serverMessage,
 
+        passport, setPassport,
+        educationDocument, setEducationDocument,
+        snils, setSnils,
+
+        adminSignature, setAdminSignature,
+        profileImg, setProfileImg,
+        currentProfileImg,
+        setCurrentProfileImg,
+
+        documents,
+        existingDocuments,
+        handleDocumentsChange,
+        removeNewDocument,
+        handleDeleteExistingDocument,
+
         programInput,
         filteredPrograms,
         selectedPrograms,
         datalistActive,
 
-        // HANDLERS
         handleChangeProgram,
         handleSelectProgram,
         deleteSelectedProgram,
         handleDiplomCheck,
         createUser,
 
-        // FLAGS
         validate,
         params,
         navigate,

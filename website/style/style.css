@@ -1211,44 +1211,49 @@ a:hover {
 .education_info_items {
     margin-top: 60px;
 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
 
     gap: 12px;
 }
 
-/* ссылка-строка */
+
+/* ссылка-карточка */
 .education_info_item {
     width: 100%;
-
 
     display: flex;
     align-items: center;
 
     padding: 14px 18px;
 
-    border-bottom: 1px solid rgba(44, 62, 80, 0.2);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
 
     font-size: 1rem;
     font-weight: 400;
-    color: #2C3E50;
+    color: #EAEAEA;
 
-    transition: 0.2s linear;
+    backdrop-filter: blur(4px);
+
+    transition: all 0.2s ease;
 }
 
-/* hover как у обычных ссылок */
+/* hover */
 .education_info_item:hover {
-    color: #2980B9;
-    border-bottom-color: #2980B9;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #2980B9;
+    color: #FFFFFF;
+    transform: translateY(-1px);
 }
 
-/* стрелка/маркер слева (как в реестрах) */
+/* стрелка */
 .education_info_item::before {
     content: "→";
     margin-right: 12px;
-    color: #2C3E50;
-    transition: 0.2s linear;
+    color: #9CA3AF;
+    transition: 0.2s ease;
 }
 
 .education_info_item:hover::before {
@@ -1259,7 +1264,6 @@ a:hover {
 .education_info_title {
     text-align: left;
 }
-
 /* адаптив */
 @media (max-width: 600px) {
     .education_info_item {

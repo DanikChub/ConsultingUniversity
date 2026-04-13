@@ -142,26 +142,51 @@ async function reorderAfterDelete(Model, parentId, parentKey, deletedIndex) {
 }
 
 const User = sequelize.define('user', {
-    id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-    email: {type: DataTypes.STRING, unique: true,},
-    number: {type: DataTypes.STRING, unique: true,},
-    name: {type: DataTypes.STRING, allowNull: false},
-    password: {type: DataTypes.STRING},
-    role: {type: DataTypes.STRING, defaultValue: "USER"},
-    diplom: {type: DataTypes.BOOLEAN},
-    address: {type: DataTypes.STRING},
-    organization: {type: DataTypes.STRING},
-    inn: {type: DataTypes.STRING},
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    email: { type: DataTypes.STRING, unique: true },
+    number: { type: DataTypes.STRING, unique: true },
+    name: { type: DataTypes.STRING, allowNull: false },
+    password: { type: DataTypes.STRING },
+    role: { type: DataTypes.STRING, defaultValue: "USER" },
+    diplom: { type: DataTypes.BOOLEAN },
+    address: { type: DataTypes.STRING },
+    organization: { type: DataTypes.STRING },
+    inn: { type: DataTypes.STRING },
 
-    img: {type: DataTypes.STRING},
+    img: { type: DataTypes.STRING },
 
-    graduation_date: {type: DataTypes.DATE},
+    graduation_date: { type: DataTypes.DATE },
 
     password_reset_token: { type: DataTypes.STRING },
     password_reset_expires: { type: DataTypes.DATE },
 
     last_login_at: { type: DataTypes.DATE },
-})
+
+    // новые поля
+    passport: { type: DataTypes.TEXT, allowNull: true },
+    education_document: { type: DataTypes.TEXT, allowNull: true },
+    snils: { type: DataTypes.STRING, allowNull: true },
+
+    admin_signature: { type: DataTypes.STRING, allowNull: true },
+});
+
+const UserDocument = sequelize.define('user_document', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+
+    userId: { type: DataTypes.INTEGER, allowNull: false },
+
+    original_name: { type: DataTypes.STRING, allowNull: false },
+    file_name: { type: DataTypes.STRING, allowNull: false }, // имя на сервере
+    file_path: { type: DataTypes.STRING, allowNull: false }, // например /static/user-documents/xxx.pdf
+    mime_type: { type: DataTypes.STRING, allowNull: false },
+    size: { type: DataTypes.INTEGER, allowNull: false },
+
+    // опционально, если потом захочешь различать
+    document_type: {
+        type: DataTypes.STRING,
+        allowNull: true, // 'passport' | 'education' | 'snils' | 'other'
+    },
+});
 
 const Event = sequelize.define('event', {
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
@@ -656,6 +681,9 @@ MessageAttachment.belongsTo(Message)
 User.belongsToMany(Program, {through: Enrollment})
 Program.belongsToMany(User, {through: Enrollment})
 
+User.hasMany(UserDocument, { foreignKey: 'userId', as: 'documents', onDelete: 'CASCADE' });
+UserDocument.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
 Enrollment.belongsTo(User);
 User.hasMany(Enrollment);
 
@@ -771,6 +799,7 @@ Test.addHook('afterDestroy', async (test) => {
 module.exports = {
     Event,
     User,
+    UserDocument,
     Program,
     Theme,
     Punct,
