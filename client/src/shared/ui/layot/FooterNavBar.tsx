@@ -6,16 +6,21 @@ const FooterNavBar = () => {
     return (
         <div>
             <div className="pt-[30px] pb-[22px] bg-[#D9D9D9]">
-            <div className="max-w-[1500px] px-[40px] w-full m-auto">
-                <div className="text-md font-extralight text-[#000]">Образовательные услуги оказываются ООО «Консалтинг-Университет» на основании Лицензии № ________________ от ”___” _______________ 202__ года</div>
-            </div>
-        
-    </div>
+                <div className="max-w-[1500px] px-[40px] w-full m-auto">
+                    <a target="_blank" href="https://islod.obrnadzor.gov.ru/view/319539" className="text-md font-extralight text-[#000] hover:text-blue-500 transition-all">
+                        Образовательные услуги оказываются ООО «Консалтинг-Университет» на основании Лицензии № Л035-01239-34/04669008 от ”26” марта 2026 года
+                    </a>
+                    <div className="text-md font-extralight text-[#000]">
+                        Лицензия на дополнительное профессиональное образование выдается бессрочно и действует на всей территории Российской Федерации.
+                    </div>
+                </div>
 
- 
-    <footer className="bg-[#2C3E50]">
-         <div className="max-w-[1300px] px-[40px] w-full m-auto">
-            <div className="m-auto pt-[120px] flex w-[78%] justify-between">
+            </div>
+
+
+            <footer className="bg-[#2C3E50]">
+                <div className="max-w-[1300px] px-[40px] w-full m-auto">
+                    <div className="m-auto pt-[120px] flex w-[78%] justify-between">
                 <div className="">
                     <div className="font-extrabold text-2xl pb-[5px] text-[#fff]">Квалитет</div>
                     <a href="https://xn--34-6kchqrlk8db.xn--p1ai/about.html" className="block no-underline text-[#fff] font-extralight text-base mt-[25px] transition hover:underline">О нас</a>
