@@ -1109,6 +1109,12 @@ a:hover {
     color: blue;
 }
 
+.legal_subtext {
+    font-size: 0.875rem;
+    font-weight: 200;
+    color: #000;
+}
+
 .nav.footer_nav {
     margin-top: 25px;
     background-color: #D9D9D9;
