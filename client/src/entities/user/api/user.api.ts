@@ -3,10 +3,10 @@ import { jwtDecode } from "jwt-decode";
 import type {UserDocument} from "../model/type";
 
 
-export const login = async (email, password) => {
-    const {data} = await $host.post('api/user/login', {email, password})
+export const login = async (login, password) => {
+    const {data} = await $host.post('api/user/login', { login, password })
     localStorage.setItem('token', data.token)
-    return jwtDecode(data.token)
+    return data
 }
 
 export const forgotPassword = async (email) => {
@@ -22,9 +22,9 @@ export const checkForgotPassword = async (email, code, pass) => {
 }
 
 export const check = async () => {
-    const {data} = await $authHost.get('api/user/auth' )
+    const {data} = await $authHost.get('api/user/auth')
     localStorage.setItem('token', data.token)
-    return jwtDecode(data.token)
+    return data
 }
 
 export const getUserById = async (id) => {
@@ -71,7 +71,8 @@ export const getAllUsersWithPage = async (page, sort_type, sort_down) => {
 
 
 export const registrateAdmin = async (
-    email: string,
+    login: string,
+    email: string | null,
     password: string,
     role: string,
     name: string,
@@ -79,6 +80,7 @@ export const registrateAdmin = async (
     admin_signature?: string | null
 ) => {
     const { data } = await $authHost.post('api/user/registrationAdmin', {
+        login,
         email,
         password,
         role,
@@ -92,7 +94,8 @@ export const registrateAdmin = async (
 
 export const remakeAdmin = async (
     id: number | string,
-    email: string,
+    login: string,
+    email: string | null,
     password: string,
     role: string,
     name: string,
@@ -101,6 +104,7 @@ export const remakeAdmin = async (
 ) => {
     const { data } = await $authHost.post('api/user/remakeAdmin', {
         id,
+        login,
         email,
         password,
         role,
@@ -116,11 +120,12 @@ export const remakeAdmin = async (
 
 export interface UserPayload {
     id?: number;
-    email: string;
+    login: string;
+    email?: string | null;
     password?: string;
     role?: string;
     name: string;
-    number: string;
+    number?: string | null;
     organization?: string | null;
     programs_id: number[];
     diplom?: boolean | null;
@@ -203,3 +208,12 @@ export const setUserProfileImg = async (formdata) => {
 
     return data
 }
+
+export const setInitialPassword = async (newPassword: string) => {
+    const { data } = await $authHost.post('api/user/setInitialPassword', {
+        newPassword,
+    });
+
+    localStorage.setItem('token', data.token);
+    return data;
+};

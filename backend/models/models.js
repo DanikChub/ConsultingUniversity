@@ -143,10 +143,20 @@ async function reorderAfterDelete(Model, parentId, parentKey, deletedIndex) {
 
 const User = sequelize.define('user', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    email: { type: DataTypes.STRING, unique: true },
-    number: { type: DataTypes.STRING, unique: true },
+
+    login: { type: DataTypes.STRING, unique: true, allowNull: false },
+
+    email: { type: DataTypes.STRING, allowNull: true }, // unique убираем
+    number: { type: DataTypes.STRING },
+
     name: { type: DataTypes.STRING, allowNull: false },
-    password: { type: DataTypes.STRING },
+
+    password: { type: DataTypes.STRING, allowNull: true }, // постоянный пароль (hash)
+
+    temporary_password_hash: { type: DataTypes.STRING, allowNull: true }, // hash временного пароля
+    temporary_password_plain: { type: DataTypes.STRING, allowNull: true },
+    must_change_password: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+
     role: { type: DataTypes.STRING, defaultValue: "USER" },
     diplom: { type: DataTypes.BOOLEAN },
     address: { type: DataTypes.STRING },
@@ -162,7 +172,6 @@ const User = sequelize.define('user', {
 
     last_login_at: { type: DataTypes.DATE },
 
-    // новые поля
     passport: { type: DataTypes.TEXT, allowNull: true },
     education_document: { type: DataTypes.TEXT, allowNull: true },
     snils: { type: DataTypes.STRING, allowNull: true },

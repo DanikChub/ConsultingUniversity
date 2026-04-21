@@ -19,8 +19,12 @@ const fs = require("fs");
 
 
 
-const generateJwt = (id, email, role) => {
-    return jwt.sign({ id, email, role }, process.env.SECRET_KEY, { expiresIn: '24h' });
+const generateJwt = (id, login, role, must_change_password = false) => {
+    return jwt.sign(
+        { id, login, role, must_change_password },
+        process.env.SECRET_KEY,
+        { expiresIn: '24h' }
+    );
 };
 
 const STATIC_DIR = path.resolve(__dirname, '..', 'static');
@@ -49,8 +53,9 @@ class UserController {
 
         try {
             const {
+                login,
+                temporary_password,
                 email,
-                password,
                 role,
                 name,
                 number,
@@ -65,33 +70,35 @@ class UserController {
             } = req.body;
 
             // --- валидация ---
-            if (!email) return next(ApiError.badRequest('Некорректный email'));
-            if (!password) return next(ApiError.badRequest('Некорректный пароль'));
+            if (!login) return next(ApiError.badRequest('Некорректный логин'));
+            if (!temporary_password) return next(ApiError.badRequest('Некорректный временный пароль'));
             if (!number) return next(ApiError.badRequest('Некорректный номер'));
             if (!Array.isArray(programs_id) || programs_id.length === 0) {
                 return next(ApiError.badRequest('Отсутствует программа у пользователя'));
             }
 
-            const [emailExists, phoneExists] = await Promise.all([
-                User.findOne({ where: { email }, transaction: t }),
-                User.findOne({ where: { number }, transaction: t }),
-            ]);
+            const loginExists = await User.findOne({
+                where: { login },
+                transaction: t,
+            });
 
-            if (emailExists) {
-                return next(ApiError.badRequest('Пользователь с таким email уже существует'));
+            if (loginExists) {
+                return next(ApiError.badRequest('Пользователь с таким логином уже существует'));
             }
 
-            if (phoneExists) {
-                return next(ApiError.badRequest('Пользователь с таким телефоном уже существует'));
-            }
+            // --- временный пароль ---
+            const temporaryPasswordHash = await bcrypt.hash(temporary_password, 5);
 
             // --- создаём пользователя ---
-            const hashPassword = await bcrypt.hash(password, 5);
-
             const user = await User.create({
-                email,
+                login,
+                email: email || null,
                 role,
-                password: hashPassword,
+                password: null, // постоянного пароля пока нет
+                temporary_password_plain: temporary_password,
+                temporary_password_hash: temporaryPasswordHash,
+                must_change_password: true,
+
                 name,
                 number,
                 organization,
@@ -110,8 +117,6 @@ class UserController {
                 status: 'active',
             }));
 
-            console.log(enrollments, Enrollment);
-
             await Enrollment.bulkCreate(enrollments, { transaction: t });
 
             await Event.create({
@@ -124,9 +129,19 @@ class UserController {
 
             await t.commit();
 
-            const token = generateJwt(user.id, user.email, user.role);
-            return res.json({ token });
-
+            return res.json({
+                message: 'Пользователь успешно создан',
+                user: {
+                    id: user.id,
+                    login: user.login,
+                    name: user.name,
+                    email: user.email,
+                    number: user.number,
+                    role: user.role,
+                    must_change_password: user.must_change_password,
+                    temporary_password_plain: user.temporary_password_plain,
+                },
+            });
         } catch (e) {
             await t.rollback();
             console.error('Registration error:', e);
@@ -137,24 +152,55 @@ class UserController {
 
     async registrationAdmin(req, res, next) {
         try {
-            const { email, password, role, name, number, organization, programs_id, diplom, inn, address, admin_signature } = req.body;
+            const {
+                login,
+                email,
+                password,
+                role,
+                name,
+                number,
+                organization,
+                programs_id,
+                diplom,
+                inn,
+                address,
+                admin_signature
+            } = req.body;
 
-            if (!email) return next(ApiError.badRequest('Некорректный email'));
-            if (!password) return next(ApiError.badRequest('Некорректный пароль'));
-            if (!number) return next(ApiError.badRequest('Некорректный номер'));
+            if (!login) {
+                return next(ApiError.badRequest('Некорректный логин'));
+            }
 
-            const candidate = await User.findOne({ where: { email } });
-            if (candidate) return next(ApiError.badRequest('Пользователь с таким email уже существует'));
+            if (!password) {
+                return next(ApiError.badRequest('Некорректный пароль'));
+            }
 
-            const candidate2 = await User.findOne({ where: { number } });
-            if (candidate2) return next(ApiError.badRequest('Пользователь с таким телефоном уже существует'));
+            if (!number) {
+                return next(ApiError.badRequest('Некорректный номер'));
+            }
+
+            const loginExists = await User.findOne({
+                where: { login },
+            });
+
+            if (loginExists) {
+                return next(ApiError.badRequest('Пользователь с таким логином уже существует'));
+            }
+
 
             const hashPassword = await bcrypt.hash(password, 5);
 
             const user = await User.create({
-                email,
-                role,
+                login,
+                email: email || null,
+                role: role || 'ADMIN',
                 password: hashPassword,
+
+                // для админа временный пароль не нужен
+                temporary_password_plain: null,
+                temporary_password_hash: null,
+                must_change_password: false,
+
                 name,
                 number,
                 organization,
@@ -170,10 +216,27 @@ class UserController {
                 organization,
                 type: 'admin',
                 event_id: user.id,
-            }, { transaction: t });
+            });
 
-            const token = generateJwt(user.id, user.email, user.role);
-            return res.json({ token });
+            const token = generateJwt(
+                user.id,
+                user.login,
+                user.role,
+                user.must_change_password
+            );
+
+            return res.json({
+                token,
+                user: {
+                    id: user.id,
+                    login: user.login,
+                    email: user.email,
+                    role: user.role,
+                    name: user.name,
+                    number: user.number,
+                    must_change_password: user.must_change_password,
+                },
+            });
 
         } catch (e) {
             console.error('RegistrationAdmin error:', e);
@@ -227,6 +290,7 @@ class UserController {
         try {
             const {
                 id,
+                login,
                 email,
                 password,
                 role,
@@ -243,31 +307,40 @@ class UserController {
             } = req.body;
 
             const user = await User.findByPk(id, { transaction: t });
-            if (!user) return next(ApiError.badRequest('Пользователь не найден'));
+            if (!user) {
+                await t.rollback();
+                return next(ApiError.badRequest('Пользователь не найден'));
+            }
 
-            if (!email) return next(ApiError.badRequest('Некорректный email'));
-            if (!number) return next(ApiError.badRequest('Некорректный номер'));
+            if (!login) {
+                await t.rollback();
+                return next(ApiError.badRequest('Некорректный логин'));
+            }
+
+            if (!number) {
+                await t.rollback();
+                return next(ApiError.badRequest('Некорректный номер'));
+            }
+
             if (!Array.isArray(programs_id)) {
+                await t.rollback();
                 return next(ApiError.badRequest('programs_id должен быть массивом'));
             }
 
-            // уникальность
-            const [emailExists, phoneExists] = await Promise.all([
-                User.findOne({ where: { email }, transaction: t }),
-                User.findOne({ where: { number }, transaction: t }),
-            ]);
+            // уникальность login и number
+            const loginExists = await User.findOne({ where: { login }, transaction: t });
 
-            if (emailExists && emailExists.id !== user.id) {
-                return next(ApiError.badRequest('Пользователь с таким email уже существует'));
+
+
+            if (loginExists && loginExists.id !== user.id) {
+                await t.rollback();
+                return next(ApiError.badRequest('Пользователь с таким логином уже существует'));
             }
 
-            if (phoneExists && phoneExists.id !== user.id) {
-                return next(ApiError.badRequest('Пользователь с таким телефоном уже существует'));
-            }
 
             // обновляем пользователя
-            user.email = email;
-            if (password) user.password = await bcrypt.hash(password, 5);
+            user.login = login;
+            user.email = email || null;
             user.role = role;
             user.name = name;
             user.number = number;
@@ -280,6 +353,14 @@ class UserController {
             user.education_document = education_document !== undefined ? education_document : user.education_document;
             user.snils = snils !== undefined ? snils : user.snils;
 
+            // если админ передал password — считаем это новым временным паролем
+            if (password) {
+                user.password = null;
+                user.temporary_password_plain = password;
+                user.temporary_password_hash = await bcrypt.hash(password, 5);
+                user.must_change_password = true;
+            }
+
             await user.save({ transaction: t });
 
             // --- Enrollment логика ---
@@ -291,12 +372,12 @@ class UserController {
             const existingProgramIds = existingEnrollments.map(e => e.programId);
             const newProgramIds = programs_id;
 
-            // ➕ добавить
+            // добавить новые программы
             const toAdd = newProgramIds.filter(
                 pid => !existingProgramIds.includes(pid)
             );
 
-            // ➖ архивировать
+            // архивировать удалённые
             const toArchive = existingEnrollments.filter(
                 e => !newProgramIds.includes(e.programId)
             );
@@ -323,7 +404,27 @@ class UserController {
             }
 
             await t.commit();
-            return res.json({ user });
+
+            return res.json({
+                message: 'Пользователь обновлён',
+                user: {
+                    id: user.id,
+                    login: user.login,
+                    email: user.email,
+                    role: user.role,
+                    name: user.name,
+                    number: user.number,
+                    organization: user.organization,
+                    diplom: user.diplom,
+                    inn: user.inn,
+                    address: user.address,
+                    passport: user.passport,
+                    education_document: user.education_document,
+                    snils: user.snils,
+                    must_change_password: user.must_change_password,
+                    temporary_password: user.temporary_password_plain,
+                },
+            });
 
         } catch (e) {
             await t.rollback();
@@ -336,27 +437,63 @@ class UserController {
     // ======================== REMAKE ADMIN ========================
     async remakeAdmin(req, res, next) {
         try {
-            const { id, email, password, role, name, number, admin_signature } = req.body;
-            const user = await User.findOne({ where: { id } });
-            if (!user) return next(ApiError.badRequest('Пользователь не найден'));
-            if (!email) return next(ApiError.badRequest('Некорректный email'));
-            if (!number) return next(ApiError.badRequest('Некорректный номер'));
+            const { id, login, email, password, role, name, number, admin_signature } = req.body;
 
-            user.email = email;
-            if (password) user.password = await bcrypt.hash(password, 5);
+            const user = await User.findOne({ where: { id } });
+            if (!user) {
+                return next(ApiError.badRequest('Пользователь не найден'));
+            }
+
+            if (!login) {
+                return next(ApiError.badRequest('Некорректный логин'));
+            }
+
+            if (!number) {
+                return next(ApiError.badRequest('Некорректный номер'));
+            }
+
+            const loginExists = await User.findOne({ where: { login } });
+
+            if (loginExists && loginExists.id !== user.id) {
+                return next(ApiError.badRequest('Пользователь с таким логином уже существует'));
+            }
+
+            user.login = login;
+            user.email = email || null;
             user.name = name;
             user.number = number;
+
+            if (password) {
+                user.password = await bcrypt.hash(password, 5);
+                user.must_change_password = false;
+                user.temporary_password_plain = null;
+                user.temporary_password_hash = null;
+            }
+
             if (role) {
                 user.role = role;
             }
 
-            user.admin_signature = admin_signature !== undefined
-                ? admin_signature
-                : user.admin_signature;
-
+            user.admin_signature =
+                admin_signature !== undefined
+                    ? admin_signature
+                    : user.admin_signature;
 
             await user.save();
-            return res.json({ user });
+
+            return res.json({
+                message: 'Администратор обновлён',
+                user: {
+                    id: user.id,
+                    login: user.login,
+                    email: user.email,
+                    role: user.role,
+                    name: user.name,
+                    number: user.number,
+                    admin_signature: user.admin_signature,
+                    must_change_password: user.must_change_password,
+                },
+            });
 
         } catch (e) {
             console.error('remakeAdmin error:', e);
@@ -367,15 +504,66 @@ class UserController {
     // ======================== LOGIN ========================
     async login(req, res, next) {
         try {
-            const { email, password } = req.body;
-            const user = await User.findOne({ where: { email } });
-            if (!user) return next(ApiError.internal('Пользователь не найден'));
+            const { login, password } = req.body;
 
-            const comparePassword = bcrypt.compareSync(password, user.password);
-            if (!comparePassword) return next(ApiError.internal('Указан неверный пароль'));
+            if (!login) {
+                return next(ApiError.badRequest('Не указан логин'));
+            }
 
-            const token = generateJwt(user.id, user.email, user.role);
-            return res.json({ token });
+            if (!password) {
+                return next(ApiError.badRequest('Не указан пароль'));
+            }
+
+            const user = await User.findOne({ where: { login } });
+
+            if (!user) {
+                return next(ApiError.badRequest('Пользователь не найден'));
+            }
+
+            let isPasswordValid = false;
+            let authenticatedByTemporaryPassword = false;
+
+            // 1. Проверяем постоянный пароль
+            if (user.password) {
+                isPasswordValid = bcrypt.compareSync(password, user.password);
+            }
+
+            // 2. Если постоянный не подошел, пробуем временный
+            if (!isPasswordValid && user.temporary_password_hash) {
+                isPasswordValid = bcrypt.compareSync(password, user.temporary_password_hash);
+
+                if (isPasswordValid) {
+                    authenticatedByTemporaryPassword = true;
+                }
+            }
+
+            if (!isPasswordValid) {
+                return next(ApiError.badRequest('Указан неверный пароль'));
+            }
+
+            user.last_login_at = new Date();
+            await user.save();
+
+            const token = generateJwt(
+                user.id,
+                user.login,
+                user.role,
+                user.must_change_password
+            );
+
+            return res.json({
+                token,
+                user: {
+                    id: user.id,
+                    login: user.login,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role,
+                    must_change_password: user.must_change_password,
+                },
+                mustChangePassword: user.must_change_password,
+                authenticatedByTemporaryPassword,
+            });
 
         } catch (e) {
             console.error('login error:', e);
@@ -383,71 +571,175 @@ class UserController {
         }
     }
 
+    async setInitialPassword(req, res, next) {
+        try {
+            const userId = req.user.id;
+            const { newPassword } = req.body;
+
+            if (!newPassword || newPassword.length < 6) {
+                return next(ApiError.badRequest('Новый пароль должен быть не короче 6 символов'));
+            }
+
+            const user = await User.findByPk(userId);
+            if (!user) {
+                return next(ApiError.badRequest('Пользователь не найден'));
+            }
+
+            if (!user.must_change_password) {
+                return next(ApiError.badRequest('Смена временного пароля не требуется'));
+            }
+
+            const hashedPassword = bcrypt.hashSync(newPassword, 5);
+
+            user.password = hashedPassword;
+            user.temporary_password_plain = null;
+            user.temporary_password_hash = null;
+            user.must_change_password = false;
+
+            await user.save();
+
+            const token = generateJwt(
+                user.id,
+                user.login,
+                user.role,
+                false
+            );
+
+            return res.json({
+                message: 'Пароль успешно изменен',
+                token,
+                user: {
+                    id: user.id,
+                    login: user.login,
+                    email: user.email,
+                    role: user.role,
+                    name: user.name,
+                    must_change_password: user.must_change_password,
+                }
+            })
+
+        } catch (e) {
+            console.error('setInitialPassword error:', e);
+            return next(ApiError.internal('Ошибка при установке пароля'));
+        }
+    }
+
     // ======================== FORGOT PASSWORD ========================
     async forgotPassword(req, res, next) {
         try {
             const { email } = req.body;
-            const user = await User.findOne({ where: { email } });
-            if (!user) return next(ApiError.badRequest('Пользователь не найден'));
 
-            const code = Math.floor(1000 + Math.random() * 9000); // 4-значный код
-            const hashCode = await bcrypt.hash(`${code}`, 5);
+            if (!email) {
+                return next(ApiError.badRequest('Укажите email'));
+            }
+
+            const user = await User.findOne({ where: { email } });
+
+            if (!user) {
+                return next(ApiError.badRequest('Пользователь не найден'));
+            }
+
+            // 4-значный код (оставляем как есть)
+            const code = Math.floor(1000 + Math.random() * 9000).toString();
+
+            const hashCode = await bcrypt.hash(code, 5);
+
             user.forgot_pass_code = hashCode;
             await user.save();
 
             try {
                 const transporter = nodemailer.createTransport({
                     service: 'gmail',
-                    auth: { user: 'chabanovdan@gmail.com', pass: 'fmdn veek hhnz wirs' }
+                    auth: {
+                        user: 'chabanovdan@gmail.com',
+                        pass: 'fmdn veek hhnz wirs',
+                    },
                 });
 
-                const mailOptions = {
+                await transporter.sendMail({
                     from: "chabanovdan@gmail.com",
                     to: email,
                     subject: 'Код для восстановления пароля',
-                    html: `<p>Код: ${code}</p>`
-                };
-
-                await transporter.sendMail(mailOptions);
+                    html: `<p>Код: <b>${code}</b></p>`,
+                });
 
             } catch (mailErr) {
                 console.error('Mail send error:', mailErr);
+                return next(ApiError.internal('Ошибка отправки письма'));
             }
 
-            return res.json({ user });
+            return res.json({ message: 'Код отправлен на почту' });
 
         } catch (e) {
             console.error('forgotPassword error:', e);
             return next(ApiError.internal('Ошибка при восстановлении пароля'));
         }
     }
-
     async checkForgotPassword(req, res, next) {
         try {
             const { email, code, pass } = req.body;
+
+            if (!email || !code || !pass) {
+                return next(ApiError.badRequest('Не все данные указаны'));
+            }
+
             const user = await User.findOne({ where: { email } });
-            if (!user) return next(ApiError.badRequest('Пользователь не найден'));
 
-            const compareCode = bcrypt.compareSync(code, user.forgot_pass_code);
-            if (!compareCode) return next(ApiError.internal('Код неверный'));
+            if (!user) {
+                return next(ApiError.badRequest('Пользователь не найден'));
+            }
 
+            if (!user.forgot_pass_code) {
+                return next(ApiError.badRequest('Код не был запрошен'));
+            }
+
+            const compareCode = bcrypt.compareSync(String(code), user.forgot_pass_code);
+
+            if (!compareCode) {
+                return next(ApiError.badRequest('Код неверный'));
+            }
+
+            // новый пароль
             user.password = await bcrypt.hash(pass, 5);
+
+            // чистим код
             user.forgot_pass_code = null;
+
+            // важно для твоей новой системы
+            user.temporary_password_plain = null;
+            user.temporary_password_hash = null;
+            user.must_change_password = false;
+
             await user.save();
 
-            return res.json({ user });
+            return res.json({ message: 'Пароль успешно изменён' });
 
         } catch (e) {
             console.error('checkForgotPassword error:', e);
-            return next(ApiError.internal('Ошибка при проверке кода восстановления'));
+            return next(ApiError.internal('Ошибка при проверке кода'));
         }
     }
 
     // ======================== CHECK TOKEN ========================
     async check(req, res, next) {
         try {
-            const token = generateJwt(req.user.id, req.user.email, req.user.role);
-            return res.json({ token });
+            const token = generateJwt(
+                req.user.id,
+                req.user.login,
+                req.user.role,
+                req.user.must_change_password
+            );
+
+            return res.json({
+                token,
+                user: {
+                    id: req.user.id,
+                    login: req.user.login,
+                    role: req.user.role,
+                    must_change_password: req.user.must_change_password,
+                },
+                mustChangePassword: req.user.must_change_password,
+            });
         } catch (e) {
             console.error('check error:', e);
             return next(ApiError.internal('Ошибка проверки токена'));

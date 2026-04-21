@@ -280,6 +280,7 @@ const AdminUserPage = () => {
                             {/* Основная информация */}
                             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                                 <div className="space-y-4">
+
                                     {user.email && (
                                         <div
                                             className="flex items-center gap-3 rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
@@ -326,6 +327,30 @@ const AdminUserPage = () => {
                                 </div>
 
                                 <div className="space-y-4">
+                                    {user.login && (
+                                        <div className="rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
+                                            <div
+                                                className="mb-1 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-gray-400">
+                                                <FiFileText className="text-gray-400"/>
+                                                Логин пользователя
+                                            </div>
+                                            <div className="break-all text-gray-800">{user.login}</div>
+                                        </div>
+                                    )}
+                                    {user.temporary_password_plain && (
+                                        <div className="rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
+                                            <div
+                                                className="mb-1 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-gray-400">
+                                                <FiFileText className="text-gray-400"/>
+                                                <span>Временный пароль</span>
+                                                {user.must_change_password &&
+                                                    <span>Не актуален</span>
+                                                }
+
+                                            </div>
+                                            <div className="break-all text-gray-800">{user.temporary_password_plain}</div>
+                                        </div>
+                                    )}
                                     {user.inn && (
                                         <div className="rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
                                             <div

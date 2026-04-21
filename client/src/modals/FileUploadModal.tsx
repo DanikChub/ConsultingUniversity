@@ -4,8 +4,30 @@ import { useDropzone } from 'react-dropzone';
 type Props = {
 
     onClose: () => void;
-    onSubmit: (file: File) => void;
+    onSubmit: (
+        payload:
+            | { type: 'file'; file: File }
+            | { type: 'video'; url: string }
+    ) => void;
 };
+
+function extractRutubeVideoId(url: string): string | null {
+    const trimmed = url.trim();
+
+    const patterns = [
+        /rutube\.ru\/video\/([a-zA-Z0-9]+)/i,
+        /rutube\.ru\/play\/embed\/([a-zA-Z0-9]+)/i,
+    ];
+
+    for (const pattern of patterns) {
+        const match = trimmed.match(pattern);
+        if (match?.[1]) {
+            return match[1];
+        }
+    }
+
+    return null;
+}
 
 const FileUploadModal = ({ onClose, onSubmit }: Props) => {
     const [mode, setMode] = useState<'file' | 'video'>('file');
@@ -67,7 +89,7 @@ const FileUploadModal = ({ onClose, onSubmit }: Props) => {
                             mode === 'video' ? 'bg-blue-600 text-white' : 'bg-gray-200'
                         }`}
                     >
-                        Видео (VK)
+                        Видео (Rutube)
                     </button>
                 </div>
 
@@ -168,12 +190,13 @@ const FileUploadModal = ({ onClose, onSubmit }: Props) => {
                         <div className="mb-4">
                             <div className="overflow-hidden transition-all duration-500 mt-2 px-4 py-2 text-sm text-gray-700 bg-blue-50 rounded-md border-l-4 border-blue-400">
                                 <p>
-                                    Для добавления видео в программу необходимо <strong>вставить ссылку на видео Vimeo</strong>.
+                                    Для добавления видео в программу необходимо <strong>вставить ссылку на видео
+                                    Rutube</strong>.
                                 </p>
                                 <div className="ml-4 mt-2">
                                     <p className="font-semibold text-gray-800">Как получить ссылку:</p>
                                     <ul className="ml-4 list-disc space-y-1">
-                                        <li>Откройте видео на Vimeo в браузере.</li>
+                                        <li>Откройте видео на Rutube в браузере.</li>
                                         <li>Скопируйте URL из адресной строки.</li>
                                         <li>Вставьте ссылку в поле ввода ниже. После успешного отображения превью нажмите <strong>«Добавить видео»</strong>.</li>
                                     </ul>
@@ -188,14 +211,15 @@ const FileUploadModal = ({ onClose, onSubmit }: Props) => {
                         {/* Input для ссылки */}
                         <input
                             type="text"
-                            placeholder="Вставьте ссылку Vimeo"
+                            placeholder="Вставьте ссылку Rutube"
                             value={videoUrl}
                             onChange={(e) => {
-                                setVideoUrl(e.target.value);
-                                setVideoValid(false); // сброс при изменении
-                                setVideoId(null);
-                                const match = e.target.value.match(/vimeo\.com\/(\d+)/);
-                                if (match) setVideoId(match[1]);
+                                const value = e.target.value;
+                                setVideoUrl(value);
+                                setVideoValid(false);
+
+                                const extractedId = extractRutubeVideoId(value);
+                                setVideoId(extractedId);
                             }}
                             className="w-full border outline-none rounded-lg p-2"
                         />
@@ -205,15 +229,14 @@ const FileUploadModal = ({ onClose, onSubmit }: Props) => {
                             <div className="w-full flex justify-center my-4">
                                 <iframe
                                     key={videoId}
-                                    src={`https://player.vimeo.com/video/${videoId}`}
+                                    src={`https://rutube.ru/play/embed/${videoId}`}
                                     width="640"
                                     height="360"
                                     frameBorder="0"
-                                    allow="autoplay; fullscreen; picture-in-picture"
+                                    allow="clipboard-write; autoplay; fullscreen"
                                     allowFullScreen
                                     onLoad={() => setVideoValid(true)}
-                                    onError={() => setVideoValid(false)}
-                                    style={{ backgroundColor: "#000" }}
+                                    style={{backgroundColor: '#000'}}
                                 />
                             </div>
                         )}

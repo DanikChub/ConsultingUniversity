@@ -3,6 +3,7 @@ export const EXPERT_ROUTE = "/expert_course"
 export const AUTH_ROUTE = "/signin"
 export const FORGOT_PASSWORD_ROUTE = "/forgot_password"
 export const USER_ROUTE = "/user"
+export const USER_PROFILE_ROUTE = "/user/profile"
 export const STATEMENT_ROUTE = "/user/statement"
 export const COURSE_ROUTE = "/user/course/:id"
 export const TEST_OVERVIEW_ROUTE = "/user/course/test/:id/overview"
@@ -36,4 +37,5 @@ export const ADMIN_REGISTRATE_ADMIN= "/admin/administrators/new_admin"
 export const ADMIN_CHANGE_ADMIN= "/admin/administrators/new_admin/:id"
 export const ADMIN_STATEMENT_USER= "/admin/listeners/statement/:id"
 export const ADMIN_DOCUMENTS_ROUTE = "/admin/documents/"
+export const SET_INITIAL_PASSWORD_ROUTE = '/set-initial-password';
 

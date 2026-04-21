@@ -37,7 +37,12 @@ import {
     CHAT_PAGE_ROUTE,
     CHAT_USERS_PAGE_ROUTE,
     USER_CHAT_ROUTE,
-    ADMIN_REGISTRATE_ADMIN, TEST_OVERVIEW_ROUTE, TEST_ATTEMPT_ROUTE, PDF_ROUTE, ADMIN_CHANGE_ADMIN
+    ADMIN_REGISTRATE_ADMIN,
+    TEST_OVERVIEW_ROUTE,
+    TEST_ATTEMPT_ROUTE,
+    PDF_ROUTE,
+    ADMIN_CHANGE_ADMIN,
+    SET_INITIAL_PASSWORD_ROUTE, USER_PROFILE_ROUTE
 } from './shared/utils/consts'
 import LoginPage from './pages/LoginPage/LoginPage'
 import AdminPage from './pages/admin/AdminPage/AdminPage'
@@ -67,6 +72,8 @@ import RegistrateAdmin from "./pages/admin/RegistrateAdmin/RegistrateAdmin";
 import TestOverview from "./pages/User/TestOverview/TestOverview";
 import TestAttemptPage from "./pages/User/TestAttemptPage/TestAttemptPage";
 import PdfPage from "./pages/User/PdfPage/PdfPage";
+import SetInitialPasswordPage from "./pages/SetInitialPasswordPage/SetInitialPasswordPage";
+import ProfilePage from "./pages/User/ProfilePage/ProfilePage";
 
 
 export const authRoutes = [
@@ -115,6 +122,14 @@ export const authRoutes = [
         path: PDF_ROUTE,
         Component: <PdfPage/>
     },
+    {
+        path: SET_INITIAL_PASSWORD_ROUTE,
+        Component: <SetInitialPasswordPage/>
+    },
+    {
+        path: USER_PROFILE_ROUTE,
+        Component: <ProfilePage/>
+    }
 ]
 
 export const adminRoutes = [

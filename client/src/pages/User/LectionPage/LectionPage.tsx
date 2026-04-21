@@ -203,7 +203,7 @@ const LectionPage: React.FC = () => {
 
                         <div
                             className="docx-content"
-                            dangerouslySetInnerHTML={{__html: file.file_asset.content}}
+                            dangerouslySetInnerHTML={{__html: file?.file_asset?.content}}
                         />
                     </div>
 

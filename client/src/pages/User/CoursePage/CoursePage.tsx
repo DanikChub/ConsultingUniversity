@@ -230,7 +230,7 @@ export default function CoursePage() {
                     <div className="flex flex-col lg:flex-row items-center lg:items-stretch">
 
                         {/* 🖼 Cover */}
-                        <div className="relative lg:w-[320px] w-full max-h-[350px] flex-shrink-0">
+                        <div className="relative lg:w-[320px] w-full max-h-[260px] flex-shrink-0">
 
                             {program.img ? (
                                 <img

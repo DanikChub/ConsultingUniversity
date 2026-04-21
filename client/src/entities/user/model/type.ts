@@ -19,6 +19,7 @@ export interface UserDocument {
 
 export interface User {
     id: number;
+    login: string;
     email?: string | null;
     number?: string | null;
     name: string;
@@ -39,6 +40,12 @@ export interface User {
     snils?: string | null;
     documents?: UserDocument[];
 
+
+    temporary_password_plain?: string | null;
+    temporary_password_hash?: string | null;
+    must_change_password?: boolean;
+    admin_signature?: string | null;
+
     yellow_value?: string;
     createdAt?: string;
     programs?: ProgramWithProgress[];
@@ -46,6 +53,7 @@ export interface User {
 
 export interface UserWithProgress {
     id: number;
+    login: string;
     email?: string | null;
     number?: string | null;
     name: string;
@@ -64,6 +72,11 @@ export interface UserWithProgress {
     education_document?: string | null;
     snils?: string | null;
     documents?: UserDocument[];
+
+    temporary_password_plain?: string | null;
+    temporary_password_hash?: string | null;
+    must_change_password?: boolean;
+    admin_signature?: string | null;
 
     yellow_value?: string;
     createdAt?: string;

@@ -193,18 +193,30 @@ const FilePreview = ({file}: { file: ProgramFile }) => {
     }
 
     if (file.type === 'video') {
-        const match = file.url.match(/vimeo\.com\/(\d+)/);
-        const videoId = match[1]
+        const match = file.url.match(
+            /rutube\.ru\/(?:video|play\/embed)\/([a-zA-Z0-9]+)/i
+        );
+
+        if (!match) {
+            return (
+                <div className="text-sm text-red-500">
+                    Неверная ссылка на видео
+                </div>
+            );
+        }
+
+        const videoId = match[1];
+
         return (
             <iframe
                 key={videoId}
-                src={`https://player.vimeo.com/video/${videoId}`}
+                src={`https://rutube.ru/play/embed/${videoId}`}
                 width="640"
                 height="360"
                 frameBorder="0"
-                allow="autoplay; fullscreen; picture-in-picture"
+                allow="clipboard-write; autoplay; fullscreen"
                 allowFullScreen
-                style={{backgroundColor: "#000"}}
+                style={{ backgroundColor: '#000' }}
                 className="w-full rounded"
             />
         );

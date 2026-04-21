@@ -777,7 +777,7 @@ class ProgramController {
           type: 'video',
           size: null,
           url,
-          storage: 'vimeo',
+          storage: 's3',
 
           themeId: targetType === 'theme' ? targetId : null,
           punctId: targetType === 'punct' ? targetId : null,

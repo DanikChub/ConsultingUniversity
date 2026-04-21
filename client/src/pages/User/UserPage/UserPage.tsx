@@ -14,7 +14,7 @@ import learn from '../../../assets/imgs/learn.png';
 import how from '../../../assets/imgs/how.png';
 import check from '../../../assets/imgs/check.png';
 import user_img from '../../../assets/imgs/user.png';
-import { COURSE_ROUTE, STATEMENT_ROUTE, USER_CHAT_ROUTE } from '../../../shared/utils/consts';
+import {COURSE_ROUTE, STATEMENT_ROUTE, USER_CHAT_ROUTE, USER_PROFILE_ROUTE} from '../../../shared/utils/consts';
 import {FiArchive, FiCheckCircle, FiClock} from "react-icons/fi";
 import UserPageSkeleton from "./components/UserPageSkeleton";
 import {useSocket} from "../../../hooks/useSocket";
@@ -34,15 +34,21 @@ const UserPage = observer(() => {
     }, [unreadMessages]);
 
     useEffect(() => {
-        setLoading(false)
-        const userProgram = userContext.user.user.programs[0];
+        const programs = userContext.user.user?.programs;
+
+        if (!programs || programs.length === 0) {
+            setLoading(true);
+            setProgram(null);
+            setProgress(0);
+            return;
+        }
+
+        const userProgram = programs[0];
+
         setProgram(userProgram);
-        setProgress(userProgram.enrollment.progress_percent ?? 0);
-
-        setLoading(true)
-
-    }, []);
-
+        setProgress(userProgram?.enrollment?.progress_percent ?? 0);
+        setLoading(true);
+    }, [userContext.user.user]);
     useEffect(() => {
         if (!socket) return
 
@@ -109,7 +115,7 @@ const UserPage = observer(() => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                 {/* Профиль и приветствие */}
                 <div className="flex items-center mb-8 md:mb-0">
-                    <div className="relative">
+                    <div className="relative flex flex-col justify-center">
                         <input
                             id="userProfileImgId"
                             type="file"
@@ -127,7 +133,12 @@ const UserPage = observer(() => {
                                 Изменить <br/> фото
                             </div>
                         </label>
-
+                        <Link
+                            to={USER_PROFILE_ROUTE}
+                            className="font-medium  text-center text-gray-800 block hover:underline"
+                        >
+                            Мой профиль
+                        </Link>
                     </div>
 
                     <div className="ml-12">
@@ -209,13 +220,14 @@ const UserPage = observer(() => {
                 </div>
             </div>
 
+
             {/* Программа пользователя */}
             <div className="mt-16">
                 <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-left">Ваша программа</h2>
 
                     {/* Основной курс */}
                     <Link
-                        to={COURSE_ROUTE.replace(':id', program.id)}
+                        to={COURSE_ROUTE.replace(':id', program?.id)}
                         onClick={() => localStorage.removeItem('arr_open')}
                         className="block relative rounded-3xl bg-gradient-to-br from-white via-blue-50 to-indigo-50 border border-gray-100 shadow-md overflow-hidden"
                     >
@@ -224,17 +236,17 @@ const UserPage = observer(() => {
                             {/* 🖼 Cover */}
                             <div className="relative lg:w-[320px] w-full max-h-[250px] flex-shrink-0">
 
-                                {program.img ? (
+                                {program?.img ? (
                                     <img
-                                        src={process.env.REACT_APP_API_URL + program.img}
-                                        alt={program.title ?? "Course cover"}
+                                        src={process.env.REACT_APP_API_URL + program?.img}
+                                        alt={program?.title ?? "Course cover"}
                                         className="w-full h-full object-cover lg:rounded-l-3xl"
                                     />
                                 ) : (
                                     <div
                                         className="w-full h-full min-h-[220px] flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100 lg:rounded-l-3xl">
                             <span className="text-4xl font-bold text-indigo-300">
-                                {program.title?.charAt(0)}
+                                {program?.title?.charAt(0)}
                             </span>
                                     </div>
                                 )}
@@ -251,7 +263,7 @@ const UserPage = observer(() => {
 
                                     <div className="flex flex-wrap items-center gap-4">
                                         <h1 className="text-3xl font-bold text-[#2C3E50] text-left">
-                                            {program.title}
+                                            {program?.title}
                                         </h1>
 
 

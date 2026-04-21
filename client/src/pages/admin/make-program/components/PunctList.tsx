@@ -34,7 +34,7 @@ const PunctList: React.FC<Props> = ({ theme, isHide }) => {
     return (
         <div
             className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                isHide ? 'max-h-10 opacity-0' : 'max-h-[5000px] opacity-100'
+                isHide ? 'max-h-10 opacity-0' : 'max-h-[15000px] opacity-100'
             }`}
         >
             <div className="px-4 mt-4 space-y-4 mb-4">

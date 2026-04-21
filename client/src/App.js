@@ -28,7 +28,14 @@ const App = observer(() => {
         }
 
         const data = await check()
-        const userData = await getUserById(data.id)
+
+        const userId = data?.user?.id
+        if (!userId) {
+          throw new Error("User id not found in check response")
+        }
+
+        const userData = await getUserById(userId)
+
         user.setUser(userData)
         user.setIsAuth(true)
 
