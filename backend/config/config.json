@@ -1,0 +1,16 @@
+{
+  "development": {
+    "username": "consulting_user",
+    "password": "denchick26022007100%",
+    "database": "consulting_db",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "consulting_user",
+    "password": "denchick26022007100%",
+    "database": "consulting_db",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
