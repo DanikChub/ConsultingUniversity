@@ -1315,21 +1315,27 @@ class ProgramController {
       }
 
       // ----------------- Проверяем темы и пункты -----------------
+
       for (const theme of program.themes) {
         if (!theme.title) {
           return res.status(400).json({
-            error: `Модуль с номером ${theme.order_index}  не имеет названия`
+            error: `Модуль с номером ${theme.order_index} не имеет названия`
           });
         }
+
         for (const punct of theme.puncts) {
           if (!punct.title) {
             return res.status(400).json({
               error: `Тема с номером ${punct.order_index} в теме "${theme.title}" не имеет названия`
             });
           }
-          if (!punct.files || punct.files.length === 0) {
+
+          const hasFiles = Array.isArray(punct.files) && punct.files.length > 0;
+          const hasTests = Array.isArray(punct.tests) && punct.tests.length > 0;
+
+          if (!hasFiles && !hasTests) {
             return res.status(400).json({
-              error: `Пункт "${punct.title}" не содержит ни одного файла`
+              error: `Пункт "${punct.title}" не содержит ни файлов, ни тестов`
             });
           }
         }
