@@ -95,7 +95,7 @@ module.exports = {
 
         // 2. Возвращаем password в old state
         await queryInterface.changeColumn('users', 'password', {
-            type: Sequelize.STRING,
+            type: Sequelize.ST
             allowNull: true, // оставил true, потому что насильно обратно делать false может упасть
         });
 

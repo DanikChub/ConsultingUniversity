@@ -2,6 +2,7 @@
 import {FC, useEffect, useState} from 'react';
 import type {File as ProgramFile} from "../entities/file/model/type";
 import {ModalContainer} from "./ModalContainer";
+import {buildRutubeEmbedUrl, parseRutubeVideo} from "../shared/lib/rutube/rutube";
 
 
 
@@ -193,11 +194,9 @@ const FilePreview = ({file}: { file: ProgramFile }) => {
     }
 
     if (file.type === 'video') {
-        const match = file.url.match(
-            /rutube\.ru\/(?:video|play\/embed)\/([a-zA-Z0-9]+)/i
-        );
+        const { videoId, accessKey } = parseRutubeVideo(file.url);
 
-        if (!match) {
+        if (!videoId) {
             return (
                 <div className="text-sm text-red-500">
                     Неверная ссылка на видео
@@ -205,12 +204,12 @@ const FilePreview = ({file}: { file: ProgramFile }) => {
             );
         }
 
-        const videoId = match[1];
+        const embedUrl = buildRutubeEmbedUrl(videoId, accessKey);
 
         return (
             <iframe
-                key={videoId}
-                src={`https://rutube.ru/play/embed/${videoId}`}
+                key={embedUrl}
+                src={embedUrl}
                 width="640"
                 height="360"
                 frameBorder="0"

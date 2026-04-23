@@ -10,22 +10,9 @@ import ButtonBack from "../../../shared/ui/buttons/ButtonBack";
 import { FiCheck } from "react-icons/fi";
 import type { File } from "../../../entities/file/model/type";
 import RutubePlayer from "./components/RutubePlayer";
+import {parseRutubeVideo} from "../../../shared/lib/rutube/rutube";
 
-function extractRutubeVideoId(url: string): string | null {
-    const patterns = [
-        /rutube\.ru\/video\/([a-zA-Z0-9]+)/i,
-        /rutube\.ru\/play\/embed\/([a-zA-Z0-9]+)/i,
-    ];
 
-    for (const pattern of patterns) {
-        const match = url.match(pattern);
-        if (match?.[1]) {
-            return match[1];
-        }
-    }
-
-    return null;
-}
 
 const VideoPage = () => {
     const { id } = useParams();
@@ -120,7 +107,7 @@ const VideoPage = () => {
 
     if (!file) return <UserContainer>Загрузка...</UserContainer>;
 
-    const videoId = extractRutubeVideoId(file.url);
+    const { videoId, accessKey } = parseRutubeVideo(file.url);
 
     return (
         <UserContainer isLeftPanel={true} loading={loading}>
@@ -135,7 +122,7 @@ const VideoPage = () => {
                     </div>
 
                     {videoId ? (
-                        <RutubePlayer videoId={videoId} />
+                        <RutubePlayer videoId={videoId} accessKey={accessKey} />
                     ) : (
                         <div className="w-full rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
                             Некорректная ссылка на видео
