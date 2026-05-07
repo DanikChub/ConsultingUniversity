@@ -12,6 +12,7 @@ export type ProgramFileStats = {
     video: FileStats
     audio: FileStats
     tests: FileStats
+    final_test: FileStats
 }
 
 export function getProgramFileStats(
@@ -25,9 +26,12 @@ export function getProgramFileStats(
         video: { total: 0, completed: 0 },
         audio: { total: 0, completed: 0 },
         tests: { total: 0, completed: 0 },
+        final_test: {total: 0, completed: 0 },
     }
 
     if (!program.themes) return stats
+
+
 
     for (const theme of program.themes) {
 
@@ -49,6 +53,21 @@ export function getProgramFileStats(
                 countTest(test)
             })
         })
+    }
+
+    if (program.test) {
+        countFinalTest(program.test)
+    }
+
+    function countFinalTest(test: any) {
+        stats.final_test.total += 1
+
+        const key = `test-${test.id}` as const
+        const contentProgress = progress?.byContent[key]
+
+        if (contentProgress?.status === 'completed') {
+            stats.final_test.completed += 1
+        }
     }
 
     function countFile(file: any) {
@@ -74,6 +93,7 @@ export function getProgramFileStats(
             stats.tests.completed += 1
         }
     }
+
 
     return stats
 }

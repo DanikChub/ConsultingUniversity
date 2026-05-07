@@ -295,6 +295,12 @@ export default function CoursePage() {
                                         <span>{stats.docx.completed}/{stats.docx.total} Лекции</span>
                                     )}
 
+                                    {stats.final_test.total > 0 && (
+                                        <span>{stats.final_test.completed}/{stats.final_test.total} Итоговый тест</span>
+                                    )}
+
+
+
                                 </div>
 
                             </div>

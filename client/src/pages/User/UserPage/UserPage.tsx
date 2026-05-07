@@ -29,26 +29,34 @@ const UserPage = observer(() => {
 
     const socket = useSocket()
 
-    useEffect(() => {
-        console.log(unreadMessages)
-    }, [unreadMessages]);
+
 
     useEffect(() => {
-        const programs = userContext.user.user?.programs;
+        const user = userContext.user.user;
 
+        if (!user) {
+            setLoading(false);
+            return;
+        }
+
+        const programs = user.programs;
+        console.log(programs)
         if (!programs || programs.length === 0) {
-            setLoading(true);
             setProgram(null);
             setProgress(0);
+            setLoading(true);
             return;
         }
 
         const userProgram = programs[0];
 
         setProgram(userProgram);
+
+
         setProgress(userProgram?.enrollment?.progress_percent ?? 0);
         setLoading(true);
     }, [userContext.user.user]);
+
     useEffect(() => {
         if (!socket) return
 
@@ -221,112 +229,128 @@ const UserPage = observer(() => {
             </div>
 
 
+
             {/* Программа пользователя */}
             <div className="mt-16">
                 <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-left">Ваша программа</h2>
+                    {program ? (
+                        <Link
+                            to={COURSE_ROUTE.replace(':id', String(program.id))}
+                            onClick={() => localStorage.removeItem('arr_open')}
+                            className="block relative rounded-3xl bg-gradient-to-br from-white via-blue-50 to-indigo-50 border border-gray-100 shadow-md overflow-hidden"
+                        >
+                            <div className="flex flex-col lg:flex-row items-center lg:items-stretch">
 
-                    {/* Основной курс */}
-                    <Link
-                        to={COURSE_ROUTE.replace(':id', program?.id)}
-                        onClick={() => localStorage.removeItem('arr_open')}
-                        className="block relative rounded-3xl bg-gradient-to-br from-white via-blue-50 to-indigo-50 border border-gray-100 shadow-md overflow-hidden"
-                    >
-                        <div className="flex flex-col lg:flex-row items-center lg:items-stretch">
+                                {/* 🖼 Cover */}
+                                <div className="relative lg:w-[320px] w-full max-h-[250px] flex-shrink-0">
 
-                            {/* 🖼 Cover */}
-                            <div className="relative lg:w-[320px] w-full max-h-[250px] flex-shrink-0">
-
-                                {program?.img ? (
-                                    <img
-                                        src={process.env.REACT_APP_API_URL + program?.img}
-                                        alt={program?.title ?? "Course cover"}
-                                        className="w-full h-full object-cover lg:rounded-l-3xl"
-                                    />
-                                ) : (
-                                    <div
-                                        className="w-full h-full min-h-[220px] flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100 lg:rounded-l-3xl">
+                                    {program.img ? (
+                                        <img
+                                            src={process.env.REACT_APP_API_URL + program.img}
+                                            alt={program.title ?? "Course cover"}
+                                            className="w-full h-full object-cover lg:rounded-l-3xl"
+                                        />
+                                    ) : (
+                                        <div
+                                            className="w-full h-full min-h-[220px] flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100 lg:rounded-l-3xl">
                             <span className="text-4xl font-bold text-indigo-300">
-                                {program?.title?.charAt(0)}
+                                {program.title?.charAt(0)}
                             </span>
-                                    </div>
-                                )}
+                                        </div>
+                                    )}
 
-                                {/* subtle overlay */}
-                                <div className="absolute inset-0 bg-black/5 lg:rounded-l-3xl"/>
-                            </div>
-
-                            {/* 📝 Content */}
-                            <div className="flex-1 p-10 space-y-6">
-
-                                {/* Title + badges */}
-                                <div className="space-y-4">
-
-                                    <div className="flex flex-wrap items-center gap-4">
-                                        <h1 className="text-3xl font-bold text-[#2C3E50] text-left">
-                                            {program?.title}
-                                        </h1>
-
-
-
-
-                                    </div>
-
-
+                                    {/* subtle overlay */}
+                                    <div className="absolute inset-0 bg-black/5 lg:rounded-l-3xl"/>
                                 </div>
 
-                                {/* 📊 Progress */}
-                                <div className="max-w-xl space-y-2">
+                                {/* 📝 Content */}
+                                <div className="flex-1 p-10 space-y-6">
 
-                                    <div className="flex justify-between text-sm text-gray-500">
-                                        <span>Прогресс обучения</span>
-                                        <span className="font-semibold text-gray-700">
+                                    {/* Title + badges */}
+                                    <div className="space-y-4">
+
+                                        <div className="flex flex-wrap items-center gap-4">
+                                            <h1 className="text-3xl font-bold text-[#2C3E50] text-left">
+                                                {program.title}
+                                            </h1>
+
+
+
+
+                                        </div>
+
+
+                                    </div>
+
+                                    {/* 📊 Progress */}
+                                    <div className="max-w-xl space-y-2">
+
+                                        <div className="flex justify-between text-sm text-gray-500">
+                                            <span>Прогресс обучения</span>
+                                            <span className="font-semibold text-gray-700">
                                 {progress}%
                             </span>
+                                        </div>
+
+                                        <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500"
+                                                style={{width: `${progress}%`}}
+                                            />
+                                        </div>
+
+                                        <div className="text-sm text-gray-500">
+                                            {progress === 100
+                                                ? "Курс завершён 🎉"
+                                                : "Продолжайте обучение"}
+                                        </div>
                                     </div>
 
-                                    <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500"
-                                            style={{width: `${progress}%`}}
-                                        />
-                                    </div>
-
-                                    <div className="text-sm text-gray-500">
-                                        {progress === 100
-                                            ? "Курс завершён 🎉"
-                                            : "Продолжайте обучение"}
-                                    </div>
                                 </div>
-
                             </div>
+
+                            {/* decoration */}
+                            <div
+                                className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-100 rounded-full blur-3xl opacity-40"/>
+                        </Link>
+                    ) : (
+                        <div className="rounded-3xl bg-white border border-gray-100 shadow-md p-10 text-gray-500">
+                            У вас пока нет назначенной программы обучения.
                         </div>
+                    )}
 
-                        {/* decoration */}
-                        <div
-                            className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-100 rounded-full blur-3xl opacity-40"/>
 
-                    </Link>
+                {/*/!* Как учиться *!/*/}
+                {/*<div className="bg-gray-300 rounded-xl p-6 w-full md:w-1/3 flex flex-col items-start gap-4">*/}
+                {/*    <div className="flex items-center gap-4">*/}
+                {/*        <div className="w-28">*/}
+                {/*            <img src={how} alt=""/>*/}
+                {/*        </div>*/}
+                {/*        <div className="text-lg font-semibold text-gray-800">Как учиться с Консалтинг-Университет</div>*/}
+                {/*    </div>*/}
+                {/*    <div className="flex items-center gap-2">*/}
+                {/*        <div className="w-6">*/}
+                {/*            <img src={check} alt=""/>*/}
+                {/*        </div>*/}
+                {/*        <div className="text-gray-600 text-base">Просмотрено</div>*/}
+                {/*    </div>*/}
+                {/*</div>*/}
+            </div>
 
-            {/*/!* Как учиться *!/*/}
-            {/*<div className="bg-gray-300 rounded-xl p-6 w-full md:w-1/3 flex flex-col items-start gap-4">*/}
-            {/*    <div className="flex items-center gap-4">*/}
-            {/*        <div className="w-28">*/}
-            {/*            <img src={how} alt=""/>*/}
-            {/*        </div>*/}
-            {/*        <div className="text-lg font-semibold text-gray-800">Как учиться с Консалтинг-Университет</div>*/}
-            {/*    </div>*/}
-            {/*    <div className="flex items-center gap-2">*/}
-            {/*        <div className="w-6">*/}
-            {/*            <img src={check} alt=""/>*/}
-            {/*        </div>*/}
-            {/*        <div className="text-gray-600 text-base">Просмотрено</div>*/}
-            {/*    </div>*/}
-            {/*</div>*/}
-        </div>
+            {
+                progress === 100 &&
+                    <div className="flex justify-end mt-5">
+                        <div className="w-[70%]">
+                            <div className="text-xl font-semibold">Поздравляем!</div>
+                            <div className="text-lg mt-2">Вы справились со всеми тестами программы. Документы об образовании будут выданы согласно выбранному Вами способу!</div>
+                        </div>
+                    </div>
 
-</UserContainer>
-)
-    ;
+            }
+
+        </UserContainer>
+    )
+        ;
 });
 
 export default UserPage;

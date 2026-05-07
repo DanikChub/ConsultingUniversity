@@ -46,6 +46,7 @@ const ProfilePage = observer(() => {
             try {
                 setLoading(false);
                 const docs = await getUserDocuments(user.id);
+                console.log(docs);
                 setDocuments(docs || []);
             } catch (e) {
                 console.error("Ошибка загрузки документов пользователя", e);
@@ -150,28 +151,24 @@ const ProfilePage = observer(() => {
         },
         {
             icon: <FiMapPin size={18} />,
-            label: "Адрес",
-            value: user?.address || "—",
+            label: "Документы об образовании",
+            value: user?.diplom ? 'Заберет сам' : "Направить по адресу " + user?.address || "—",
         },
-        {
-            icon: <FiCalendar size={18} />,
-            label: "Дата окончания",
-            value: formatDate(user?.graduation_date),
-        },
+
     ];
 
     const mainDocs = [
         {
             title: "Паспорт",
-            file: user?.passport,
+            text: user?.passport,
         },
         {
             title: "Документ об образовании",
-            file: user?.education_document,
+            text: user?.education_document,
         },
         {
             title: "СНИЛС",
-            file: user?.snils,
+            text: user?.snils,
         },
     ];
 
@@ -234,7 +231,7 @@ const ProfilePage = observer(() => {
                                     <div className="text-sm uppercase tracking-wide text-blue-600 font-semibold">
                                         Личный кабинет
                                     </div>
-                                    <h1 className="text-3xl md:text-4xl font-bold text-[#2C3E50] mt-2">
+                                    <h1 className="text-3xl text-left font-bold text-[#2C3E50] mt-2">
                                         {firstName}, это ваш профиль
                                     </h1>
                                 </div>
@@ -244,16 +241,7 @@ const ProfilePage = observer(() => {
                                 </p>
 
                                 <div className="flex flex-wrap gap-3 pt-2">
-                                    <div className="px-4 py-2 rounded-full bg-white shadow-sm border border-gray-100 text-sm text-gray-700">
-                                        Роль: <span className="font-semibold">{user?.role || "USER"}</span>
-                                    </div>
 
-                                    <div className="px-4 py-2 rounded-full bg-white shadow-sm border border-gray-100 text-sm text-gray-700">
-                                        Диплом:{" "}
-                                        <span className="font-semibold">
-                                            {user?.diplom ? "Да" : "Нет"}
-                                        </span>
-                                    </div>
 
                                     {user?.createdAt && (
                                         <div className="px-4 py-2 rounded-full bg-white shadow-sm border border-gray-100 text-sm text-gray-700">
@@ -308,14 +296,13 @@ const ProfilePage = observer(() => {
                                 <FiFileText size={20} />
                             </div>
                             <div>
-                                <h2 className="text-2xl font-bold text-[#2C3E50]">Документы</h2>
+                                <h2 className="text-2xl font-bold text-[#2C3E50] text-left">Документы</h2>
                                 <p className="text-gray-500 text-sm">Загруженные личные документы</p>
                             </div>
                         </div>
 
                         <div className="space-y-3">
                             {mainDocs.map((doc) => {
-                                const url = getFileUrl(doc.file);
 
                                 return (
                                     <div
@@ -325,23 +312,11 @@ const ProfilePage = observer(() => {
                                         <div>
                                             <div className="text-sm text-gray-500">{doc.title}</div>
                                             <div className="text-base font-medium text-gray-800">
-                                                {doc.file ? "Файл загружен" : "Не загружен"}
+                                                {doc.text ? doc.text : "Не загружен"}
                                             </div>
                                         </div>
 
-                                        {url ? (
-                                            <a
-                                                href={url}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition"
-                                            >
-                                                <FiDownload size={16} />
-                                                Открыть
-                                            </a>
-                                        ) : (
-                                            <div className="text-sm text-gray-400">—</div>
-                                        )}
+
                                     </div>
                                 );
                             })}
@@ -349,18 +324,18 @@ const ProfilePage = observer(() => {
 
                         <div className="mt-6">
                             <div className="text-lg font-semibold text-gray-800 mb-3">
-                                Дополнительные документы
+                                Документы - Вложения
                             </div>
 
                             {documents.length > 0 ? (
                                 <div className="space-y-3">
                                     {documents.map((doc: any) => {
-                                        const url = getFileUrl(doc.file || doc.path || doc.url);
+                                        const url = process.env.REACT_APP_API_URL + doc.file_path
 
                                         return (
                                             <a
                                                 key={doc.id}
-                                                href={url || "#"}
+                                                href={url}
                                                 target="_blank"
                                                 rel="noreferrer"
                                                 className="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white hover:bg-gray-50 transition p-4"

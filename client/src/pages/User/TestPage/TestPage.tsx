@@ -21,6 +21,7 @@ const TestPage: React.FC = () => {
     const params = useParams();
     const navigate = useNavigate();
 
+    const [loaded, setLoaded] = useState(false);
     const [test, setTest] = useState<Test | null>(null);
     const [numberQuestion, setNumberQuestion] = useState(0);
     const [userAnswers, setUserAnswers] = useState<Record<number, number[]>>({});
@@ -36,11 +37,11 @@ const TestPage: React.FC = () => {
 
     useEffect(() => {
         if (!params.id) return;
-
+        setLoaded(false)
         getOneTest(Number(params.id)).then((data: Test) => {
             data.questions = shuffle(data.questions);
             setTest(data);
-
+            setLoaded(true);
             if (data.time_limit) {
                 setTimeLeft(data.time_limit * 60);
                 setInitialTime(data.time_limit * 60);
@@ -128,7 +129,7 @@ const TestPage: React.FC = () => {
         [test]
     );
 
-    if (!test) return <UserContainer loading={true}>Загрузка...</UserContainer>;
+    if (!test) return <UserContainer loading={loaded}>0</UserContainer>;
 
 
     const showFinishButton = numberQuestion === test.questions.length - 1;
@@ -145,7 +146,7 @@ const TestPage: React.FC = () => {
             : 0;
 
     return (
-        <UserContainer loading={true}>
+        <UserContainer loading={loaded}>
 
             {/* Назад */}
             <button

@@ -38,4 +38,5 @@ export const ADMIN_CHANGE_ADMIN= "/admin/administrators/new_admin/:id"
 export const ADMIN_STATEMENT_USER= "/admin/listeners/statement/:id"
 export const ADMIN_DOCUMENTS_ROUTE = "/admin/documents/"
 export const SET_INITIAL_PASSWORD_ROUTE = '/set-initial-password';
+export const ADMIN_ENROLLMENTS_ROUTE = "/admin/users/:userId/enrollments/"
 

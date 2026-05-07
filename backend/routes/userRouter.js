@@ -26,7 +26,7 @@ router.post('/setUserProfileImg/', userController.setUserProfileImg)
 
 router.post('/addUserDocuments/:id', checkRole('ADMIN'), userController.addUserDocuments);
 router.post('/deleteUserDocument/:id', checkRole('ADMIN'), userController.deleteUserDocument);
-router.get('/getUserDocuments/:id', checkRole(['ADMIN', 'VIEWER']), userController.getUserDocuments);
+router.get('/getUserDocuments/:id', checkRole(['ADMIN', 'VIEWER', 'USER']), userController.getUserDocuments);
 router.post('/setInitialPassword', authMiddleware, userController.setInitialPassword);
 
 module.exports = router;

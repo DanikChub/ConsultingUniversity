@@ -26,6 +26,7 @@ const NavBar: React.FC = observer(() => {
 
     const handleClick = () => {
         localStorage.setItem('token', '');
+        localStorage.setItem('user', '');
         user.setUser({});
         user.setIsAuth(false);
         navigate(AUTH_ROUTE);

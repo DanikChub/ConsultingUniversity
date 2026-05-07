@@ -20,7 +20,7 @@ const LoginPage = () => {
 
             const loginData = await login(inputLogin, inputPass);
 
-            const currentUser = loginData.user ?? await getUserById(loginData.user?.id || loginData.id);
+            const currentUser = await getUserById(loginData.user?.id || loginData.id);
 
             user.setUser(currentUser);
             user.setIsAuth(true);

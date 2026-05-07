@@ -1,17 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getOneProgram } from '../../../entities/program/api/program.api';
-import { getStatistic } from '../../../entities/statistic/api/statistic.api';
 
 import { Context } from '../../../index';
 
 
 import UserContainer from "../../../components/ui/UserContainer";
-import {FiArrowLeft, FiCheckCircle} from "react-icons/fi";
+import {FiCheckCircle} from "react-icons/fi";
 import type {Program} from "../../../entities/program/model/type";
 import type {Theme} from "../../../entities/theme/model/type";
-import {Simulate} from "react-dom/test-utils";
-import progress = Simulate.progress;
 import {getEnrollmentProgress} from "../../../entities/progress/api/progress.api";
 import type {ProgramProgress} from "../../../entities/progress/model/type";
 import ButtonBack from "../../../shared/ui/buttons/ButtonBack";
@@ -36,6 +33,7 @@ const StatementPage = () => {
 
                     // --- GET FULL PROGRAM WITH THEMES & TESTS ---
                     const fullProgram = await getOneProgram(program.id);
+                    console.log(fullProgram)
                     setProgram(fullProgram)
 
 
@@ -72,6 +70,12 @@ const StatementPage = () => {
             completed: allContentCompleted,
         };
     }) || [];
+
+    const finalTestStatus = program.test
+        ? progress.byContent[`test-${program.test.id}`]?.status
+        : null;
+
+    const finalTestCompleted = finalTestStatus === "completed";
     return (
         <UserContainer loading={true}>
             <ButtonBack/>
@@ -96,6 +100,24 @@ const StatementPage = () => {
                         )}
                     </div>
                 ))}
+
+                {program.test && (
+                    <div className="flex justify-between items-center p-4 rounded-xl border border-blue-100 bg-blue-50">
+                        <span className="font-medium text-gray-700">
+                            Итоговый тест: {program.test.title ?? "Финальный тест"}
+                        </span>
+
+                        {finalTestCompleted ? (
+                            <div className="flex items-center gap-1 text-green-600 font-semibold">
+                                <FiCheckCircle /> Зачёт
+                            </div>
+                        ) : (
+                            <div className="text-gray-400 font-medium">
+                                Не пройден
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {themesWithCompletion.every(t => !t.completed) && (
                     <div className="text-center text-gray-500 py-10">
