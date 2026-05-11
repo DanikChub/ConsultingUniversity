@@ -2,10 +2,10 @@ const Router = require('express');
 const router = new Router();
 
 const enrollmentController = require('../controllers/enrollmentController')
+const authMiddleware = require('../middleware/authMiddleware')
 
 
-
-router.post('/getEnrollment/:programId', enrollmentController.getEnrollment)
+router.post('/getEnrollment/:programId', authMiddleware,  enrollmentController.getEnrollment)
 router.get('/getEnrollment/:programId', enrollmentController.getEnrollmentsByProgram)
 
 

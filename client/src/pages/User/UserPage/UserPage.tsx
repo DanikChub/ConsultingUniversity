@@ -60,17 +60,24 @@ const UserPage = observer(() => {
     useEffect(() => {
         if (!socket) return
 
-        socket.emit("join_user", userContext.user.user.id)
-
-        socket.on("chat_updated", (payload: any) => {
-            console.log(payload.unreadCount)
+        const handleChatUpdated = (payload: any) => {
+            console.log("chat_updated:", payload.unreadCount)
             setUnreadMessages(payload.unreadCount)
-        })
+        }
 
+        const handleUnreadCount = (payload: any) => {
+            console.log("initial unread:", payload.unreadCount)
+            setUnreadMessages(payload.unreadCount)
+        }
+
+        socket.emit("get_unread_count")
+
+        socket.on("chat_updated", handleChatUpdated)
+        socket.on("chat_unread_count", handleUnreadCount)
 
         return () => {
-            socket.off("chat_updated")
-            socket.off("chat_read_updated")
+            socket.off("chat_updated", handleChatUpdated)
+            socket.off("chat_unread_count", handleUnreadCount)
         }
 
     }, [socket])
@@ -197,20 +204,21 @@ const UserPage = observer(() => {
                             </defs>
                         </svg>
 
-                        {unreadMessages && unreadMessages > 0 && (
+                        {unreadMessages > 0 && (
                             <div className="absolute -right-2.5 -bottom-2.5 w-11 h-11 bg-red-600 rounded-full flex items-center justify-center">
-                                <span className="text-white font-bold text-2xl">{unreadMessages}</span>
+                                <span className="text-white font-bold text-2xl">
+                                    {unreadMessages}
+                                </span>
                             </div>
                         )}
                     </div>
 
                     <Link to={USER_CHAT_ROUTE} className="ml-8 font-medium text-xl text-gray-800">
-                        {
-                            unreadMessages && unreadMessages > 0 ?
-                                <div>Прочитать <br/> сообщение</div>
-                                :
-                                <div>Написать <br/> преподавателю</div>
-                        }
+                        {unreadMessages > 0 ? (
+                            <div>Прочитать <br /> сообщение</div>
+                        ) : (
+                            <div>Написать <br /> преподавателю</div>
+                        )}
 
                     </Link>
                 </div>

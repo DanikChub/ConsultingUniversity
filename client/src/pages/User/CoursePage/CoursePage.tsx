@@ -69,8 +69,8 @@ export default function CoursePage() {
                     })
                 })
                 setProgram(programData);
-
-                const enrollment = await getEnrollmentByProgram(programData.id, userContext.user.user.id);
+                console.log(userContext.user.user.id)
+                const enrollment = await getEnrollmentByProgram(programData.id);
                 userContext.user.setEnrollmentId(enrollment.id);
 
                 const freshProgress = await getEnrollmentProgress(enrollment.id);

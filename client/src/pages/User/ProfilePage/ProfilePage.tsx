@@ -229,7 +229,7 @@ const ProfilePage = observer(() => {
                             <div className="space-y-4">
                                 <div>
                                     <div className="text-sm uppercase tracking-wide text-blue-600 font-semibold">
-                                        Личный кабинет
+                                        Мой профиль
                                     </div>
                                     <h1 className="text-3xl text-left font-bold text-[#2C3E50] mt-2">
                                         {firstName}, это ваш профиль
@@ -237,7 +237,7 @@ const ProfilePage = observer(() => {
                                 </div>
 
                                 <p className="text-gray-600 text-lg max-w-2xl">
-                                    Здесь собраны ваши основные данные, документы и программы обучения.
+                                    Здесь собраны ваши основные данные и документы.
                                 </p>
 
                                 <div className="flex flex-wrap gap-3 pt-2">

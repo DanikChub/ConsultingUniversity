@@ -104,7 +104,7 @@ const StatementPage = () => {
                 {program.test && (
                     <div className="flex justify-between items-center p-4 rounded-xl border border-blue-100 bg-blue-50">
                         <span className="font-medium text-gray-700">
-                            Итоговый тест: {program.test.title ?? "Финальный тест"}
+                            {program.test.title ?? "Финальный тест"}
                         </span>
 
                         {finalTestCompleted ? (

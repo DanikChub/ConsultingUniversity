@@ -25,12 +25,10 @@ export interface Enrollment {
  * Получить enrollment по programId и userId
  */
 export const getEnrollmentByProgram = async (
-    programId: number,
-    userId: number
+    programId: number
 ): Promise<Enrollment> => {
     const { data } = await $authHost.post<Enrollment>(
-        `/api/enrollment/getEnrollment/${programId}`,
-        { userId }
+        `/api/enrollment/getEnrollment/${programId}`
     );
 
     return data;

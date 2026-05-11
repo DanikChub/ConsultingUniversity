@@ -1,4 +1,5 @@
-const { Chat, Message} = require("./models/models")
+const { Chat, Message,User } = require("./models/models")
+const { Op } = require("sequelize")
 const { Server } = require("socket.io")
 const jwt = require("jsonwebtoken")
 
@@ -55,14 +56,31 @@ function initSocket(server) {
         }
 
         // вход в конкретный чат
-        socket.on("join_chat", (chatId) => {
+        socket.on("join_chat", async (chatId) => {
             socket.join(`chat:${chatId}`)
             console.log(`➡ Joined room chat:${chatId}`)
 
-            // отправляем список онлайн юзеров в этом чате
             const usersOnline = Array.from(onlineUsers.keys())
-
             socket.emit("online_users", usersOnline)
+
+            if (role === "ADMIN") {
+                const admin = await User.findByPk(id, {
+                    attributes: ["id", "name", "email", "img", "role"]
+                })
+
+                if (!admin) return
+
+                io.to(`chat:${chatId}`).emit("admin_joined_chat", {
+                    chatId,
+                    admin: {
+                        id: admin.id,
+                        name: admin.name,
+                        email: admin.email,
+                        img: admin.img,
+                        role: admin.role
+                    }
+                })
+            }
         })
 
         socket.on("check_user_online", (userId) => {
@@ -116,6 +134,66 @@ function initSocket(server) {
         })
 
         io.emit("user_online", { userId: id })
+
+        socket.on("get_unread_count", async () => {
+            try {
+                if (role === "ADMIN") {
+                    const chats = await Chat.findAll()
+
+                    let totalUnread = 0
+
+                    for (const chat of chats) {
+                        const count = await Message.count({
+                            where: {
+                                chatId: chat.id,
+                                senderType: "USER",
+                                id: {
+                                    [Op.gt]: chat.lastReadAdminMessageId || 0
+                                }
+                            }
+                        })
+
+                        totalUnread += count
+                    }
+
+                    socket.emit("chat_unread_count", {
+                        unreadCount: totalUnread
+                    })
+
+                    return
+                }
+
+                const chat = await Chat.findOne({
+                    where: {
+                        userId: id
+                    }
+                })
+
+                if (!chat) {
+                    socket.emit("chat_unread_count", {
+                        unreadCount: 0
+                    })
+                    return
+                }
+
+                const unreadCount = await Message.count({
+                    where: {
+                        chatId: chat.id,
+                        senderType: "ADMIN",
+                        id: {
+                            [Op.gt]: chat.lastReadUserMessageId || 0
+                        }
+                    }
+                })
+
+                socket.emit("chat_unread_count", {
+                    unreadCount
+                })
+
+            } catch (e) {
+                console.error("get_unread_count error:", e)
+            }
+        })
     })
 
     return io

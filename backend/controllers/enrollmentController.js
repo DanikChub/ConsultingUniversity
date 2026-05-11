@@ -3,8 +3,8 @@ const { Enrollment } = require("../models/models");
 class EnrollmentController {
     async getEnrollment(req, res) {
         try {
-            const { programId, userId } = req.params;
-
+            const { programId } = req.params;
+            const userId = req.user.id;
             const enrollment = await Enrollment.findOne({
                 where: { userId, programId }
             });
