@@ -4,9 +4,7 @@ const {
   Punct,
   Test,
   User,
-  Statistic,
-  ThemeStatistic,
-  PunctStatistic,
+  Enrollment,
   File,
   FileAsset,
   Question,
@@ -969,6 +967,9 @@ class ProgramController {
         include: [
           {
             model: User,
+            where: {
+              is_delete: false,
+            },
             attributes: [],
             through: {
               where: { status: 'active' }, // считаем только активных
@@ -1033,29 +1034,27 @@ class ProgramController {
         include: [
           {
             model: Theme,
-            separate: true, // отдельный запрос для тем
+            separate: true,
             order: [['order_index', 'ASC']],
             include: [
               {
                 model: Punct,
-                separate: true, // отдельный запрос для пунктов
+                separate: true,
                 order: [['order_index', 'ASC']],
                 include: [
                   {
                     model: File,
-                    separate: true, // отдельный запрос для файлов
+                    separate: true,
                     order: [['order_index', 'ASC']],
                     include: [
                       {
                         model: FileAsset,
-                        // можно добавить order, если FileAsset тоже имеет order_index
-                        // order: [['order_index', 'ASC']]
                       }
                     ]
                   },
                   {
                     model: Test,
-                    separate: true, // отдельный запрос для файлов
+                    separate: true,
                     order: [['order_index', 'ASC']],
                     include: [
                       {
@@ -1069,13 +1068,11 @@ class ProgramController {
               },
               {
                 model: File,
-                separate: true, // отдельный запрос для файлов
+                separate: true,
                 order: [['order_index', 'ASC']],
                 include: [
                   {
                     model: FileAsset,
-                    // можно добавить order, если FileAsset тоже имеет order_index
-                    // order: [['order_index', 'ASC']]
                   }
                 ]
               }
@@ -1097,9 +1094,28 @@ class ProgramController {
 
       if (!program) return next(ApiError.notFound('Программа не найдена'));
 
-      // Считаем пользователей, как раньше
+      const usersQuantity = await Enrollment.count({
+        where: {
+          programId: id,
+          status: 'active',
+        },
+        include: [
+          {
+            model: User,
+            where: {
+              is_delete: false,
+            },
+            required: true,
+          },
+        ],
+      });
 
-      return res.json(program);
+      const programJson = program.toJSON();
+
+      return res.json({
+        ...programJson,
+        users_quantity: usersQuantity,
+      });
 
     } catch (e) {
       console.error(e);

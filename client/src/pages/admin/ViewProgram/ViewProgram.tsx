@@ -41,7 +41,7 @@ const ViewProgram: React.FC = () => {
     const [loaded, setLoaded] = useState(false);
     const [openModules, setOpenModules] = useState<Record<number, boolean>>({});
     const [error, setError] = useState<string | null>(null);
-    const [enrollments, setEnrollments] = useState<Enrollment[] | null>(null)
+
     const navigate = useNavigate();
     const params = useParams<{ id: string }>();
 
@@ -60,8 +60,6 @@ const ViewProgram: React.FC = () => {
 
                 setProgram(data);
 
-                const enrollments_data = await getAllEnrollmentsByProgram(program_id)
-                setEnrollments(enrollments_data)
                 const openState: Record<number, boolean> = {};
                 data.themes?.forEach((t) => (openState[t.id] = true));
                 setOpenModules(openState);
@@ -177,13 +175,13 @@ const ViewProgram: React.FC = () => {
                 {/* Метрики */}
                 <div className="flex flex-wrap gap-6 mt-4 text-gray-700">
 
-                    <div className="flex items-center gap-2"><FaUserAlt /> {enrollments.length ?? 0} пользователей</div>
-                    <div className="flex items-center gap-2"><FaRubleSign /> {program.price ?? '-'}</div>
+                    <div className="flex items-center gap-2"><FaUserAlt/> { program.users_quantity ?? 0} пользователей</div>
+                    <div className="flex items-center gap-2"><FaRubleSign/> {program.price ?? '-'}</div>
                 </div>
 
                 {/* Аккордеон модулей */}
                 <div className="mt-6 space-y-3">
-                    {program.themes?.sort((a, b) => a.order_index - b.order_index).map((theme, theme_index) => {
+                {program.themes?.sort((a, b) => a.order_index - b.order_index).map((theme, theme_index) => {
                         const open = openModules[theme.id] || false;
 
 
