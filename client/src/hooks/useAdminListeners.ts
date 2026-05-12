@@ -69,10 +69,34 @@ export const useAdminListeners = () => {
     };
 
     const destroyUser = async (id: number) => {
-        setLoading(false);
-        await deleteUser(id);
-        fetchUsers(1);
+        try {
+            setLoading(true);
+
+            await deleteUser(id);
+
+            setUsers(prev =>
+                prev.filter(user => Number(user.id) !== Number(id))
+            );
+
+            setFilteredUsers(prev =>
+                prev.filter(user => Number(user.id) !== Number(id))
+            );
+
+            await fetchUsers(activePage + 1, searchInput || undefined);
+        } catch (error: any) {
+            console.error('destroyUser error:', error);
+
+            const message =
+                error?.response?.data?.message ||
+                error?.message ||
+                'Ошибка удаления пользователя';
+
+            alert(message);
+        } finally {
+            setLoading(false);
+        }
     };
+
 
     const handleSearchInput = (value: string) => {
         if (/[^а-яА-Яa-zA-Z0-9\s]/.test(value)) return;
