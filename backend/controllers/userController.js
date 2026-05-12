@@ -992,7 +992,7 @@ class UserController {
             const { id } = req.body;
             const user = await User.findOne({ where: { id } });
 
-            user.destroy();
+            await user.destroy();
 
             await Event.create({
                 event_text: 'Пользователь удален',
