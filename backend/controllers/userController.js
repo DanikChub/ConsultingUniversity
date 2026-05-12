@@ -756,7 +756,7 @@ class UserController {
         try {
             const { id } = req.params;
 
-            const user = await User.findByPk({
+            const user = await User.findOne({
                 where: {
                     id,
                     is_delete: false,
