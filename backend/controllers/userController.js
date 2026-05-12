@@ -514,7 +514,12 @@ class UserController {
                 return next(ApiError.badRequest('Не указан пароль'));
             }
 
-            const user = await User.findOne({ where: { login } });
+            const user = await User.findOne({
+                where: {
+                    login,
+                    is_delete: false,
+                },
+            });
 
             if (!user) {
                 return next(ApiError.badRequest('Пользователь не найден'));
@@ -751,7 +756,11 @@ class UserController {
         try {
             const { id } = req.params;
 
-            const user = await User.findByPk(id, {
+            const user = await User.findByPk({
+                where: {
+                    id,
+                    is_delete: false,
+                },
                 include: [
                     {
                         model: Program,
@@ -798,7 +807,12 @@ class UserController {
     }
     async getAllUsers(req, res, next) {
         try {
-            const users = await User.findAll({ where: { role: 'USER' } });
+            const users = await User.findAll({
+                where: {
+                    role: 'USER',
+                    is_delete: false,
+                },
+            });
             return res.json(users);
         } catch (e) {
             console.error('getAllUsers error:', e);
@@ -810,7 +824,10 @@ class UserController {
         try {
 
             const users = await User.findAndCountAll({
-                where: { role: 'USER' },
+                where: {
+                    role: 'USER',
+                    is_delete: false,
+                },
                 include: [
                     {
                         model: Program,
@@ -855,9 +872,10 @@ class UserController {
             const users = await User.findAll({
                 where: {
                     role: {
-                        [Op.in]: ['ADMIN', 'VIEWER']
-                    }
-                }
+                        [Op.in]: ['ADMIN', 'VIEWER'],
+                    },
+                    is_delete: false,
+                },
             });
             return res.json(users);
         } catch (e) {
@@ -880,7 +898,10 @@ class UserController {
             const users = await User.findAndCountAll({
                 offset: (page - 1) * limit,
                 limit,
-                where: { role: 'USER' },
+                where: {
+                    role: 'USER',
+                    is_delete: false,
+                },
                 order: [[sortType, sortDirection]],
                 include: [
                     {
@@ -938,10 +959,15 @@ class UserController {
                 limit: 10,
                 where: {
                     role: 'USER',
+                    is_delete: false,
                     [Op.or]: [
-                        Sequelize.where(fn('LOWER', Sequelize.col('name')), { [Op.like]: `%${q.toLowerCase()}%` }),
-                        Sequelize.where(fn('LOWER', Sequelize.col('organization')), { [Op.like]: `%${q.toLowerCase()}%` })
-                    ]
+                        Sequelize.where(fn('LOWER', Sequelize.col('name')), {
+                            [Op.like]: `%${q.toLowerCase()}%`,
+                        }),
+                        Sequelize.where(fn('LOWER', Sequelize.col('organization')), {
+                            [Op.like]: `%${q.toLowerCase()}%`,
+                        }),
+                    ],
                 },
                 include: [
                     {
@@ -990,18 +1016,33 @@ class UserController {
     async deleteUser(req, res, next) {
         try {
             const { id } = req.body;
-            const user = await User.findOne({ where: { id } });
 
-            await user.destroy();
+            const user = await User.findOne({
+                where: {
+                    id,
+                    is_delete: false,
+                },
+            });
+
+            if (!user) {
+                return next(ApiError.badRequest('Пользователь не найден'));
+            }
+
+            user.is_delete = true;
+            await user.save();
 
             await Event.create({
                 event_text: 'Пользователь удален',
                 name: user.name,
                 organization: user.organization,
-                type: 'admin',
+                type: 'user',
+                event_id: user.id,
             });
 
-            return res.json(user);
+            return res.json({
+                message: 'Пользователь удалён',
+                user,
+            });
         } catch (e) {
             console.error('deleteUser error:', e);
             return next(ApiError.internal('Ошибка удаления пользователя'));
@@ -1012,7 +1053,12 @@ class UserController {
     // ======================== LAST MESSAGES ========================
     async getUsersWithLastMessages(req, res, next) {
         try {
-            const users = await User.findAll({ where: { role: 'USER' } });
+            const users = await User.findAll({
+                where: {
+                    role: 'USER',
+                    is_delete: false,
+                },
+            });
             for (const user of users) {
                 const message = await Messages.findOne({ where: { user_id: user.id }, order: [['createdAt', 'DESC']] });
                 const numberUnReadMessages = await Messages.count({

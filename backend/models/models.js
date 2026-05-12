@@ -177,6 +177,12 @@ const User = sequelize.define('user', {
     snils: { type: DataTypes.STRING, allowNull: true },
 
     admin_signature: { type: DataTypes.STRING, allowNull: true },
+
+    is_delete: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    },
 });
 
 const UserDocument = sequelize.define('user_document', {
