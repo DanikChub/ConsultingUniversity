@@ -991,13 +991,16 @@ class UserController {
         try {
             const { id } = req.body;
             const user = await User.findOne({ where: { id } });
+
+            user.destroy();
+
             await Event.create({
                 event_text: 'Пользователь удален',
                 name: user.name,
                 organization: user.organization,
                 type: 'admin',
             });
-            user.destroy();
+
             return res.json(user);
         } catch (e) {
             console.error('deleteUser error:', e);

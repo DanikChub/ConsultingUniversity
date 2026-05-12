@@ -70,7 +70,7 @@ export const useAdminListeners = () => {
 
     const destroyUser = async (id: number) => {
         try {
-            setLoading(true);
+            setLoading(false);
 
             await deleteUser(id);
 
@@ -93,7 +93,7 @@ export const useAdminListeners = () => {
 
             alert(message);
         } finally {
-            setLoading(false);
+            setLoading(true);
         }
     };
 
