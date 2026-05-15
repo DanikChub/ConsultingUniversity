@@ -17,7 +17,19 @@ const uuid = require("uuid");
 const fs = require("fs");
 
 
+function decodeOriginalFilename(name = '') {
+    try {
+        return Buffer.from(name, 'latin1').toString('utf8');
+    } catch {
+        return name;
+    }
+}
 
+function sanitizeOriginalFilename(name = '') {
+    return decodeOriginalFilename(name)
+        .replace(/[<>:"/\\|?*\x00-\x1F]/g, '_')
+        .trim();
+}
 
 const generateJwt = (id, login, role, must_change_password = false) => {
     return jwt.sign(
@@ -1141,6 +1153,7 @@ class UserController {
                     return next(ApiError.badRequest('Допустимы только файлы PNG, JPG, PDF'));
                 }
 
+                const originalName = sanitizeOriginalFilename(file.name);
                 const ext = path.extname(file.name);
                 const fileName = `${uuid.v4()}${ext}`;
                 const savePath = path.join(USER_DOCS_DIR, fileName);
@@ -1149,7 +1162,7 @@ class UserController {
 
                 const createdDoc = await UserDocument.create({
                     userId: user.id,
-                    original_name: file.name,
+                    original_name: originalName,
                     file_name: fileName,
                     file_path: `user-documents/${fileName}`,
                     mime_type: file.mimetype,

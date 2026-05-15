@@ -344,7 +344,7 @@ const AdminUserPage = () => {
                                                 <FiFileText className="text-gray-400"/>
                                                 <span>Временный пароль</span>
                                                 {user.must_change_password &&
-                                                    <span>Не актуален</span>
+                                                    <span>Актуален</span>
                                                 }
 
                                             </div>

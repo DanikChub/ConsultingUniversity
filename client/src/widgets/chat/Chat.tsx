@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { useParams } from "react-router-dom"
+import {Link, useParams} from "react-router-dom"
 import {Context} from "../../index";
 import type {Chat as ChatType, Message} from "../../entities/chat/model/type";
 import {useSocket} from "../../hooks/useSocket";
@@ -13,6 +13,7 @@ import type {User} from "../../entities/user/model/type";
 import {API_URL} from "../../shared/config/api";
 
 import admin_avatar from '../../assets/imgs/admin_avatar.jpg'
+import {ADMIN_LISTENERS_ROUTE} from "../../shared/utils/consts";
 
 type ChatProps = {
     chatId: number | null;
@@ -416,7 +417,7 @@ const Chat: React.FC<ChatProps> = ({chatId, own}) => {
                                 )}
                                 <div className="px-6 py-4 border-b flex items-center justify-between bg-white">
                                     <div>
-                                        <div className="font-semibold text-gray-800">
+                                        <Link to={`${ADMIN_LISTENERS_ROUTE}/${chatUser?.id}`} className="font-semibold text-gray-800 hover:text-blue-600 transition">
                                             {
                                                 own == "ADMIN" ?
                                                     chatUser?.name || "Собеседник"
@@ -424,7 +425,7 @@ const Chat: React.FC<ChatProps> = ({chatId, own}) => {
                                                     "Администратор"
                                             }
 
-                                        </div>
+                                        </Link>
                                         <div className="text-xs text-gray-500 flex">
 
 
