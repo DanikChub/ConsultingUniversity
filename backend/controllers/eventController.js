@@ -1,5 +1,5 @@
 const ApiError = require('../error/ApiError');
-const { Event } = require('../models/models');
+const { Event } = require('../models/models.old');
 
 
 

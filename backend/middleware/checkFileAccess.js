@@ -1,4 +1,4 @@
-const { File, Punct, Theme, Enrollment } = require('../models/models');
+const { File, Punct, Theme, Enrollment } = require('../models/models.old');
 const { Op} = require('sequelize');
 const checkFileAccess = async (req, res, next) => {
     try {

@@ -1,4 +1,4 @@
-const { Certificate, Enrollment, User, Program } = require('../models/models');
+const { Certificate, Enrollment, User, Program } = require('../models/models.old');
 const { Op } = require('sequelize');
 
 

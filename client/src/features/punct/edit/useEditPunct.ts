@@ -9,6 +9,7 @@ import {
     movePunct as apiMovePunct,
     updatePunctDescription
 } from "../../../entities/punct/api/punct.api";
+
 import type {Theme} from "../../../entities/theme/model/type";
 import type {Punct} from "../../../entities/punct/model/type";
 

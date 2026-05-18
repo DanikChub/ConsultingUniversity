@@ -1,108 +1,130 @@
-import { $authHost, $host } from "../../../shared/api/axios";
-import { File } from "../model/type";
+import { $authHost } from "../../../shared/api/axios";
+import type { File as ProgramFile } from "../model/type";
+
 // ---------- Files ----------
+
+export type ProgramFileTargetType = "theme" | "punct";
+export type ProgramFileType = "docx" | "pdf" | "audio" | "video";
 
 export const updateFileName = async (
     fileId: number,
     original_name: string
-): Promise<File> => {
-    const { data } = await $authHost.patch<File>(
-        `api/program/file/${fileId}`,
+): Promise<{ file: ProgramFile }> => {
+    const { data } = await $authHost.patch<{ file: ProgramFile }>(
+        `api/program/files/${fileId}`,
         { original_name }
     );
+
     return data;
 };
 
-// Удалить файл
-export const deleteFile = async (fileId: number): Promise<{ success: boolean; message: string }> => {
-    const { data } = await $authHost.delete(`api/program/file/${fileId}`);
+export const deleteFile = async (
+    fileId: number
+): Promise<{ success: boolean; message: string }> => {
+    const { data } = await $authHost.delete<{
+        success: boolean;
+        message: string;
+    }>(`api/program/files/${fileId}`);
+
     return data;
 };
-
 
 export const moveFile = async (
-    id: number,
+    fileId: number,
     newIndex: number,
-    targetType: 'theme' | 'punct',
+    targetType: ProgramFileTargetType,
     targetId: number
-): Promise<{ success: boolean; file: any }> => {
-    const { data } = await $authHost.post(`api/program/file/${id}/move`, {
-        newIndex,
-        targetType,
-        targetId,
-    });
+): Promise<{ success: boolean; item: ProgramFile }> => {
+    const { data } = await $authHost.post<{ success: boolean; item: ProgramFile }>(
+        `api/program/files/${fileId}/move`,
+        {
+            newIndex,
+            targetType,
+            targetId,
+        }
+    );
+
     return data;
 };
 
-export const getFile = async (id: string): Promise<File> => {
-    const { data } = await $authHost.get(`api/program/file/${id}`);
+export const getFile = async (fileId: string | number): Promise<ProgramFile> => {
+    const { data } = await $authHost.get<ProgramFile>(
+        `api/program/files/${fileId}`
+    );
+
     return data;
 };
 
-// ---------- Upload file with progress ----------
 export const uploadFile = (
     file: File,
-    type: string,
-    targetType: 'theme' | 'punct',
+    type: ProgramFileType,
+    targetType: ProgramFileTargetType,
     targetId: number,
     onProgress?: (percent: number) => void
-): Promise<File> => {
+): Promise<ProgramFile> => {
     return new Promise((resolve, reject) => {
         const formData = new FormData();
-        formData.append('file', file);
-        formData.append('type', type);
-        formData.append('targetType', targetType);
-        formData.append('targetId', `${targetId}`);
+
+        formData.append("file", file);
+        formData.append("type", type);
+        formData.append("targetType", targetType);
+        formData.append("targetId", String(targetId));
 
         const xhr = new XMLHttpRequest();
+
         xhr.open(
-            'POST',
-            `${process.env.REACT_APP_API_URL}api/program/file`
+            "POST",
+            `${process.env.REACT_APP_API_URL}api/program/files`
         );
 
-        // если нужен токен
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
+
         if (token) {
-            xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+            xhr.setRequestHeader("Authorization", `Bearer ${token}`);
         }
 
-        xhr.upload.onprogress = (e) => {
-            if (e.lengthComputable && onProgress) {
-                const percent = Math.round((e.loaded / e.total) * 100);
+        xhr.upload.onprogress = event => {
+            if (event.lengthComputable && onProgress) {
+                const percent = Math.round((event.loaded / event.total) * 100);
                 onProgress(percent);
             }
         };
 
         xhr.onload = () => {
-            if (xhr.status === 200) {
-                const response = JSON.parse(xhr.response);
-                resolve(response.file);
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    resolve(response.file);
+                } catch (e) {
+                    reject(e);
+                }
             } else {
-                reject(xhr.response);
+                reject(xhr.responseText);
             }
         };
 
-        xhr.onerror = () => reject(xhr.response);
+        xhr.onerror = () => {
+            reject(xhr.responseText);
+        };
 
         xhr.send(formData);
     });
 };
 
-// ---------- Add video ----------
 export const createVideoFile = async (
     url: string,
-    targetType: 'theme' | 'punct',
+    targetType: ProgramFileTargetType,
     targetId: number
-): Promise<File> => {
-    const { data } = await $authHost.post(
-        `api/program/file`,
-        {
-            targetType,
-            targetId,
-            type: 'video',
-            url,
-        }
-    );
+): Promise<ProgramFile> => {
+    const { data } = await $authHost.post<{
+        success: boolean;
+        file: ProgramFile;
+    }>("api/program/files", {
+        targetType,
+        targetId,
+        type: "video",
+        url,
+    });
 
     return data.file;
 };

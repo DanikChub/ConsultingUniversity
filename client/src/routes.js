@@ -60,7 +60,7 @@ import LectionPage from './pages/User/LectionPage/LectionPage'
 import AdminPracticalPage from './pages/admin/AdminPracticalPage/AdminPracticalPage'
 import StatementPage from './pages/User/StatementPage/StatementPage'
 import AdminOnePracticalPage from './pages/admin/AdminOnePracticalPage/AdminOnePracticalPage'
-import AdminUserPage from './pages/admin/AdminUserPage/AdminUserPage'
+import AdminListenerPage from './pages/admin/AdminListenerPage/AdminListenerPage'
 import AdminStatementPage from './pages/admin/AdminStatementPage/AdminStatementPage'
 import AdministratorsPage from './pages/admin/AdministratorsPage/AdministratorsPage'
 import AdminDocumentsPage from './pages/admin/AdminDocumentsPage/AdminCertificatesPage'
@@ -152,7 +152,7 @@ export const adminRoutes = [
     },
     {
         path: ADMIN_USER_ROUTE,
-        Component: <AdminUserPage/>
+        Component: <AdminListenerPage/>
     },
     {
         path: ADMIN_REGISTRATE_USER,
@@ -239,7 +239,7 @@ export const viewerRoutes = [
     },
     {
         path: ADMIN_USER_ROUTE,
-        Component: <AdminUserPage/>
+        Component: <AdminListenerPage/>
     },
     {
         path: ADMIN_REGISTRATE_USER,

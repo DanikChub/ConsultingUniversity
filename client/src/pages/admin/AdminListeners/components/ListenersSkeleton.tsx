@@ -1,52 +1,27 @@
 import React from "react";
 
 const ListenersSkeleton: React.FC = () => {
-    // Создаем массив для имитации строк таблицы
-    const rows = Array.from({ length: 8 }); // 5 строк скелетона
+    const rows = Array.from({ length: 8 });
 
     return (
-        <div className="w-full animate-pulse">
-            {/* Шапка */}
-            <div
-                className="
-                    grid 
-                    grid-cols-[max-content_2fr_2fr_2fr_2fr_1fr_1fr] 
-                    gap-[40px]
-                    items-center 
-                    font-semibold 
-                    pb-2
-                "
-            >
-                <div className="h-6 w-6 bg-gray-300 rounded"></div>
-                <div className="h-6  bg-gray-300 rounded"></div>
-                <div className="h-6  bg-gray-300 rounded"></div>
-                <div className="h-6  bg-gray-300 rounded"></div>
-                <div className="h-6  bg-gray-300 rounded"></div>
-                <div className="h-6  bg-gray-300 rounded"></div>
-                <div className="h-6  bg-gray-300 rounded"></div>
-
+        <div className="w-full animate-pulse rounded-3xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="grid grid-cols-[80px_2fr_2fr_2fr_1.4fr_1.2fr_90px] gap-4 border-b border-gray-100 pb-4">
+                {Array.from({ length: 7 }).map((_, index) => (
+                    <div key={index} className="h-5 rounded bg-gray-200" />
+                ))}
             </div>
 
-            {/* Строки */}
-            {rows.map((_, index) => (
+            {rows.map((_, rowIndex) => (
                 <div
-                    key={index}
-                    className="
-                        grid 
-                        grid-cols-[max-content_2fr_2fr_2fr_2fr_1fr_1fr] 
-                        gap-[40px]
-                        items-center 
-                        py-2
-                    "
+                    key={rowIndex}
+                    className="grid grid-cols-[80px_2fr_2fr_2fr_1.4fr_1.2fr_90px] gap-4 border-b border-gray-50 py-4 last:border-b-0"
                 >
-                    <div className="h-6 w-6 bg-gray-300 rounded"></div>
-                    <div className="h-6  bg-gray-300 rounded"></div>
-                    <div className="h-6  bg-gray-300 rounded"></div>
-                    <div className="h-6  bg-gray-300 rounded"></div>
-                    <div className="h-6  bg-gray-300 rounded"></div>
-                    <div className="h-6  bg-gray-300 rounded"></div>
-                    <div className="h-6  bg-gray-300 rounded"></div>
-
+                    {Array.from({ length: 7 }).map((__, colIndex) => (
+                        <div
+                            key={colIndex}
+                            className="h-5 rounded bg-gray-200"
+                        />
+                    ))}
                 </div>
             ))}
         </div>

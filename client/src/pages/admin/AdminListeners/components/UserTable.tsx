@@ -1,124 +1,246 @@
-import React, {useEffect, useState} from "react";
-import { User } from "../../../../entities/user/model/type";
+import React from "react";
 import { Link } from "react-router-dom";
+
 import ProgressBar from "./ProgressBar";
 import ListenersSkeleton from "./ListenersSkeleton";
+import ListenerActionsMenu from "./ListenerActionsMenu";
+
+import type { AdminUserListItem } from "../../../../entities/user/api/user.api";
 
 interface Props {
-    users: User[];
+    users: AdminUserListItem[];
     loading: boolean;
-    onEdit: (id: number) => void;
-    onDelete: (id: number) => void;
-    handleContextMenu: (e: React.MouseEvent, userId: number, programId: number) => void;
-    
+
+    onOpenUser: (id: number) => void;
+    onOpenEnrollments: (id: number) => void;
+    onOpenProgram: (programId?: number | null) => void;
+    onSendMessage: (id: number) => void;
+    onDelete: (user: AdminUserListItem) => void;
+    onRestore: (user: AdminUserListItem) => void;
 }
 
-const UserTable: React.FC<Props> = ({ users, loading, onEdit, onDelete, handleContextMenu }) => {
-
-    useEffect(() => {
-        console.log(users)
-    }, [users]);
-
+const UserTable: React.FC<Props> = ({
+                                        users,
+                                        loading,
+                                        onOpenUser,
+                                        onOpenEnrollments,
+                                        onOpenProgram,
+                                        onSendMessage,
+                                        onDelete,
+                                        onRestore,
+                                    }) => {
     const dateToString = (date?: string | null) =>
         date ? new Date(date).toLocaleDateString("ru-RU") : "-";
 
+    if (loading) {
+        return (
+            <div className="mt-4 min-h-[410px] w-full">
+                <ListenersSkeleton />
+            </div>
+        );
+    }
+
+    if (users.length === 0) {
+        return (
+            <div className="mt-4 rounded-3xl border border-gray-100 bg-white p-10 text-center text-sm text-gray-500 shadow-sm">
+                Слушатели не найдены
+            </div>
+        );
+    }
+
     return (
-        <div className="w-full mt-4 min-h-[410px]">
-            {/* Шапка */}
+        <div className="mt-4 min-h-[410px] w-full overflow-visible rounded-3xl border border-gray-100 bg-white shadow-sm">
             <div
                 className="
-                    grid 
-                    grid-cols-[20px_2fr_2fr_2fr_2fr_1fr]
-                    gap-[40px] 
-                    items-center
-                    font-semibold 
-                    pb-2
+                    grid
+                    grid-cols-[80px_2fr_2fr_2fr_1.4fr_1.2fr_90px]
+                    gap-4
+                    border-b border-gray-100
+                    px-5
+                    py-4
+                    text-sm
+                    font-semibold
+                    text-[#2C3E50]
                 "
             >
-                <div>#</div>
-                <div className="text-sm text-[#2C3E50] font-semibold">ФИО</div>
-                <div className="text-sm text-[#2C3E50] font-semibold">Организация</div>
-                <div className="text-sm text-[#2C3E50] font-semibold">Программа</div>
-                <div className="text-sm text-[#2C3E50] font-semibold">Процент завершенности</div>
-                <div className="text-sm text-[#2C3E50] font-semibold">Дата начала</div>
-
+                <div>ID</div>
+                <div>Слушатель</div>
+                <div>Контакты</div>
+                <div>Организация</div>
+                <div>Программы</div>
+                <div>Регистрация</div>
+                <div className="text-right">Действия</div>
             </div>
 
-            {/* Строки */}
-            {!loading ? (
-                <ListenersSkeleton />
-            ) : <>
-                {users.map((user) => {
-                    const program = user.programs?.[0];
+            {users.map(user => (
+                <div
+                    key={user.id}
+                    className={[
+                        "grid grid-cols-[80px_2fr_2fr_2fr_1.4fr_1.2fr_90px] gap-4 px-5 py-4 text-sm transition",
+                        "border-b border-gray-50 last:border-b-0",
+                        user.is_delete
+                            ? "bg-red-50/50 text-gray-500"
+                            : "bg-white text-[#2C3E50] hover:bg-gray-50",
+                    ].join(" ")}
+                >
+                    <div className="flex items-center">
+                        <span className="font-medium">#{user.id}</span>
+                    </div>
 
-                    return (
-                        <div
-                            key={user.id}
-                            onContextMenu={(e) =>
-                                handleContextMenu(e, user.id, program?.id)
-                            }
-                            className="
-                                grid
-                                grid-cols-[20px_2fr_2fr_2fr_2fr_1fr]
-                                gap-[40px]
-                                items-center
-                                py-2
-                                hover:bg-gray-100
-                                relative
-                              "
-                        >
-                            <div className="text-sm text-[#2C3E50]">{user?.id}.</div>
+                    <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                            <Link
+                                className="truncate font-medium hover:text-blue-700"
+                                to={`/admin/listeners/${user.id}`}
+                            >
+                                {user.name || "Без имени"}
+                            </Link>
 
-                            <div className="text-sm text-[#2C3E50]">
-                                <Link className="hover:text-blue-700" to={`/admin/listeners/${user?.id}`}>
-                                    {user?.name}
-                                </Link>
-                            </div>
+                            {user.is_delete && (
+                                <span className="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-medium text-red-700">
+                                    Удален
+                                </span>
+                            )}
 
-                            <div className="text-sm text-[#2C3E50]">
-                                {user?.organization?.length > 21
-                                    ? `${user.organization.slice(0, 21)}...`
-                                    : user.organization}
-                            </div>
-
-                            <div className="text-sm text-[#2C3E50]">
-                                {program ? (
-                                    <Link
-                                        className="hover:text-blue-700"
-                                        to={`/admin/programs/${program.id}`}
-                                    >
-                                        {program?.short_title}
-                                    </Link>
-                                ) : (
-                                    <span className="text-gray-400 italic">Нет программы</span>
-                                )}
-                            </div>
-
-                            <div className="text-sm text-[#2C3E50]">
-                                {user.programs[0]?.progress != null ? (
-                                    <ProgressBar value={user.programs[0]?.progress} />
-                                ) : (
-                                    <span className="text-gray-400">—</span>
-                                )}
-                            </div>
-
-                            <div className="text-sm text-[#2C3E50]">
-                                {dateToString(user?.createdAt)}
-                            </div>
-
-
+                            {user.must_change_password && (
+                                <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-[11px] font-medium text-yellow-700 text-center">
+                                    Временный пароль
+                                </span>
+                            )}
                         </div>
-                    );
-                })}
 
+                        <div className="mt-1 truncate text-xs text-gray-400">
+                            login: {user.login || "-"}
+                        </div>
+                    </div>
 
-            </>
+                    <div className="min-w-0">
+                        <div className="truncate">
+                            {user.number || (
+                                <span className="text-gray-400">Телефон не указан</span>
+                            )}
+                        </div>
 
+                        <div className="mt-1 truncate text-xs text-gray-400">
+                            {user.email || "Email не указан"}
+                        </div>
+                    </div>
 
-            }
+                    <div className="min-w-0">
+                        {user.organization ? (
+                            <span title={user.organization}>
+                                {user.organization.length > 28
+                                    ? `${user.organization.slice(0, 28)}...`
+                                    : user.organization}
+                            </span>
+                        ) : (
+                            <span className="text-gray-400">—</span>
+                        )}
+                    </div>
 
-            
+                    <ProgramsCell
+                        user={user}
+                        onOpenProgram={onOpenProgram}
+                    />
+
+                    <div>
+                        {dateToString(user.createdAt)}
+                    </div>
+
+                    <div className="flex justify-end">
+                        <ListenerActionsMenu
+                            user={user}
+                            onOpenUser={() => onOpenUser(user.id)}
+                            onOpenEnrollments={() => onOpenEnrollments(user.id)}
+                            onOpenProgram={() => onOpenProgram(user.programs[0]?.id)}
+                            onSendMessage={() => onSendMessage(user.id)}
+                            onDelete={() => onDelete(user)}
+                            onRestore={() => onRestore(user)}
+                        />
+                    </div>
+                </div>
+            ))}
         </div>
+    );
+};
+
+interface ProgramsCellProps {
+    user: AdminUserListItem;
+    onOpenProgram: (programId?: number | null) => void;
+}
+
+const ProgramsCell: React.FC<ProgramsCellProps> = ({ user, onOpenProgram }) => {
+    if (!user.programs || user.programs.length === 0) {
+        return (
+            <div className="text-gray-400">
+                Без программы
+            </div>
+        );
+    }
+
+    const firstProgram = user.programs[0];
+    const extraCount = user.programs.length - 1;
+
+    return (
+        <div className="min-w-0 space-y-2">
+            <button
+                type="button"
+                onClick={() => onOpenProgram(firstProgram.id)}
+                className="block max-w-full truncate text-left font-medium hover:text-blue-700"
+                title={firstProgram.title}
+            >
+                {firstProgram.short_title || firstProgram.title}
+            </button>
+
+            <div className="flex items-center gap-2">
+                <EnrollmentBadge status={firstProgram.enrollment?.status} />
+
+                {firstProgram.progress != null ? (
+                    <ProgressBar value={firstProgram.progress} />
+                ) : (
+                    <span className="text-xs text-gray-400">—</span>
+                )}
+            </div>
+
+            {extraCount > 0 && (
+                <div className="text-xs text-gray-400">
+                    + еще {extraCount}
+                </div>
+            )}
+        </div>
+    );
+};
+
+interface EnrollmentBadgeProps {
+    status?: string;
+}
+
+const EnrollmentBadge: React.FC<EnrollmentBadgeProps> = ({ status }) => {
+    const map: Record<string, string> = {
+        active: "Обучается",
+        completed: "Завершил",
+        archived: "Архив",
+        paused: "Пауза",
+    };
+
+    const classMap: Record<string, string> = {
+        active: "bg-blue-50 text-blue-700",
+        completed: "bg-green-50 text-green-700",
+        archived: "bg-gray-100 text-gray-600",
+        paused: "bg-yellow-50 text-yellow-700",
+    };
+
+    if (!status) return null;
+
+    return (
+        <span
+            className={[
+                "rounded-full px-2 py-0.5 text-[11px] font-medium",
+                classMap[status] || "bg-gray-100 text-gray-600",
+            ].join(" ")}
+        >
+            {map[status] || status}
+        </span>
     );
 };
 

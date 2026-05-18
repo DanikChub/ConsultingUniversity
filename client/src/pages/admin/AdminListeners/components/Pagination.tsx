@@ -2,6 +2,7 @@ import React from "react";
 
 interface Page {
     number: number | string;
+    class?: string;
     active?: boolean;
     disabled?: boolean;
 }
@@ -13,9 +14,12 @@ interface Props {
 }
 
 const Pagination: React.FC<Props> = ({ pages, onClick, activePage }) => {
+    if (pages.length <= 1) return null;
+
     return (
-        <ul className="flex items-center gap-2 select-none mt-4">
+        <ul className="mt-4 flex select-none items-center gap-2">
             {pages.map((p, i) => {
+                const isActive = activePage === i || p.class === "active";
 
                 const base =
                     "px-3 py-1 rounded-md text-sm font-medium border transition-all duration-150";
@@ -32,14 +36,14 @@ const Pagination: React.FC<Props> = ({ pages, onClick, activePage }) => {
                 let finalClass = base;
 
                 if (p.disabled) finalClass += " " + disabled;
-                else if (activePage == i) finalClass += " " + active;
+                else if (isActive) finalClass += " " + active;
                 else finalClass += " " + normal;
 
                 return (
                     <li
                         key={i}
                         className={finalClass}
-                        onClick={() => !p.disabled && !p.active && onClick(i)}
+                        onClick={() => !p.disabled && !isActive && onClick(i)}
                     >
                         {p.number}
                     </li>

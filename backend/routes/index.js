@@ -3,8 +3,8 @@ const Router = require('express');
 const router = new Router();
 
 
-const programRouter = require('./programRouter')
-const userRouter = require('./userRouter')
+const programRouter = require('./program.router')
+const userRouter = require('./user.router')
 const eventRouter = require('./eventRouter')
 const application = require('./application');
 const testRouter = require('./testRouter');

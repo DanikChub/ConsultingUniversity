@@ -1,107 +1,135 @@
-import React, {useRef, useState} from "react";
-import LeftMenu from "../../../components/LeftMenu/LeftMenu";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+
 import {
     ADMIN_ENROLLMENTS_ROUTE,
     ADMIN_REGISTRATE_USER,
-    CHAT_PAGE_ROUTE,
-    CHAT_USERS_PAGE_ROUTE
+    CHAT_USERS_PAGE_ROUTE,
 } from "../../../shared/utils/consts";
-import { useNavigate, Link } from "react-router-dom";
 
 import { useAdminListeners } from "../../../hooks/useAdminListeners";
+import { useModals } from "../../../hooks/useModals";
+
+import AppContainer from "../../../components/ui/AppContainer";
+import Button from "../../../shared/ui/buttons/Button";
+
 import UserTable from "./components/UserTable";
 import Pagination from "./components/Pagination";
 import SearchAndSortPanel from "./components/SearchAndSortPanel";
-import Button from "../../../shared/ui/buttons/Button";
-import AdminPath from "../../../components/ui/AdminPath";
-import AppContainer from "../../../components/ui/AppContainer";
-import SearchInput from "../../../shared/ui/inputs/SearchInput";
-import {useModals} from "../../../hooks/useModals";
-import {createChat} from "../../../entities/chat/api/chat.api";
 
-interface ContextMenuState {
-    visible: boolean;
-    x: number;
-    y: number;
-    userId: number | null;
-    programId: number | null;
-}
+import { createChat } from "../../../entities/chat/api/chat.api";
+import type { AdminUserListItem } from "../../../entities/user/api/user.api";
 
 const AdminListeners: React.FC = () => {
     const navigate = useNavigate();
+    const { openModal } = useModals();
+
     const {
-        users, filteredUsers, loading, countUsers,
-        searchInput,
+        users,
+        loading,
+
+        countUsers,
+        activePage,
+        totalCount,
+
+        filters,
+        sortField,
+        sortDirection,
+        hasActiveFilters,
+
+        updateFilter,
+        resetFilters,
         handleSearchInput,
-        handleClickPagination, destroyUser, activePage
+        handleSort,
+        handleClickPagination,
+
+        destroyUser,
+        recoverUser,
     } = useAdminListeners();
 
-    const {openModal} = useModals();
-    
-    const [contextMenu, setContextMenu] = useState<ContextMenuState>({
-        visible: false,
-        x: 0,
-        y: 0,
-        userId: null,
-        programId: null
-    });
-
-
-    const handleEdit = (id: number) => navigate(`/admin/listeners/new_listener/${id}`);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const handleContextMenu = (e: React.MouseEvent, userId: number, programId: number) => {
-        e.preventDefault(); // отключаем стандартное меню
-        const rect = containerRef.current.getBoundingClientRect();
-        setContextMenu({
-            visible: true,
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-            userId,
-            programId
-        });
+    const handleOpenUser = (userId: number) => {
+        navigate(`/admin/listeners/${userId}`);
     };
 
-    const handleClickOutside = () => {
-        if (contextMenu.visible) {
-            setContextMenu({ visible: false, x: 0, y: 0, userId: null, programId: null });
-        }
+    const handleOpenEnrollments = (userId: number) => {
+        navigate(ADMIN_ENROLLMENTS_ROUTE.replace(":userId", String(userId)));
     };
 
-    const handleDestroyUser = async(userId: number) => {
-        const confirmed = await openModal('confirm', {
-            title: 'Вы действительно хотите удалить пользователя?',
-            description: 'Отменить действие будет невозможно',
-            confirmText: 'Удалить',
+    const handleOpenProgram = (programId?: number | null) => {
+        if (!programId) return;
+        navigate(`/admin/programs/${programId}`);
+    };
+
+    const handleSendMessage = async (userId: number) => {
+        const chat = await createChat(userId);
+        navigate(CHAT_USERS_PAGE_ROUTE + `?chatId=${chat.id}`);
+    };
+
+    const handleDeleteUser = async (user: AdminUserListItem) => {
+        const confirmed = await openModal("confirm", {
+            title: "Удалить слушателя?",
+            description: `Слушатель "${user.name}" будет скрыт из активного списка. Его можно будет восстановить через фильтр "Удаленные".`,
+            confirmText: "Удалить",
             variant: "danger",
-        })
+        });
+
         if (!confirmed) return;
 
-        await destroyUser(userId)
-    }
+        await destroyUser(user.id);
+    };
+
+    const handleRestoreUser = async (user: AdminUserListItem) => {
+        const confirmed = await openModal("confirm", {
+            title: "Восстановить слушателя?",
+            description: `Слушатель "${user.name}" снова появится в активном списке.`,
+            confirmText: "Восстановить",
+            variant: "default",
+        });
+
+        if (!confirmed) return;
+
+        await recoverUser(user.id);
+    };
 
     return (
-        <AppContainer onClick={handleClickOutside}>
-            <div className="relative" ref={containerRef}>
-                <Button
-                    to={ADMIN_REGISTRATE_USER}
-                    checkRole="ADMIN"
-                >
-                    Добавить слушателя
-                </Button>
+        <AppContainer>
+            <div className="space-y-6">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold text-[#2C3E50]">
+                            Слушатели
+                        </h1>
 
-                <SearchInput
-                    className="mt-7"
-                    value={searchInput}
-                    onChange={e => handleSearchInput(e)}
-                    placeholder="Поиск..."
+                        <div className="mt-1 text-sm text-gray-500">
+                            Найдено: {totalCount}
+                        </div>
+                    </div>
+
+                    <Button to={ADMIN_REGISTRATE_USER} checkRole="ADMIN">
+                        Добавить слушателя
+                    </Button>
+                </div>
+
+                <SearchAndSortPanel
+                    filters={filters}
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    hasActiveFilters={hasActiveFilters}
+                    onSearchChange={handleSearchInput}
+                    onFilterChange={updateFilter}
+                    onSort={handleSort}
+                    onReset={resetFilters}
                 />
 
                 <UserTable
-                    handleContextMenu={handleContextMenu}
-                    users={filteredUsers}
+                    users={users}
                     loading={loading}
-                    onEdit={handleEdit}
-                    onDelete={destroyUser}
+                    onOpenUser={handleOpenUser}
+                    onOpenEnrollments={handleOpenEnrollments}
+                    onOpenProgram={handleOpenProgram}
+                    onSendMessage={handleSendMessage}
+                    onDelete={handleDeleteUser}
+                    onRestore={handleRestoreUser}
                 />
 
                 <Pagination
@@ -109,82 +137,7 @@ const AdminListeners: React.FC = () => {
                     onClick={handleClickPagination}
                     activePage={activePage}
                 />
-                {contextMenu.visible && (
-                    <div
-                        style={{
-                            position: "absolute",
-                            top: contextMenu.y + "px",
-                            left: contextMenu.x + "px",
-                        }}
-                        className="bg-white z-50 w-[220px] rounded-md overflow-hidden"
-                    >
-                        <button
-                            onClick={() => {
-                                if (contextMenu.userId) navigate(ADMIN_ENROLLMENTS_ROUTE.replace(':userId', `${contextMenu.userId}`));
-                                setContextMenu({visible: false, x: 0, y: 0, userId: null, programId: null});
-                            }}
-                            className="w-full bg-[#D9D9D9] hover:bg-[#2D91CB] hover:text-white py-2 px-3 transition text-left text-sm"
-                        >
-                            Управление доступом
-                        </button>
-                        <button
-                            onClick={() => {
-                                async function createChatAsync(userId) {
-                                    const chat = await createChat(userId)
-                                    navigate(CHAT_USERS_PAGE_ROUTE + `?chatId=${chat.id}`)
-
-                                }
-
-                                if (contextMenu.userId) {
-                                    createChatAsync(contextMenu.userId)
-                                }
-                                setContextMenu({visible: false, x: 0, y: 0, userId: null, programId: null});
-                            }}
-                            className="w-full bg-[#D9D9D9] hover:bg-[#2D91CB] hover:text-white py-2 px-3 transition text-left text-sm"
-                        >
-                            Написать слушателю
-                        </button>
-                        <button
-                            onClick={() => {
-                                if (contextMenu.userId) navigate(`/admin/listeners/${contextMenu.userId}`);
-                                setContextMenu({visible: false, x: 0, y: 0, userId: null, programId: null});
-                            }}
-                            className="w-full bg-[#D9D9D9] hover:bg-[#2D91CB] hover:text-white py-2 px-3 transition text-left text-sm"
-                        >
-                            Перейти к слушателю
-                        </button>
-                        <button
-                            onClick={() => {
-                                if (contextMenu.userId) navigate(`/admin/programs/${contextMenu.programId}`);
-                                setContextMenu({visible: false, x: 0, y: 0, userId: null, programId: null});
-                            }}
-                            className="w-full bg-[#D9D9D9] hover:bg-[#2D91CB] hover:text-white py-2 px-3 transition text-left text-sm"
-                        >
-                            Перейти к программе
-                        </button>
-                        <button
-                            onClick={() => {
-                                if (contextMenu.userId) handleEdit(contextMenu.userId);
-                                setContextMenu({visible: false, x: 0, y: 0, userId: null, programId: null});
-                            }}
-                            className="w-full bg-[#D9D9D9] hover:bg-[#2D91CB] hover:text-white py-2 px-3 transition text-left text-sm"
-                        >
-                            Изменить
-                        </button>
-                        <button
-                            onClick={() => {
-                                if (contextMenu.userId) handleDestroyUser(contextMenu.userId);
-                                setContextMenu({visible: false, x: 0, y: 0, userId: null, programId: null});
-                            }}
-
-                            className="w-full bg-[#D9D9D9] hover:bg-red-600 hover:text-white py-2 px-3 transition text-left text-sm"
-                        >
-                            Удалить
-                        </button>
-                    </div>
-                )}
             </div>
-
         </AppContainer>
     );
 };

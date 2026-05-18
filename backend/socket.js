@@ -1,4 +1,4 @@
-const { Chat, Message,User } = require("./models/models")
+const { Chat, Message,User } = require("./models/models.old")
 const { Op } = require("sequelize")
 const { Server } = require("socket.io")
 const jwt = require("jsonwebtoken")

@@ -1,151 +1,255 @@
-import { useEffect, useState } from "react";
-import { User, UsersAPIResponse, PaginationItem } from "../entities/user/model/type";
-import { getAllUsersWithPage, searchUsers, deleteUser } from "../entities/user/api/user.api";
-import {generateFakeUsers, getUsersPage} from "../shared/utils/generateFakeUsers";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import {
+    getAdminUsersList,
+    restoreUser,
+    softDeleteUser,
+    type AdminUserListItem,
+    type AdminUsersDeletedFilter,
+    type AdminUsersEnrollmentStatus,
+    type AdminUsersHasProgramFilter,
+    type AdminUsersSortDirection,
+    type AdminUsersSortField,
+} from "../entities/user/api/user.api";
+
+import type { PaginationItem } from "../entities/user/model/type";
+
+export interface AdminListenersFilters {
+    search: string;
+    deleted: AdminUsersDeletedFilter;
+    hasProgram: AdminUsersHasProgramFilter;
+    programId: string;
+    enrollmentStatus: AdminUsersEnrollmentStatus;
+    createdFrom: string;
+    createdTo: string;
+    completedFrom: string;
+    completedTo: string;
+}
+
+const DEFAULT_FILTERS: AdminListenersFilters = {
+    search: "",
+    deleted: "active",
+    hasProgram: "all",
+    programId: "",
+    enrollmentStatus: "all",
+    createdFrom: "",
+    createdTo: "",
+    completedFrom: "",
+    completedTo: "",
+};
+
+const DEFAULT_LIMIT = 10;
 
 export const useAdminListeners = () => {
-    const [users, setUsers] = useState<User[]>([]);
-    const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [users, setUsers] = useState<AdminUserListItem[]>([]);
+    const [loading, setLoading] = useState(false);
     const [countUsers, setCountUsers] = useState<PaginationItem[]>([]);
-    const [searchInput, setSearchInput] = useState<string>('');
-    const [sortType, setSortType] = useState<number>(0);
-    const [sortDown, setSortDown] = useState<boolean>(true);
-    const [activePage, setActivePage]  = useState(0)
-    const sortTypeVariations = ["statistic", "name", "createdAt"];
+    const [activePage, setActivePage] = useState(0);
+    const [totalCount, setTotalCount] = useState(0);
 
+    const [filters, setFilters] = useState<AdminListenersFilters>(() => {
+        const saved = localStorage.getItem("admin_listeners_filters");
 
-    const generatePagination = (totalCount: number) => {
-        const pages: PaginationItem[] = [];
-        for (let i = 0; i < Math.ceil(totalCount / 10); i++) {
-            pages.push({ number: i + 1, class: i === 0 ? 'active' : '' });
+        if (!saved) return DEFAULT_FILTERS;
+
+        try {
+            return {
+                ...DEFAULT_FILTERS,
+                ...JSON.parse(saved),
+            };
+        } catch {
+            return DEFAULT_FILTERS;
         }
+    });
+
+    const [sortField, setSortField] = useState<AdminUsersSortField>(
+        (localStorage.getItem("admin_listeners_sort_field") as AdminUsersSortField) ||
+        "createdAt"
+    );
+
+    const [sortDirection, setSortDirection] = useState<AdminUsersSortDirection>(
+        (localStorage.getItem("admin_listeners_sort_direction") as AdminUsersSortDirection) ||
+        "DESC"
+    );
+
+    const generatePagination = useCallback((total: number, pageIndex: number) => {
+        const pages: PaginationItem[] = [];
+
+        for (let i = 0; i < Math.ceil(total / DEFAULT_LIMIT); i++) {
+            pages.push({
+                number: i + 1,
+                class: i === pageIndex ? "active" : "",
+            });
+        }
+
         setCountUsers(pages);
+    }, []);
+
+    const fetchUsers = useCallback(
+        async (
+            page: number = activePage + 1,
+            nextFilters: AdminListenersFilters = filters,
+            nextSortField: AdminUsersSortField = sortField,
+            nextSortDirection: AdminUsersSortDirection = sortDirection
+        ) => {
+            try {
+                setLoading(true);
+
+                const data = await getAdminUsersList({
+                    page,
+                    limit: DEFAULT_LIMIT,
+                    search: nextFilters.search,
+                    deleted: nextFilters.deleted,
+                    hasProgram: nextFilters.hasProgram,
+                    programId: nextFilters.programId || undefined,
+                    enrollmentStatus: nextFilters.enrollmentStatus,
+                    createdFrom: nextFilters.createdFrom || undefined,
+                    createdTo: nextFilters.createdTo || undefined,
+                    completedFrom: nextFilters.completedFrom || undefined,
+                    completedTo: nextFilters.completedTo || undefined,
+                    sortField: nextSortField,
+                    sortDirection: nextSortDirection,
+                });
+
+                setUsers(data.rows);
+                setTotalCount(data.count);
+                setActivePage(data.page - 1);
+                generatePagination(data.count, data.page - 1);
+            } catch (error: any) {
+                console.error("fetchUsers error:", error);
+
+                const message =
+                    error?.response?.data?.message ||
+                    error?.message ||
+                    "Ошибка загрузки пользователей";
+
+                alert(message);
+            } finally {
+                setLoading(false);
+            }
+        },
+        [activePage, filters, sortField, sortDirection, generatePagination]
+    );
+
+    const saveFilters = (nextFilters: AdminListenersFilters) => {
+        setFilters(nextFilters);
+        localStorage.setItem("admin_listeners_filters", JSON.stringify(nextFilters));
     };
 
-    const fetchUsers = async (page: number = 1, search?: string) => {
-        try {
-            setLoading(true);
+    const updateFilter = async <K extends keyof AdminListenersFilters>(
+        key: K,
+        value: AdminListenersFilters[K]
+    ) => {
+        const nextFilters = {
+            ...filters,
+            [key]: value,
+        };
 
-            let data: UsersAPIResponse;
+        saveFilters(nextFilters);
+        await fetchUsers(1, nextFilters);
+    };
 
-            if (search) {
-                data = await searchUsers(page, search);
-            } else {
-                data = await getAllUsersWithPage(
-                    page,
-                    sortTypeVariations[sortType],
-                    sortDown ? 'DESC' : 'ASC'
-                );
-            }
-            // const data = getUsersPage(page)
+    const handleSearchInput = async (value: string) => {
+        if (/[^а-яА-Яa-zA-Z0-9\s@._+\-()]/.test(value)) return;
 
-            generatePagination(data.count);
+        await updateFilter("search", value);
+    };
 
-            const userList = data.rows;
+    const resetFilters = async () => {
+        saveFilters(DEFAULT_FILTERS);
+        await fetchUsers(1, DEFAULT_FILTERS);
+    };
 
+    const handleSort = async (field: AdminUsersSortField) => {
+        const nextDirection: AdminUsersSortDirection =
+            sortField === field && sortDirection === "DESC" ? "ASC" : "DESC";
 
-            if (search) {
-                userList.forEach(u => (u.yellow_value = search));
-            }
+        setSortField(field);
+        setSortDirection(nextDirection);
 
-            setUsers(userList);
-            setFilteredUsers(userList);
+        localStorage.setItem("admin_listeners_sort_field", field);
+        localStorage.setItem("admin_listeners_sort_direction", nextDirection);
 
-        } catch (error: any) {
-            console.error('fetchUsers error:', error);
+        await fetchUsers(1, filters, field, nextDirection);
+    };
 
-            // сообщение пользователю
-            const message =
-                error?.response?.data?.message ||
-                error?.message ||
-                'Ошибка загрузки пользователей';
-
-            alert(message)
-
-        } finally {
-            setLoading(true);
-        }
+    const handleClickPagination = async (pageIndex: number) => {
+        await fetchUsers(pageIndex + 1);
     };
 
     const destroyUser = async (id: number) => {
         try {
-            setLoading(false);
+            setLoading(true);
 
-            await deleteUser(id);
-
-            setUsers(prev =>
-                prev.filter(user => Number(user.id) !== Number(id))
-            );
-
-            setFilteredUsers(prev =>
-                prev.filter(user => Number(user.id) !== Number(id))
-            );
-
-            await fetchUsers(activePage + 1, searchInput || undefined);
+            await softDeleteUser(id);
+            await fetchUsers(activePage + 1);
         } catch (error: any) {
-            console.error('destroyUser error:', error);
+            console.error("destroyUser error:", error);
 
             const message =
                 error?.response?.data?.message ||
                 error?.message ||
-                'Ошибка удаления пользователя';
+                "Ошибка удаления пользователя";
 
             alert(message);
         } finally {
-            setLoading(true);
+            setLoading(false);
         }
     };
 
+    const recoverUser = async (id: number) => {
+        try {
+            setLoading(true);
 
-    const handleSearchInput = (value: string) => {
-        if (/[^а-яА-Яa-zA-Z0-9\s]/.test(value)) return;
-        setSearchInput(value);
-        fetchUsers(1, value || undefined);
-    };
+            await restoreUser(id);
+            await fetchUsers(activePage + 1);
+        } catch (error: any) {
+            console.error("recoverUser error:", error);
 
-    const handleSortButton = (type: number) => {
-        setSortType(type);
-        localStorage.setItem('sort_type', type.toString());
-        setSearchInput('');
-        fetchUsers(1);
-    };
+            const message =
+                error?.response?.data?.message ||
+                error?.message ||
+                "Ошибка восстановления пользователя";
 
-    const handleSortDown = () => {
-        setSortDown(prev => !prev);
-        localStorage.setItem('sort_down', Number(!sortDown).toString());
-        setSearchInput('');
-        fetchUsers(1);
-    };
-
-    const handleClickPagination = (pageIndex: number) => {
-        const updated = countUsers.map((item, i) => ({ ...item, class: i === pageIndex ? 'active' : '' }));
-        setCountUsers(updated);
-        setActivePage(pageIndex);
-        fetchUsers(pageIndex + 1);
+            alert(message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
-        const savedSortType = Number(localStorage.getItem('sort_type')) || 0;
-        const savedSortDown = Boolean(Number(localStorage.getItem('sort_down')));
-        setSortType(savedSortType);
-        setSortDown(savedSortDown);
         fetchUsers(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    const hasActiveFilters = useMemo(() => {
+        return JSON.stringify(filters) !== JSON.stringify(DEFAULT_FILTERS);
+    }, [filters]);
 
     return {
         users,
-        filteredUsers,
         loading,
+
         countUsers,
-        searchInput,
-        sortType,
-        sortDown,
+        activePage,
+        totalCount,
+
+        filters,
+        searchInput: filters.search,
+
+        sortField,
+        sortDirection,
+
+        hasActiveFilters,
+
+        fetchUsers,
+        updateFilter,
+        resetFilters,
         handleSearchInput,
-        handleSortButton,
-        handleSortDown,
+        handleSort,
         handleClickPagination,
+
         destroyUser,
-        activePage
+        recoverUser,
     };
 };
