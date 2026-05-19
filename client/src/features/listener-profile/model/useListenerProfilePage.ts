@@ -99,11 +99,17 @@ export const useListenerProfilePage = () => {
                             };
                         })
                     );
+                    const enrollment = program.enrollment;
+
+                    if (!enrollment) continue;
+
 
                     enrichedPrograms.push({
                         programId: program.id,
                         title: program.title,
-                        enrollmentId,
+                        enrollmentId: enrollment.id,
+                        status: enrollment.status,
+
                         progress,
                         testStats,
                         totalContent,

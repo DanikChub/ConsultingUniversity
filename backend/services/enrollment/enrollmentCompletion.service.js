@@ -235,6 +235,94 @@ class EnrollmentCompletionService {
 
         return [certificate, true];
     }
+
+    async completeEnrollment(enrollmentId) {
+        try {
+            let completionEmailPayload = null;
+
+            const result = await sequelize.transaction(async transaction => {
+                console.log(Enrollment)
+                const enrollment = await Enrollment.findByPk(enrollmentId, {
+                    transaction,
+                    lock: transaction.LOCK.UPDATE,
+                });
+
+                if (!enrollment) {
+                    return null;
+                }
+
+                const user = await User.findByPk(enrollment.userId, {
+                    transaction,
+                    attributes: ["id", "name", "email", "organization"],
+                });
+
+                const program = await Program.findByPk(enrollment.programId, {
+                    transaction,
+                    attributes: ["id", "title"],
+                });
+
+                const wasCompleted = enrollment.status === "completed";
+
+                enrollment.status = "completed";
+                enrollment.progress_percent = 100;
+                enrollment.completed_at = enrollment.completed_at || new Date();
+
+                await enrollment.save({ transaction });
+
+                const [certificate, created] = await this.findOrCreateCertificate({
+                    enrollment,
+                    transaction,
+                });
+
+                if (!wasCompleted) {
+                    await Event.create(
+                        {
+                            event_text: "Пользователь завершил обучение",
+                            name: program?.title || "Программа",
+                            event_id: enrollment.programId,
+                            type: "program",
+                            organization: user?.organization || null,
+                        },
+                        { transaction }
+                    );
+
+                    completionEmailPayload = {
+                        email: user?.email,
+                        name: user?.name,
+                        programTitle: program?.title || "Программа",
+                        certificateNumber: certificate.certificate_number,
+                        certificateCreated: created,
+                    };
+                }
+
+                return {
+                    message: wasCompleted
+                        ? "Обучение уже было завершено"
+                        : "Обучение завершено",
+                    completedNow: !wasCompleted,
+                    enrollment,
+                    certificate,
+                };
+            });
+
+            if (completionEmailPayload?.email) {
+                try {
+                    await sendCompletionEmail(
+                        completionEmailPayload.email,
+                        completionEmailPayload.name || "Слушатель",
+                        completionEmailPayload.programTitle
+                    );
+                } catch (e) {
+                    console.error("Completion email send failed:", e);
+                }
+            }
+
+            return result;
+        } catch(e) {
+            console.log(e)
+        }
+
+    }
 }
 
 module.exports = new EnrollmentCompletionService();

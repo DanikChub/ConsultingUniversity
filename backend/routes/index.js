@@ -12,7 +12,7 @@ const statisticRouter = require('./statisticRouter');
 const progressRouter = require('./progressRouter');
 const practicalWorkRouter = require('./practicalWorkRouter');
 const chatRouter = require('./chatRouter');
-const enrollmentRouter = require('./enrollmentRouter');
+const enrollmentRouter = require('./enrollment.router');
 const certificateRouter = require('./certificateRouter');
 
 

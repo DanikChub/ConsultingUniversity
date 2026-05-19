@@ -2,7 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const { Op } = require("sequelize");
 const { sendCompletionEmail } = require("../services/mail.service");
-const enrollmentCompletionService = require("../services/enrollment/enrollmentCompletion.service");
+const createEnrollmentProgressService = require("../services/enrollment/enrollmentProgress.service");
 const STATIC_DIR = path.resolve(__dirname, "..", "static");
 
 if (!fs.existsSync(STATIC_DIR)) {
@@ -10,6 +10,8 @@ if (!fs.existsSync(STATIC_DIR)) {
 }
 
 module.exports = (models) => {
+    const enrollmentProgressService = createEnrollmentProgressService(models);
+
     const {
         Program,
         Theme,
@@ -138,7 +140,7 @@ module.exports = (models) => {
     });
 
     UserContentProgress.addHook("afterSave", async (progress) => {
-        await enrollmentCompletionService.recalculateAndComplete(
+        await enrollmentProgressService.recalculateEnrollmentProgress(
             progress.enrollmentId
         );
     });

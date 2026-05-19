@@ -40,17 +40,34 @@ class UserQueryService {
                 id: userId,
                 is_delete: false,
             },
+            attributes: {
+                exclude: [
+                    "password",
+                    "temporary_password_hash",
+                    "forgot_pass_code",
+                ],
+            },
             include: [
                 {
                     model: Program,
-                    attributes: ["id", "title", "short_title", "price", "img"],
+                    attributes: [
+                        "id",
+                        "title",
+                        "short_title",
+                        "price",
+                        "img",
+                        "status",
+                    ],
                     through: {
+                        as: "enrollment",
                         attributes: [
                             "id",
                             "status",
                             "progress_percent",
                             "started_at",
                             "completed_at",
+                            "createdAt",
+                            "updatedAt",
                         ],
                     },
                     required: false,
@@ -70,8 +87,11 @@ class UserQueryService {
                         "updatedAt",
                     ],
                     required: false,
+                    separate: true,
+                    order: [["createdAt", "DESC"]],
                 },
             ],
+            order: [[Program, "id", "DESC"]],
         });
 
         if (!user) {

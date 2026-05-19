@@ -11,10 +11,18 @@ export interface TestStat {
     lastAttemptDate: string | null;
 }
 
+export type EnrollmentStatus =
+    | "active"
+    | "paused"
+    | "completed"
+    | "archived";
+
 export interface ProgramWithStats {
     programId: number;
     title?: string;
     enrollmentId: number;
+    status: EnrollmentStatus;
+
     progress: ProgramProgress;
     testStats: TestStat[];
     totalContent: number;

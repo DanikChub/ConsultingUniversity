@@ -42,14 +42,14 @@ const EditListenerFieldModal: React.FC<EditListenerFieldModalProps> = ({
                             value={value}
                             onChange={e => onChange(e.target.value)}
                             rows={5}
-                            className="w-full resize-none rounded-2xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#2980B9]"
+                            className="w-full resize-none rounded-2xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-blue-500"
                             autoFocus
                         />
                     ) : (
                         <input
                             value={value}
                             onChange={e => onChange(e.target.value)}
-                            className="w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#2980B9]"
+                            className="w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-blue-500"
                             autoFocus
                         />
                     )}
@@ -75,7 +75,7 @@ const EditListenerFieldModal: React.FC<EditListenerFieldModalProps> = ({
                         type="button"
                         onClick={onSubmit}
                         disabled={loading}
-                        className="rounded-xl bg-[#2980B9] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#2474a5] disabled:opacity-60"
+                        className="rounded-xl bg-blue-500 px-5 py-2 text-sm font-medium text-white transition hover:bg-[#2474a5] disabled:opacity-60"
                     >
                         {loading ? "Сохранение..." : "Сохранить"}
                     </button>

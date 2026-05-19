@@ -1,16 +1,29 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import AppContainer from "../../../components/ui/AppContainer";
 import { useListenerProfilePage } from "../../../features/listener-profile/model/useListenerProfilePage";
 
 import ListenerHeader from "./components/ListenerHeader";
-import ListenerInfoGrid from "./components/ListenerInfoGrid";
-import ListenerDocumentsCard from "./components/ListenerDocumentsCard";
-import ListenerProgramsSection from "./components/ListenerProgramsSection";
+import ListenerTabs, { type ListenerTab } from "./components/ListenerTabs";
 
+import ListenerPersonalTab from "./components/tabs/ListenerPersonalTab";
+import ListenerProgramsTab from "./components/tabs/ListenerProgramsTab";
+import ListenerCertificatesTab from "./components/tabs/ListenerCertificatesTab";
+import ListenerMessagesTab from "./components/tabs/ListenerMessagesTab";
+import ListenerHistoryTab from "./components/tabs/ListenerHistoryTab";
 
+const allowedTabs: ListenerTab[] = [
+    "personal",
+    "programs",
+    "certificates",
+    "messages",
+    "history",
+];
 
 const AdminListenerPage: React.FC = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+
     const {
         user,
         programs,
@@ -22,6 +35,20 @@ const AdminListenerPage: React.FC = () => {
         handleOpenGradeBook,
         handleUserFieldUpdated,
     } = useListenerProfilePage();
+
+    const activeTab = useMemo<ListenerTab>(() => {
+        const tab = searchParams.get("tab") as ListenerTab | null;
+
+        if (tab && allowedTabs.includes(tab)) {
+            return tab;
+        }
+
+        return "personal";
+    }, [searchParams]);
+
+    const handleTabChange = (tab: ListenerTab) => {
+        setSearchParams({ tab });
+    };
 
     if (loading) {
         return (
@@ -49,31 +76,44 @@ const AdminListenerPage: React.FC = () => {
 
     return (
         <AppContainer>
-            <div className="space-y-12">
+            <div className="space-y-8">
                 <div className="rounded-3xl border border-gray-100 bg-white p-8 shadow-md">
                     <ListenerHeader
                         user={user}
                         onSendMessage={handleSendMessage}
                     />
 
-                    <div className="mt-8">
-                        <ListenerInfoGrid
-                            user={user}
-                            onFieldUpdated={handleUserFieldUpdated}
-                        />
-                    </div>
-
-                    <ListenerDocumentsCard
-                        userId={user.id}
-                        documents={documents}
-                        onDocumentsChanged={reload}
+                    <ListenerTabs
+                        activeTab={activeTab}
+                        onChange={handleTabChange}
                     />
                 </div>
 
-                <ListenerProgramsSection
-                    programs={programs}
-                    onOpenGradeBook={handleOpenGradeBook}
-                />
+                {activeTab === "personal" && (
+                    <ListenerPersonalTab
+                        user={user}
+                        documents={documents}
+                        onFieldUpdated={handleUserFieldUpdated}
+                        onDocumentsChanged={reload}
+                    />
+                )}
+
+                {activeTab === "programs" && (
+                    <ListenerProgramsTab
+                        userId={user.id}
+                        programs={programs}
+                        onOpenGradeBook={handleOpenGradeBook}
+                        onChanged={reload}
+                    />
+                )}
+
+                {activeTab === "certificates" && <ListenerCertificatesTab />}
+
+                {activeTab === "messages" && (
+                    <ListenerMessagesTab onSendMessage={handleSendMessage} />
+                )}
+
+                {activeTab === "history" && <ListenerHistoryTab />}
             </div>
         </AppContainer>
     );
