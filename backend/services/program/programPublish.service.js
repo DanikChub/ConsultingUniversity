@@ -1,259 +1,167 @@
-const path = require("path");
-const fs = require("fs");
-const { Op } = require("sequelize");
-
-const sequelize = require("../../db");
 const ApiError = require("../../error/ApiError");
 
-const { Program, File, FileAsset } = require("../../models/models");
-
 const {
-    STATIC_DIR,
-    safeFilename,
-    saveSingleFile,
-    deleteStaticFile,
-} = require("../../utils/fileStorage");
+    Program,
+    Theme,
+    Punct,
+    File,
+    FileAsset,
+    Test,
+    Event,
+} = require("../../models/models");
 
-const { convertDocxToHtmlIfExists } = require("../../utils/docx");
-const { getNextOrderIndex, moveOrderedItem } = require("../../utils/order");
-
-const ALLOWED_FILE_TYPES = ["docx", "pdf", "audio", "video"];
-
-const typeExtensions = {
-    docx: ["docx"],
-    pdf: ["pdf"],
-    audio: ["mp3", "wav", "ogg"],
-};
-
-class ProgramFileService {
-    async updateProgramImage(programId, file) {
-        const program = await Program.findByPk(programId);
+class ProgramPublishService {
+    async getProgramForPublish(programId) {
+        const program = await Program.findOne({
+            where: { id: programId },
+            include: [
+                {
+                    model: Theme,
+                    separate: true,
+                    order: [["order_index", "ASC"]],
+                    include: [
+                        {
+                            model: Punct,
+                            separate: true,
+                            order: [["order_index", "ASC"]],
+                            include: [
+                                {
+                                    model: File,
+                                    separate: true,
+                                    order: [["order_index", "ASC"]],
+                                    include: [FileAsset],
+                                },
+                                {
+                                    model: Test,
+                                    separate: true,
+                                    order: [["order_index", "ASC"]],
+                                },
+                            ],
+                        },
+                        {
+                            model: File,
+                            separate: true,
+                            order: [["order_index", "ASC"]],
+                            include: [FileAsset],
+                        },
+                    ],
+                },
+            ],
+        });
 
         if (!program) {
             throw ApiError.notFound("Программа не найдена");
         }
 
-        if (!file) {
-            throw ApiError.badRequest("Файл не передан");
+        return program;
+    }
+
+    validateProgramFields(program) {
+        const requiredProgramFields = ["title", "short_title", "img", "price"];
+
+        const fieldNames = {
+            title: "Полное название",
+            short_title: "Короткое название",
+            img: "Изображение",
+            price: "Цена",
+        };
+
+        for (const field of requiredProgramFields) {
+            if (!program[field]) {
+                throw ApiError.badRequest(
+                    `Программа не может быть опубликована: поле "${fieldNames[field]}" не заполнено`
+                );
+            }
+        }
+    }
+
+    validateProgramStructure(program) {
+        if (!program.themes || program.themes.length === 0) {
+            throw ApiError.badRequest(
+                "Программа не может быть опубликована: не создан ни один модуль"
+            );
         }
 
-        const imgSaved = await saveSingleFile(file);
+        for (const theme of program.themes) {
+            if (!theme.title) {
+                throw ApiError.badRequest(
+                    `Модуль с номером ${theme.order_index+1} не имеет названия`
+                );
+            }
 
-        if (program.img) {
-            await deleteStaticFile(program.img);
+            if (!theme.puncts || theme.puncts.length === 0) {
+                throw ApiError.badRequest(
+                    `Модуль "${theme.title}" не содержит ни одного пункта`
+                );
+            }
+
+            for (const punct of theme.puncts) {
+                if (!punct.title) {
+                    throw ApiError.badRequest(
+                        `Тема с номером ${punct.order_index+1} в модуле "${theme.title}" не имеет названия`
+                    );
+                }
+
+                const hasFiles = Array.isArray(punct.files) && punct.files.length > 0;
+                const hasTests = Array.isArray(punct.tests) && punct.tests.length > 0;
+
+                if (!hasFiles && !hasTests) {
+                    throw ApiError.badRequest(
+                        `Тема "${punct.title}" не содержит ни файлов, ни тестов`
+                    );
+                }
+            }
+        }
+    }
+
+    validatePublishedTests(program) {
+        let hasPublishedTest = false;
+
+        for (const theme of program.themes || []) {
+            for (const punct of theme.puncts || []) {
+                if (punct.tests?.some(test => test.status === "published")) {
+                    hasPublishedTest = true;
+                    break;
+                }
+            }
+
+            if (hasPublishedTest) break;
         }
 
-        program.status = "draft";
-        program.img = imgSaved;
+        if (!hasPublishedTest) {
+            throw ApiError.badRequest(
+                "Программа не содержит ни одного опубликованного теста"
+            );
+        }
+    }
+
+    validateBeforePublish(program) {
+        this.validateProgramFields(program);
+        this.validateProgramStructure(program);
+        this.validatePublishedTests(program);
+    }
+
+    async publishProgram(programId) {
+        const program = await this.getProgramForPublish(programId);
+
+        this.validateBeforePublish(program);
+
+        await Event.create({
+            event_text: "Программа опубликована",
+            name: program.title,
+            event_id: program.id,
+            type: "program",
+        });
+
+        program.status = "published";
         await program.save();
 
         return {
-            img: program.img,
-            message: "Картинка обновлена",
-        };
-    }
-
-    async deleteProgramImage(programId) {
-        const program = await Program.findByPk(programId);
-
-        if (!program) {
-            throw ApiError.notFound("Программа не найдена");
-        }
-
-        if (program.img) {
-            await deleteStaticFile(program.img);
-        }
-
-        program.status = "draft";
-        program.img = null;
-        await program.save();
-
-        return {
-            img: null,
-            message: "Картинка удалена",
-        };
-    }
-
-    async addFileToPunctOrTheme({ body, files }) {
-        const { targetType, targetId, type, url } = body;
-
-        if (!targetType || !targetId) {
-            throw ApiError.badRequest("targetType and targetId are required");
-        }
-
-        if (!["theme", "punct"].includes(targetType)) {
-            throw ApiError.badRequest("Invalid targetType");
-        }
-
-        if (!ALLOWED_FILE_TYPES.includes(type)) {
-            throw ApiError.badRequest("Invalid type");
-        }
-
-        const orderWhere =
-            targetType === "punct"
-                ? { punctId: targetId }
-                : { themeId: targetId, punctId: null };
-
-        const order_index = await getNextOrderIndex(File, orderWhere);
-
-        if (type === "video") {
-            if (!url) {
-                throw ApiError.badRequest("Video url required");
-            }
-
-            const videoRecord = await File.create({
-                original_name: "Видео",
-                stored_name: null,
-                mime_type: null,
-                type: "video",
-                size: null,
-                url,
-                storage: "s3",
-                themeId: targetType === "theme" ? targetId : null,
-                punctId: targetType === "punct" ? targetId : null,
-                order_index,
-                status: "idle",
-            });
-
-            return {
-                success: true,
-                file: videoRecord,
-            };
-        }
-
-        if (!files || Object.keys(files).length === 0) {
-            throw ApiError.badRequest("No files uploaded");
-        }
-
-        const fileKey = Object.keys(files)[0];
-        const file = files[fileKey];
-
-        const ext = file.name.split(".").pop().toLowerCase();
-
-        if (!typeExtensions[type]?.includes(ext)) {
-            throw ApiError.badRequest(`File extension .${ext} does not match type ${type}`);
-        }
-
-        const originalName = Buffer.from(file.name, "latin1").toString("utf8");
-
-        const tempFileRecord = await File.create({
-            original_name: originalName,
-            stored_name: "",
-            mime_type: file.mimetype,
-            size: file.size,
-            storage: "local",
-            type,
-            themeId: targetType === "theme" ? targetId : null,
-            punctId: targetType === "punct" ? targetId : null,
-            order_index,
-            status: "uploading",
-        });
-
-        const storedName = safeFilename(file.name);
-        const fullPath = path.join(STATIC_DIR, storedName);
-
-        try {
-            await new Promise((resolve, reject) => {
-                file.mv(fullPath, err => (err ? reject(err) : resolve()));
-            });
-
-            await tempFileRecord.update({
-                stored_name: storedName,
-                status: "idle",
-            });
-        } catch (err) {
-            await tempFileRecord.update({ status: "error" });
-            throw ApiError.internal("File save failed");
-        }
-
-        if (type === "docx") {
-            const htmlContent = await convertDocxToHtmlIfExists(storedName);
-
-            if (htmlContent) {
-                await FileAsset.create({
-                    fileId: tempFileRecord.id,
-                    type: "html",
-                    content: htmlContent,
-                });
-            }
-        }
-
-        const fullFile = await File.findByPk(tempFileRecord.id, {
-            include: [FileAsset],
-        });
-
-        return {
             success: true,
-            file: fullFile,
+            message: "Программа успешно опубликована",
+            program,
         };
-    }
-
-    async updateFileName(fileId, originalName) {
-        if (!originalName) {
-            throw ApiError.badRequest("original_name is required");
-        }
-
-        const file = await File.findByPk(fileId);
-
-        if (!file) {
-            throw ApiError.notFound("File not found");
-        }
-
-        file.original_name = originalName;
-        await file.save();
-
-        return { file };
-    }
-
-    async deleteFile(fileId) {
-        const file = await File.findByPk(fileId);
-
-        if (!file) {
-            throw ApiError.notFound("Файл не найден");
-        }
-
-        await file.destroy();
-
-        return {
-            success: true,
-            message: "Файл успешно удалён",
-        };
-    }
-
-    async getFile(fileId) {
-        const file = await File.findByPk(fileId, {
-            include: [FileAsset],
-        });
-
-        if (!file) {
-            throw ApiError.notFound("Файл не найден");
-        }
-
-        return file;
-    }
-
-    async moveFile({ fileId, newIndex, targetType, targetId }) {
-        if (!fileId || newIndex === undefined || !targetType || !targetId) {
-            throw ApiError.badRequest("fileId, newIndex, targetType and targetId are required");
-        }
-
-        let parentWhere;
-
-        if (targetType === "punct") {
-            parentWhere = { punctId: targetId };
-        } else if (targetType === "theme") {
-            parentWhere = { themeId: targetId, punctId: null };
-        } else {
-            throw ApiError.badRequest("Invalid targetType");
-        }
-
-        return await moveOrderedItem({
-            Model: File,
-            itemId: fileId,
-            parentWhere,
-            newIndex,
-        });
     }
 }
 
-module.exports = new ProgramFileService();
+module.exports = new ProgramPublishService();

@@ -9,7 +9,8 @@ export const usePublishProgram = (programId: number) => {
         try {
             return await publishProgram(programId);
         } catch (err: any) {
-            setPublishError(err?.response?.data?.error);
+            console.log(err)
+            setPublishError(err?.response?.data?.message);
             return null;
         }
     };

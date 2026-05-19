@@ -35,9 +35,11 @@ const MakeProgramPage = () => {
 
     const handlePublicate = async () => {
         const result = await publish();
-        if (result.success) {
+
+        if (result?.success) {
             navigate(ADMIN_PROGRAMS_ROUTE);
         }
+        console.log(publishError)
     };
 
     const handleCreateFinalTest = async () => {
