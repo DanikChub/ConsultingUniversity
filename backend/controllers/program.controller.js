@@ -284,6 +284,7 @@ class ProgramController {
 
   async getFile(req, res, next) {
     try {
+      console.log('первое')
       const file = await programFileService.getFile(req.params.fileId);
       return res.json(file);
     } catch (e) {

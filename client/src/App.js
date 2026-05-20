@@ -11,7 +11,7 @@ import Spinner from "./components/Spinner/Spinner"
 
 import "./App.css"
 import { ModalProvider } from "./providers/ModalProvider"
-import { getEnrollmentByProgram } from "./entities/enrollment/api/enrollment.api"
+import { getMyEnrollmentByProgram } from "./entities/enrollment/api/enrollment.api"
 
 const App = observer(() => {
   const { user } = useContext(Context)
@@ -42,7 +42,7 @@ const App = observer(() => {
         // Берем первый доступный курс, если есть
         if (userData.programs?.length > 0) {
           const programId = userData.programs[0].id
-          const enrollment = await getEnrollmentByProgram(programId, userData.id)
+          const enrollment = await getMyEnrollmentByProgram(programId)
           if (enrollment) {
             user.setEnrollmentId(enrollment.id)
           }

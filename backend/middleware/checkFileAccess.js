@@ -3,7 +3,7 @@ const { Op} = require('sequelize');
 const checkFileAccess = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        const fileId = req.params.id;
+        const fileId = req.params.fileId;
 
         // 1️⃣ Находим файл с вложенностью до программы
         const file = await File.findByPk(fileId, {

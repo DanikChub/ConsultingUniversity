@@ -221,6 +221,7 @@ class ProgramFileService {
     }
 
     async getFile(fileId) {
+        console.log('второе', fileId)
         const file = await File.findByPk(fileId, {
             include: [FileAsset],
         });

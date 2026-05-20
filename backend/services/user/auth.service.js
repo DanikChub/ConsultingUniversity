@@ -21,6 +21,8 @@ class AuthService {
             },
         });
 
+        console.log(user)
+
         if (!user) {
             throw ApiError.badRequest("Пользователь не найден");
         }

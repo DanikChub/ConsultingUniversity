@@ -11,12 +11,14 @@ module.exports = function (req, res, next) {
         const authHeader = req.headers.authorization;
 
         if (!authHeader) {
+            console.log('Первое')
             return res.status(401).json({ message: 'Не авторизован' });
         }
 
         const token = authHeader.split(' ')[1]; // Bearer token
 
         if (!token) {
+            console.log('Второе')
             return res.status(401).json({ message: 'Не авторизован' });
         }
 

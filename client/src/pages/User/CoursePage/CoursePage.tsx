@@ -13,7 +13,7 @@ import {Context} from '../../../index';
 import UserContainer from "../../../components/ui/UserContainer"
 import type {ProgramProgress} from "../../../entities/progress/model/type";
 import {getEnrollmentProgress} from "../../../entities/progress/api/progress.api";
-import {getEnrollmentByProgram} from "../../../entities/enrollment/api/enrollment.api";
+import {getEnrollmentByProgram, getMyEnrollmentByProgram} from "../../../entities/enrollment/api/enrollment.api";
 import CustomAudioPlayer from "../../../components/CustomAudioPlayer/CustomAudioPlayer";
 import type {File} from "../../../entities/file/model/type";
 
@@ -70,7 +70,7 @@ export default function CoursePage() {
                 })
                 setProgram(programData);
                 console.log(userContext.user.user.id)
-                const enrollment = await getEnrollmentByProgram(programData.id);
+                const enrollment = await getMyEnrollmentByProgram(programData.id);
                 userContext.user.setEnrollmentId(enrollment.id);
 
                 const freshProgress = await getEnrollmentProgress(enrollment.id);
