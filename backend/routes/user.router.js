@@ -7,7 +7,7 @@ const checkRole = require("../middleware/checkRoleMiddleware");
 
 // ---------- Auth ----------
 router.post("/registration", checkRole("ADMIN"), UserController.registration);
-router.post("/registration-admin", checkRole("ADMIN"), UserController.registrationAdmin);
+router.post("/registration-admin", UserController.registrationAdmin);
 
 router.post("/login", UserController.login);
 router.get("/auth", authMiddleware, UserController.check);

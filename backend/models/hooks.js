@@ -60,6 +60,13 @@ module.exports = (models) => {
         return theme.programId;
     }
 
+    async function getProgramIdFromThemeId(themeId) {
+        if (!themeId) return null;
+
+        const theme = await Theme.findByPk(themeId);
+        return theme?.programId || null;
+    }
+
     async function getProgramIdFromFile(file) {
         if (file.punctId) {
             return getProgramIdFromPunctId(file.punctId);
@@ -164,7 +171,7 @@ module.exports = (models) => {
     });
 
     Punct.addHook("afterCreate", async (punct) => {
-        const programId = await getProgramIdFromPunctId(punct.themeId);
+        const programId = await getProgramIdFromThemeId(punct.themeId);
 
         if (programId) {
             await updateProgramStatusToDraft(programId);
@@ -172,7 +179,7 @@ module.exports = (models) => {
     });
 
     Punct.addHook("afterSave", async (punct) => {
-        const programId = await getProgramIdFromPunctId(punct.themeId);
+        const programId = await getProgramIdFromThemeId(punct.themeId);
 
         if (programId) {
             await updateProgramStatusToDraft(programId);
@@ -180,7 +187,7 @@ module.exports = (models) => {
     });
 
     Punct.addHook("afterDestroy", async (punct) => {
-        const programId = await getProgramIdFromPunctId(punct.themeId);
+        const programId = await getProgramIdFromThemeId(punct.themeId);
 
         if (programId) {
             await updateProgramStatusToDraft(programId);
