@@ -57,6 +57,8 @@ export const useListenerProfilePage = () => {
                     const enrollmentId = program.enrollment.id;
 
                     const fullProgram = await getOneProgram(program.id);
+
+                    console.log(fullProgram);
                     const totalContent = getTotalContent(fullProgram);
                     const tests = extractAllTests(fullProgram);
                     const progress = await getEnrollmentProgress(enrollmentId);

@@ -1,13 +1,21 @@
 import type { Program } from "../../../entities/program/model/type";
 import type { Test } from "../../../entities/test/model/type";
 
-export function extractAllTests(program: Program): Test[] {
-    if (!program.themes) return [];
+export const extractAllTests = (program: Program) => {
+    const tests: Test[] = [];
 
-    return program.themes.flatMap(theme =>
-        theme.puncts?.flatMap(punct => punct.tests ?? []) ?? []
-    );
-}
+    program.themes?.forEach(theme => {
+        theme.puncts?.forEach(punct => {
+            tests.push(...(punct.tests || []));
+        });
+    });
+
+    if (program.test) {
+        tests.push(program.test);
+    }
+
+    return tests;
+};
 
 export function getTotalContent(program: Program): number {
     if (!program.themes) return 0;
