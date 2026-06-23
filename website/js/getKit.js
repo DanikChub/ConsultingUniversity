@@ -1,9 +1,36 @@
 const kit_items = document.querySelector('.kit_slider_slides');
 const kit_buttons = document.querySelectorAll('.kit_button');
 const items = [
-    {id: 1, link: "./courses/specialist.html", img: 'intro_4.png', title: "Специалист в сфере  закупок (44-ФЗ)  для заказчиков", diplom: false, description: "Повышение квалификации 144 академических часа", price: "9 700"},
-    {id: 2, link: "./courses/expert.html", img: 'intro_2.png', title: "Эксперт в сфере закупок (44-ФЗ, 223-ФЗ)  для заказчиков", diplom: true, description: "Профпереподготовка 260 академических часов", price: "12 700"},
-    {id: 3, link: "./courses/contract_system.html", img: 'intro_5.png', title: "Контрактная система в сфере закупок  для руководителей (44-ФЗ)", diplom: false, description: "Повышение квалификации 40 академических часов", price: "5 700"},
+    {
+        id: 1,
+        link: "./courses/specialist.html",
+        img: 'intro_4.png',
+        title: "Специалист в сфере  закупок (44-ФЗ)  для заказчиков",
+        diplom: false,
+        description: "Повышение квалификации 144 академических часа",
+        prev_price: "9 700",
+        price: "8 000"
+    },
+    {
+        id: 2,
+        link: "./courses/expert.html",
+        img: 'intro_2.png',
+        title: "Эксперт в сфере закупок (44-ФЗ, 223-ФЗ)  для заказчиков",
+        diplom: true,
+        description: "Профпереподготовка 260 академических часов",
+        prev_price: "12 700",
+        price: "10 700"
+    },
+    {
+        id: 3,
+        link: "./courses/contract_system.html",
+        img: 'intro_5.png',
+        title: "Контрактная система в сфере закупок  для руководителей (44-ФЗ)",
+        diplom: false,
+        description: "Повышение квалификации 40 академических часов",
+
+        price: "5 700"
+    },
    
 ]
 
@@ -30,19 +57,25 @@ function update(sort) {
             </div>
             <div class="kit_item_title">
                 <p>${el.title}</p>
-                <img src="${el.diplom?"./imgs/slider_docs/short_diplom.png":"./imgs/slider_docs/short_diplom1.png"}" alt="">
+                <img src="${el.diplom ? "./imgs/slider_docs/short_diplom.png" : "./imgs/slider_docs/short_diplom1.png"}" alt="">
             </div>
             <div class="kit_item_description">${el.description}</div>
             <div class="kit_item_content">
-                <div class="kit_item_price">${el.price} руб</div>
-                <div  class="kit_item_button">Подробнее</div>
+                <div class="kit_item_content_price">
+                    ${el.prev_price ? `<div class="kit_item_prev_price">${el.prev_price} руб</div>` : ''}
+                    
+                    <div class="kit_item_price">${el.price} руб</div>
+                </div>
+              
+                
+                <div class="kit_item_button">Подробнее</div>
             </div>
             
         </a>`
-        } 
-        
+        }
+
     })
-    
+
     kit_items.innerHTML = '';
     kit_items.innerHTML = s;
 
