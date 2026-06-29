@@ -110,7 +110,7 @@ const AdminListenerPage: React.FC = () => {
                 {activeTab === "certificates" && <ListenerCertificatesTab />}
 
                 {activeTab === "messages" && (
-                    <ListenerMessagesTab onSendMessage={handleSendMessage} />
+                    <ListenerMessagesTab userId={user.id} />
                 )}
 
                 {activeTab === "history" && <ListenerHistoryTab />}

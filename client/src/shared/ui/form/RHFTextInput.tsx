@@ -7,6 +7,7 @@ type RHFTextInputProps = {
     placeholder?: string;
     type?: string;
     transform?: (value: string) => string;
+    required?: boolean;
 };
 
 const RHFTextInput: React.FC<RHFTextInputProps> = ({
@@ -15,6 +16,7 @@ const RHFTextInput: React.FC<RHFTextInputProps> = ({
                                                        placeholder,
                                                        type = 'text',
                                                        transform,
+                                                       required
                                                    }) => {
     const {
         control,
@@ -27,12 +29,13 @@ const RHFTextInput: React.FC<RHFTextInputProps> = ({
         <div className="grid grid-cols-[118px_auto] p-[25px] border-b border-[#C7C7C7] gap-[30px]">
             <label htmlFor={name} className="text-right">
                 {label}
+                {required && <span className="ml-1 text-red-500">*</span>}
             </label>
 
             <Controller
                 control={control}
                 name={name}
-                render={({ field }) => (
+                render={({field}) => (
                     <input
                         {...field}
                         id={name}

@@ -145,3 +145,9 @@ export const updateMessage = async (
 
     return data
 }
+
+// получить чат по id пользователя
+export const getChatByUserId = async (userId: number): Promise<Chat> => {
+    const { data } = await $authHost.get<Chat>(`api/chat/user/${userId}`)
+    return data
+}

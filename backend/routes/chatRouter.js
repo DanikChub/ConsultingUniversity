@@ -63,6 +63,8 @@ router.get(
     chatController.getAllChats
 )
 
+router.get("/user/:userId", checkRole("ADMIN"), chatController.getChatByUserId);
+
 // закрыть чат
 router.patch(
     '/:chatId/close',

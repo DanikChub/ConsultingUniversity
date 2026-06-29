@@ -16,7 +16,10 @@ const ProgramSelectSection: React.FC<ProgramSelectSectionProps> = ({ options }) 
 
     return (
         <div className="grid grid-cols-[118px_auto] p-[25px] border-b border-[#C7C7C7] gap-[30px]">
-            <label className="text-right">Программа</label>
+            <label className="text-right">
+                Программа
+                <span className="ml-1 text-red-500">*</span>
+            </label>
 
             <Controller
                 control={control}

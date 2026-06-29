@@ -22,6 +22,12 @@ module.exports = (sequelize) => {
             allowNull: false,
         },
 
+        program_type: {
+            type: DataTypes.ENUM("ПК", "ПП"),
+            allowNull: false,
+            defaultValue: "ПК",
+        },
+
         img: { type: DataTypes.STRING },
         price: { type: DataTypes.STRING },
         short_title: { type: DataTypes.STRING },

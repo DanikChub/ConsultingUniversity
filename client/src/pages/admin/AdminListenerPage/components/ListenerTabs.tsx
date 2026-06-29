@@ -17,7 +17,7 @@ const tabs: { key: ListenerTab; label: string }[] = [
     { key: "programs", label: "Программы" },
     { key: "certificates", label: "Дипломы" },
     { key: "messages", label: "Сообщения" },
-    { key: "history", label: "История" },
+    // { key: "history", label: "История" },
 ];
 
 const ListenerTabs: React.FC<ListenerTabsProps> = ({ activeTab, onChange }) => {

@@ -73,6 +73,7 @@ const UserUpsertPage: React.FC = () => {
                 programOptions={pageData.programOptions}
                 existingDocuments={pageData.existingDocuments}
                 currentProfileImg={pageData.currentProfileImg}
+                serverError={serverError}
                 onSubmit={async ({ values, newDocuments, profileImg }) => {
                     try {
                         setServerError('');

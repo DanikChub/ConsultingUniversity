@@ -2,22 +2,25 @@ const { Certificate, Enrollment, User, Program } = require('../../models/models.
 const { Op } = require('sequelize');
 
 class CertificateService {
-    async generateCertificateNumber() {
+    async generateCertificateNumber(programType) {
         const year = new Date().getFullYear();
+
+        const prefix = programType === "professional_retraining"
+            ? `КС/ПП-${year}`
+            : `КС/ПК-${year}`;
 
         const countThisYear = await Certificate.count({
             where: {
-                createdAt: {
-                    [Op.gte]: new Date(`${year}-01-01`),
-                    [Op.lt]: new Date(`${year + 1}-01-01`)
+                certificate_number: {
+                    [Op.like]: `${prefix}-%`
                 }
             }
         });
 
-        const sequence = String(countThisYear + 1).padStart(6, '0');
-        return `DP-${year}-${sequence}`;
-    }
+        const sequence = String(countThisYear + 1).padStart(4, "0");
 
+        return `${prefix}-${sequence}`;
+    }
     getInclude() {
         return [
             {
@@ -28,15 +31,37 @@ class CertificateService {
     }
 
     async createCertificate(enrollmentId) {
-        const existing = await Certificate.findOne({ where: { enrollmentId } });
+        const existing = await Certificate.findOne({
+            where: { enrollmentId }
+        });
 
         if (existing) {
-            const error = new Error('Certificate already exists');
+            const error = new Error("Certificate already exists");
             error.status = 400;
             throw error;
         }
 
-        const certificateNumber = await this.generateCertificateNumber();
+        const enrollment = await Enrollment.findByPk(enrollmentId, {
+            include: [Program]
+        });
+
+        if (!enrollment) {
+            const error = new Error("Enrollment not found");
+            error.status = 404;
+            throw error;
+        }
+
+        if (!enrollment.program) {
+            const error = new Error("Program not found for enrollment");
+            error.status = 404;
+            throw error;
+        }
+
+        const program = enrollment.program;
+
+        const certificateNumber = await this.generateCertificateNumber(
+            program.program_type
+        );
 
         return Certificate.create({
             enrollmentId,

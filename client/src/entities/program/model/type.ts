@@ -17,6 +17,7 @@ export interface Program {
     number_of_practical_work: number;
     number_of_test: number;
     number_of_videos: number;
+    program_type: "ПК" | "ПП";
     themes?: Theme[];
     test?: Test;
     users_quantity?: number;

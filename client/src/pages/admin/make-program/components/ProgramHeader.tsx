@@ -126,7 +126,22 @@ const ProgramHeader: React.FC<Props> = ({
                     />
                 </div>
 
-                {/* Картинка */}
+                {/* Тип программы */}
+                <div className="mt-5 grid grid-cols-[1fr_6fr] items-center">
+                    <label className="text-right mr-3 font-semibold text-[#2C3E50] text-base">
+                        Тип программы:
+                    </label>
+
+                    <select
+                        className="flex-1 bg-transparent text-gray-800 text-md outline-none border-b border-gray-300 py-1 focus:border-blue-500 transition-all"
+                        value={program.program_type || "ПК"}
+                        onChange={(e) => onChange("program_type", e.target.value)}
+                    >
+                        <option value="ПК">ПК — повышение квалификации (удостоверение)</option>
+                        <option value="ПП">ПП — профессиональная переподготовка (диплом)</option>
+                    </select>
+                </div>
+
                 {/* Картинка */}
                 <div className="mt-5 grid grid-cols-[1fr_6fr]">
                     <label className="text-right mr-3 font-semibold text-[#2C3E50] text-base">

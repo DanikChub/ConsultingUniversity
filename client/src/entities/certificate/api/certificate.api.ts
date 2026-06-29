@@ -117,3 +117,14 @@ export const updateCertificate = async (
     );
     return data;
 };
+
+// 📌 Получить дипломы пользователя
+export const getCertificatesByUserId = async (
+    userId: number
+): Promise<Certificate[]> => {
+    const { data } = await $authHost.get<Certificate[]>(
+        `api/certificates/user/${userId}`
+    );
+
+    return data;
+};

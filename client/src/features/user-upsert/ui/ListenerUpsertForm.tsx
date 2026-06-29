@@ -23,6 +23,7 @@ type ListenerUpsertFormProps = {
     programOptions: ProgramOption[];
     existingDocuments: UserDocument[];
     currentProfileImg: string | null;
+    serverError?: string;
     onSubmit: (payload: {
         values: ListenerFormDefaultValues;
         newDocuments: File[];
@@ -36,6 +37,7 @@ const ListenerUpsertForm: React.FC<ListenerUpsertFormProps> = ({
                                                                    programOptions,
                                                                    existingDocuments,
                                                                    currentProfileImg,
+                                                                   serverError,
                                                                    onSubmit,
                                                                }) => {
     const isEdit = mode === 'edit-listener';
@@ -77,6 +79,12 @@ const ListenerUpsertForm: React.FC<ListenerUpsertFormProps> = ({
                 )}
                 className="mt-[30px] w-full"
             >
+                {serverError ? (
+                    <div className="mb-4 rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-600">
+                        <div className="font-semibold">Ошибка сохранения:</div>
+                        <div className="mt-1">{serverError}</div>
+                    </div>
+                ) : null}
                 {Object.keys(errors).length > 0 ? (
                     <div className="mb-4 rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-600">
                         <div className="font-semibold">Исправьте ошибки в форме:</div>
@@ -90,16 +98,16 @@ const ListenerUpsertForm: React.FC<ListenerUpsertFormProps> = ({
                     </div>
                 ) : null}
                 <BaseUserFields isEdit={isEdit}/>
-                <ListenerFields/>
+                {/*<ListenerFields/>*/}
                 <ProgramSelectSection options={programOptions}/>
 
-                <DocumentsSection
-                    existingDocuments={assets.existingDocuments}
-                    newDocuments={assets.newDocuments}
-                    onAddDocuments={assets.handleDocumentsChange}
-                    onRemoveNewDocument={assets.removeNewDocument}
-                    onDeleteExistingDocument={assets.handleDeleteExistingDocument}
-                />
+                {/*<DocumentsSection*/}
+                {/*    existingDocuments={assets.existingDocuments}*/}
+                {/*    newDocuments={assets.newDocuments}*/}
+                {/*    onAddDocuments={assets.handleDocumentsChange}*/}
+                {/*    onRemoveNewDocument={assets.removeNewDocument}*/}
+                {/*    onDeleteExistingDocument={assets.handleDeleteExistingDocument}*/}
+                {/*/>*/}
 
 
 

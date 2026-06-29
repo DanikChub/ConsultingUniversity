@@ -17,6 +17,7 @@ class ProgramService {
             number_of_practical_work: 0,
             number_of_test: 0,
             number_of_videos: 0,
+            program_type: "ПК",
             status: "draft",
         });
 
@@ -40,6 +41,9 @@ class ProgramService {
             if (body.title !== undefined) program.title = body.title;
             if (body.short_title !== undefined) program.short_title = body.short_title;
             if (body.price !== undefined) program.price = body.price;
+            if (body.program_type !== undefined) {
+                program.program_type = body.program_type;
+            }
 
             if (body.number_of_videos !== undefined) {
                 program.number_of_videos = body.number_of_videos;

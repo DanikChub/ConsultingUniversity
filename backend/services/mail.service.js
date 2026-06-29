@@ -76,4 +76,123 @@ async function sendCompletionEmail(toEmail, userName, programName) {
     }
 }
 
-module.exports = { sendCompletionEmail };
+
+
+function getWelcomeEmailHtml(userName, login, password) {
+    return `
+    <!DOCTYPE html>
+    <html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+    </head>
+
+    <body style="margin:0;padding:0;background:#f4f4f7;font-family:Arial,sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f4f7">
+            <tr>
+                <td align="center" style="padding:40px 0;">
+
+                    <table width="600" cellpadding="0" cellspacing="0"
+                           style="background:#fff;border-radius:12px;overflow:hidden;">
+
+                        <tr>
+                            <td align="center"
+                                style="background:#4f46e5;color:#fff;padding:35px;">
+                                <h1 style="margin:0;">
+                                    Добро пожаловать!
+                                </h1>
+
+                                <p style="margin-top:10px;">
+                                    Ваш личный кабинет успешно создан.
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td style="padding:35px;">
+
+                                <p>
+                                    Здравствуйте,
+                                    <strong>${userName}</strong>!
+                                </p>
+
+                                <p>
+                                    Для вас был создан личный кабинет.
+                                </p>
+
+                                <table
+                                    width="100%"
+                                    cellpadding="10"
+                                    cellspacing="0"
+                                    style="margin:25px 0;background:#f7f7f7;border-radius:8px;">
+
+                                    <tr>
+                                        <td><b>Логин</b></td>
+                                        <td>${login}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td><b>Временный пароль</b></td>
+                                        <td>${password}</td>
+                                    </tr>
+
+                                </table>
+
+                                <p>
+                                    При первом входе рекомендуем сменить пароль.
+                                </p>
+
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td
+                                align="center"
+                                style="padding:20px;background:#f4f4f7;font-size:12px;color:#888;">
+                                Это автоматическое письмо. Пожалуйста, не отвечайте на него.
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </td>
+            </tr>
+        </table>
+        
+        <a
+            href="https://consulting-university.ru/login"
+            style="
+                display:inline-block;
+                background:#4f46e5;
+                color:white;
+                padding:14px 28px;
+                border-radius:8px;
+                text-decoration:none;
+                margin-top:20px;
+                font-weight:bold;
+            "
+        >
+            Войти в личный кабинет
+        </a>
+    </body>
+    </html>
+    `;
+}
+
+async function sendWelcomeEmail(toEmail, userName, login, password) {
+    try {
+        await transporter.sendMail({
+            from: process.env.MAIL_USER,
+            to: toEmail,
+            subject: "Добро пожаловать в Consulting University",
+            html: getWelcomeEmailHtml(userName, login, password),
+        });
+    } catch (err) {
+        console.error("Ошибка отправки welcome-письма:", err);
+        return null;
+    }
+}
+
+module.exports = {
+    sendCompletionEmail,
+    sendWelcomeEmail,
+};

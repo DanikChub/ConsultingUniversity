@@ -328,21 +328,21 @@ const UserPage = observer(() => {
                     )}
 
 
-                {/*/!* Как учиться *!/*/}
-                {/*<div className="bg-gray-300 rounded-xl p-6 w-full md:w-1/3 flex flex-col items-start gap-4">*/}
-                {/*    <div className="flex items-center gap-4">*/}
-                {/*        <div className="w-28">*/}
-                {/*            <img src={how} alt=""/>*/}
-                {/*        </div>*/}
-                {/*        <div className="text-lg font-semibold text-gray-800">Как учиться с Консалтинг-Университет</div>*/}
-                {/*    </div>*/}
-                {/*    <div className="flex items-center gap-2">*/}
-                {/*        <div className="w-6">*/}
-                {/*            <img src={check} alt=""/>*/}
-                {/*        </div>*/}
-                {/*        <div className="text-gray-600 text-base">Просмотрено</div>*/}
-                {/*    </div>*/}
-                {/*</div>*/}
+                {/* Как учиться */}
+                <a href="../../../assets/files/how_learn.pdf" className="bg-gray-300 rounded-xl p-6 w-full md:w-1/3 flex flex-col items-start gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className="w-28">
+                            <img src={how} alt=""/>
+                        </div>
+                        <div className="text-lg font-semibold text-gray-800">Как учиться с Консалтинг-Университет</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-6">
+                            <img src={check} alt=""/>
+                        </div>
+                        <div className="text-gray-600 text-base">Просмотрено</div>
+                    </div>
+                </a>
             </div>
 
             {

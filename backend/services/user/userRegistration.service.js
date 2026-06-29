@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-
+const { sendWelcomeEmail } = require("../mail.service");
 const ApiError = require("../../error/ApiError");
 const sequelize = require("../../db");
 const { User, Enrollment, Event } = require("../../models/models");
@@ -102,6 +102,15 @@ class UserRegistrationService {
             );
 
             await t.commit();
+
+            if (user.email) {
+                await sendWelcomeEmail(
+                    user.email,
+                    user.name,
+                    user.login,
+                    temporary_password
+                );
+            }
 
             return {
                 message: "Пользователь успешно создан",

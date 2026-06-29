@@ -56,6 +56,8 @@ function programFullInclude() {
         },
         {
             model: Test,
+            as: "test",
+            required: false,
             include: [
                 {
                     model: Question,
@@ -133,33 +135,39 @@ class ProgramQueryService {
     }
 
     async getProgramFull(programId) {
-        const program = await Program.findOne({
-            where: { id: programId },
-            include: programFullInclude(),
-        });
+        try {
+            const program = await Program.findOne({
+                where: { id: programId },
+                include: programFullInclude(),
+            });
 
-        if (!program) {
-            throw ApiError.notFound("Программа не найдена");
-        }
+            if (!program) {
+                throw ApiError.notFound("Программа не найдена");
+            }
 
-        const usersQuantity = await Enrollment.count({
-            where: {
-                programId,
-                status: "active",
-            },
-            include: [
-                {
-                    model: User,
-                    where: { is_delete: false },
-                    required: true,
+            const usersQuantity = await Enrollment.count({
+                where: {
+                    programId,
+                    status: "active",
                 },
-            ],
-        });
+                include: [
+                    {
+                        model: User,
+                        where: { is_delete: false },
+                        required: true,
+                    },
+                ],
+            });
 
-        return {
-            ...program.toJSON(),
-            users_quantity: usersQuantity,
-        };
+            return {
+                ...program.toJSON(),
+                users_quantity: usersQuantity,
+            };
+        } catch (e) {
+            console.error("GET PROGRAM FULL ERROR:");
+            console.error(e);
+            throw e;
+        }
     }
 
     async getProgramEntityFull(programId) {

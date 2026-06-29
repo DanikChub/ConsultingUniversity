@@ -517,6 +517,40 @@ class ChatController {
         }
     }
 
+    async getChatByUserId(req, res) {
+        try {
+            const { userId } = req.params;
+
+            const chat = await Chat.findOne({
+                where: { userId },
+                include: [
+                    {
+                        model: User,
+                        attributes: ["id", "name", "email", "role"]
+                    },
+                    {
+                        model: Message,
+                        include: [
+                            {
+                                model: MessageAttachment
+                            }
+                        ],
+                        order: [["createdAt", "ASC"]]
+                    }
+                ]
+            });
+
+            if (!chat) {
+                return res.status(404).json({ message: "Chat not found" });
+            }
+
+            return res.json(chat);
+
+        } catch (e) {
+            console.error("getChatByUserId error:", e);
+            return res.status(500).json({ message: "Failed to fetch chat" });
+        }
+    }
 
 }
 
