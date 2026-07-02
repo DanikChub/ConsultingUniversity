@@ -11,6 +11,7 @@ module.exports = (sequelize) => {
 
         status: {
             type: DataTypes.ENUM(
+                "waiting_issue_date",
                 "pending_contact",
                 "contacted",
                 "waiting_delivery",

@@ -136,6 +136,19 @@ class CertificateController {
             next(e);
         }
     }
+
+    async setIssued(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { issued_at } = req.body;
+
+            const certificate = await certificateService.setIssued(id, issued_at);
+
+            return res.json(certificate);
+        } catch (e) {
+            next(e);
+        }
+    }
 }
 
 module.exports = new CertificateController();

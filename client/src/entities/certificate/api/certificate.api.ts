@@ -128,3 +128,16 @@ export const getCertificatesByUserId = async (
 
     return data;
 };
+
+// 📌 Назначить дату выдачи
+export const setCertificateIssued = async (
+    id: number,
+    issued_at: string
+): Promise<Certificate> => {
+    const { data } = await $authHost.patch<Certificate>(
+        `api/certificates/${id}/issued`,
+        { issued_at }
+    );
+
+    return data;
+};

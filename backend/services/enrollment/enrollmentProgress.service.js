@@ -43,8 +43,7 @@ module.exports = (models) => {
         return Certificate.create({
             enrollmentId,
             certificate_number: number,
-            status: "pending_contact",
-            issued_at: new Date(),
+            status: "waiting_issue_date",
         });
     }
 

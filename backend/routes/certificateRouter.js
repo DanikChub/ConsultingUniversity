@@ -3,6 +3,9 @@ const router = new Router();
 const certificateController = require('../controllers/certificate.controller');
 
 // CRUD
+
+
+
 router.post('/', certificateController.createCertificate);
 router.get('/', certificateController.getAllCertificates);
 router.get('/user/:userId', certificateController.getCertificatesByUserId);
@@ -11,6 +14,7 @@ router.delete('/:id', certificateController.deleteCertificate);
 router.patch('/:id', certificateController.updateCertificate);
 
 // Бизнес действия
+router.patch("/:id/issued", certificateController.setIssued);
 router.patch('/:id/status', certificateController.updateStatus);
 router.patch('/:id/post', certificateController.setDeliveryPost);
 router.patch('/:id/pickup', certificateController.setPickup);

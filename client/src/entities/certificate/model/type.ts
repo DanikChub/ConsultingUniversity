@@ -4,6 +4,7 @@ import type {User} from "../../user/model/type";
 import type {Program} from "../../program/model/type";
 
 export type CertificateStatus =
+    "waiting_issue_date"
     | 'pending_contact'
     | 'contacted'
     | 'waiting_delivery'

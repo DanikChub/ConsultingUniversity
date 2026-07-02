@@ -3,10 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import AppContainer from "../../../components/ui/AppContainer";
 import SearchInput from "../../../shared/ui/inputs/SearchInput";
 
-import type {
-    Certificate,
-    CertificateStatus,
-} from "../../../entities/certificate/model/types";
+
 
 import {
     getCertificates,
@@ -21,6 +18,7 @@ import {FiSettings} from "react-icons/fi";
 import {HiOutlineCog} from "react-icons/hi";
 import {Link, useNavigate} from "react-router-dom";
 import {ADMIN_USER_ROUTE, ADMIN_VIEW_PROGRAM} from "../../../shared/utils/consts";
+import type {Certificate, CertificateStatus} from "../../../entities/certificate/model/type";
 
 function dateToString(date?: string | null) {
     if (!date) return "-";
@@ -29,6 +27,7 @@ function dateToString(date?: string | null) {
 }
 
 const statusLabels: Record<CertificateStatus, string> = {
+    waiting_issue_date: "Ожидает даты выдачи",
     pending_contact: "Ожидает связи",
     contacted: "Связались",
     waiting_delivery: "Готов к отправке",
@@ -38,6 +37,7 @@ const statusLabels: Record<CertificateStatus, string> = {
 };
 
 const statusColors: Record<CertificateStatus, string> = {
+    waiting_issue_date: "bg-red-100 text-red-700",
     pending_contact: "bg-yellow-100 text-yellow-700",
     contacted: "bg-blue-100 text-blue-700",
     waiting_delivery: "bg-purple-100 text-purple-700",

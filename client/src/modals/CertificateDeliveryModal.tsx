@@ -8,7 +8,7 @@ import {
     setCertificatePostDelivery,
     setCertificatePickup,
     markCertificateShipped,
-    markCertificateDelivered,
+    markCertificateDelivered, setCertificateIssued,
 } from "../entities/certificate/api/certificate.api";
 import { ModalContainer } from "./ModalContainer";
 import type {User} from "../entities/user/model/type";
@@ -22,6 +22,7 @@ type Props = {
 };
 
 const statusOrder: CertificateStatus[] = [
+    "waiting_issue_date",
     "pending_contact",
     "contacted",
     "waiting_delivery",
@@ -39,6 +40,7 @@ const deliveryTypeLabels: Record<
 };
 
 const statusLabels: Record<CertificateStatus, string> = {
+    waiting_issue_date: "Диплом не выдан",
     pending_contact: "Ожидает связи",
     contacted: "Связались",
     waiting_delivery: "Подготовка к отправке",
@@ -70,6 +72,12 @@ const CertificateDeliveryModal: React.FC<Props> = ({
     );
     const [tracking, setTracking] = useState(
         currentCert.tracking_number || ""
+    );
+
+    const [issuedAt, setIssuedAt] = useState(
+        currentCert.issued_at
+            ? currentCert.issued_at.slice(0, 10)
+            : ""
     );
 
     const currentStepIndex = useMemo(() => {
@@ -247,6 +255,28 @@ const CertificateDeliveryModal: React.FC<Props> = ({
                 </div>
 
                 {/* WORKFLOW */}
+                {currentCert.status === "waiting_issue_date" && (
+                    <div className="space-y-3">
+                        <input
+                            type="date"
+                            value={issuedAt}
+                            onChange={(e) => setIssuedAt(e.target.value)}
+                            className="w-full border px-3 py-2 rounded-lg"
+                        />
+
+                        <button
+                            disabled={!issuedAt || loading}
+                            onClick={() =>
+                                handleAction(() =>
+                                    setCertificateIssued(currentCert.id, issuedAt)
+                                )
+                            }
+                            className="w-full bg-blue-600 text-white py-2 rounded-lg disabled:opacity-50"
+                        >
+                            Назначить дату выдачи
+                        </button>
+                    </div>
+                )}
 
                 {currentCert.status === "pending_contact" && (
                     <button

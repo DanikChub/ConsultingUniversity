@@ -35,6 +35,8 @@ function formatTime(date: string) {
 }
 
 const AdminPage: React.FC = () => {
+    const { user } = useContext(Context)
+    const currentAdmin = user.user
     const [events, setEvents] = useState<EventItem[]>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [openIndex, setOpenIndex] = useState<number | null>(0)
@@ -140,9 +142,38 @@ const AdminPage: React.FC = () => {
         }
     }
 
+    const adminImgSrc = currentAdmin?.img
+        ? currentAdmin.img.startsWith("http") || currentAdmin.img.startsWith("blob:")
+            ? currentAdmin.img
+            : process.env.REACT_APP_API_URL + currentAdmin.img
+        : null
+
+
+
     return (
         <AppContainer>
             <div className="mx-auto py-8 px-4">
+
+                <div className="mb-8 flex items-center gap-6">
+                    {adminImgSrc && (
+                        <img
+                            src={adminImgSrc}
+                            alt="Фото администратора"
+                            className="w-20 h-20 rounded-full object-cover border"
+                        />
+                    )}
+
+                    <div>
+                        <div className="text-2xl font-semibold text-gray-800">
+                            {currentAdmin?.name || "Без имени"}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                            {currentAdmin?.admin_signature || "Администратор"}
+                        </div>
+
+
+                    </div>
+                </div>
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-2xl font-bold text-gray-800">

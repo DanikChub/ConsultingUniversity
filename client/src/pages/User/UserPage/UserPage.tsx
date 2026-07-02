@@ -241,6 +241,7 @@ const UserPage = observer(() => {
             {/* Программа пользователя */}
             <div className="mt-16">
                 <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-left">Ваша программа</h2>
+                <div className="flex justify-between gap-2">
                     {program ? (
                         <Link
                             to={COURSE_ROUTE.replace(':id', String(program.id))}
@@ -261,9 +262,9 @@ const UserPage = observer(() => {
                                     ) : (
                                         <div
                                             className="w-full h-full min-h-[220px] flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100 lg:rounded-l-3xl">
-                            <span className="text-4xl font-bold text-indigo-300">
-                                {program.title?.charAt(0)}
-                            </span>
+                                            <span className="text-4xl font-bold text-indigo-300">
+                                                {program.title?.charAt(0)}
+                                            </span>
                                         </div>
                                     )}
 
@@ -326,23 +327,24 @@ const UserPage = observer(() => {
                             У вас пока нет назначенной программы обучения.
                         </div>
                     )}
+                    {/* Как учиться */}
+                    <a href="../../../assets/files/how_learn.pdf" className="rounded-3xl bg-gradient-to-br from-white via-blue-50 to-indigo-50 border border-gray-100 shadow-md p-6 w-full md:w-1/3 flex flex-col items-start gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-28">
+                                <img src={how} alt=""/>
+                            </div>
+                            <div className="text-lg font-semibold text-gray-800">Как учиться с Консалтинг-Университет</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-6">
+                                <img src={check} alt=""/>
+                            </div>
+                            <div className="text-gray-600 text-base">Просмотрено</div>
+                        </div>
+                    </a>
+                </div>
 
 
-                {/* Как учиться */}
-                <a href="../../../assets/files/how_learn.pdf" className="bg-gray-300 rounded-xl p-6 w-full md:w-1/3 flex flex-col items-start gap-4">
-                    <div className="flex items-center gap-4">
-                        <div className="w-28">
-                            <img src={how} alt=""/>
-                        </div>
-                        <div className="text-lg font-semibold text-gray-800">Как учиться с Консалтинг-Университет</div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-6">
-                            <img src={check} alt=""/>
-                        </div>
-                        <div className="text-gray-600 text-base">Просмотрено</div>
-                    </div>
-                </a>
             </div>
 
             {

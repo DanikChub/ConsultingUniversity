@@ -65,8 +65,7 @@ class CertificateService {
 
         return Certificate.create({
             enrollmentId,
-            certificate_number: certificateNumber,
-            issued_at: new Date()
+            certificate_number: certificateNumber
         });
     }
 
@@ -169,6 +168,23 @@ class CertificateService {
         await certificate.destroy();
 
         return { message: 'Certificate deleted' };
+    }
+
+    async setIssued(id, issued_at) {
+        const certificate = await this.getCertificateOrFail(id);
+
+        if (!issued_at) {
+            const error = new Error("Issued date is required");
+            error.status = 400;
+            throw error;
+        }
+
+        certificate.issued_at = issued_at;
+        certificate.status = "pending_contact";
+
+        await certificate.save();
+
+        return certificate;
     }
 
     async updateCertificate(id, data) {
