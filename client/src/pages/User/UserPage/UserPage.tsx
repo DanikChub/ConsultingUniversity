@@ -13,6 +13,7 @@ import statement from '../../../assets/imgs/statement.png';
 import learn from '../../../assets/imgs/learn.png';
 import how from '../../../assets/imgs/how.png';
 import check from '../../../assets/imgs/check.png';
+import how_learn from '../../../assets/files/how_learn.pdf';
 import user_img from '../../../assets/imgs/user.png';
 import {COURSE_ROUTE, STATEMENT_ROUTE, USER_CHAT_ROUTE, USER_PROFILE_ROUTE} from '../../../shared/utils/consts';
 import {FiArchive, FiCheckCircle, FiClock} from "react-icons/fi";
@@ -22,6 +23,7 @@ import {useSocket} from "../../../hooks/useSocket";
 const UserPage = observer(() => {
     const userContext = useContext(Context);
     const [program, setProgram] = useState<any>({});
+    const [programs, setPrograms] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [progress, setProgress] = useState<number>(0);
     const [unreadMessages, setUnreadMessages] = useState<number | null>(null);
@@ -40,7 +42,7 @@ const UserPage = observer(() => {
         }
 
         const programs = user.programs;
-        console.log(programs)
+
         if (!programs || programs.length === 0) {
             setProgram(null);
             setProgress(0);
@@ -48,12 +50,11 @@ const UserPage = observer(() => {
             return;
         }
 
-        const userProgram = programs[0];
-
-        setProgram(userProgram);
 
 
-        setProgress(userProgram?.enrollment?.progress_percent ?? 0);
+        setPrograms(programs);
+
+
         setLoading(true);
     }, [userContext.user.user]);
 
@@ -241,94 +242,104 @@ const UserPage = observer(() => {
             {/* Программа пользователя */}
             <div className="mt-16">
                 <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-left">Ваша программа</h2>
-                <div className="flex justify-between gap-2">
-                    {program ? (
-                        <Link
-                            to={COURSE_ROUTE.replace(':id', String(program.id))}
-                            onClick={() => localStorage.removeItem('arr_open')}
-                            className="block relative rounded-3xl bg-gradient-to-br from-white via-blue-50 to-indigo-50 border border-gray-100 shadow-md overflow-hidden"
-                        >
-                            <div className="flex flex-col lg:flex-row items-center lg:items-stretch">
-
-                                {/* 🖼 Cover */}
-                                <div className="relative lg:w-[320px] w-full max-h-[250px] flex-shrink-0">
-
-                                    {program.img ? (
-                                        <img
-                                            src={process.env.REACT_APP_API_URL + program.img}
-                                            alt={program.title ?? "Course cover"}
-                                            className="w-full h-full object-cover lg:rounded-l-3xl"
-                                        />
-                                    ) : (
-                                        <div
-                                            className="w-full h-full min-h-[220px] flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100 lg:rounded-l-3xl">
-                                            <span className="text-4xl font-bold text-indigo-300">
-                                                {program.title?.charAt(0)}
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    {/* subtle overlay */}
-                                    <div className="absolute inset-0 bg-black/5 lg:rounded-l-3xl"/>
-                                </div>
-
-                                {/* 📝 Content */}
-                                <div className="flex-1 p-10 space-y-6">
-
-                                    {/* Title + badges */}
-                                    <div className="space-y-4">
-
-                                        <div className="flex flex-wrap items-center gap-4">
-                                            <h1 className="text-3xl font-bold text-[#2C3E50] text-left">
-                                                {program.title}
-                                            </h1>
+                <div className="flex justify-between gap-4">
 
 
+                    {programs.length > 0 ? (
+                        <div className="flex flex-col gap-4">
+                            {programs.map((program) => {
+                                const progress = program?.enrollment?.progress_percent ?? 0;
 
+                                return (
+                                    <Link
+                                        key={program.id}
+                                        to={COURSE_ROUTE.replace(":id", String(program.id))}
+                                        onClick={() => localStorage.removeItem("arr_open")}
+                                        className="block relative rounded-3xl bg-gradient-to-br from-white via-blue-50 to-indigo-50 border border-gray-100 shadow-md overflow-hidden"
+                                    >
+                                    <div className="flex flex-col lg:flex-row items-center lg:items-stretch">
 
+                                        {/* 🖼 Cover */}
+                                        <div className="relative lg:w-[320px] w-full max-h-[200px] flex-shrink-0">
+
+                                            {program.img ? (
+                                                <img
+                                                    src={process.env.REACT_APP_API_URL + program.img}
+                                                    alt={program.title ?? "Course cover"}
+                                                    className="w-full h-full object-cover lg:rounded-l-3xl"
+                                                />
+                                            ) : (
+                                                <div
+                                                    className="w-full h-full min-h-[170px] flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100 lg:rounded-l-3xl">
+                                                    <span className="text-4xl font-bold text-indigo-300">
+                                                        {program.title?.charAt(0)}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* subtle overlay */}
+                                            <div className="absolute inset-0 bg-black/5 lg:rounded-l-3xl"/>
                                         </div>
 
+                                        {/* 📝 Content */}
+                                        <div className="flex-1 px-10 py-7 space-y-6">
 
+                                            {/* Title + badges */}
+                                            <div className="space-y-4">
+
+                                                <div className="flex flex-wrap items-center gap-4">
+                                                    <h1 className="text-3xl font-bold text-[#2C3E50] text-left">
+                                                        {program.title}
+                                                    </h1>
+
+
+
+
+                                                </div>
+
+
+                                            </div>
+
+                                            {/* 📊 Progress */}
+                                            <div className="max-w-xl space-y-2">
+
+                                                <div className="flex justify-between text-sm text-gray-500">
+                                                    <span>Прогресс обучения</span>
+                                                    <span className="font-semibold text-gray-700">
+                                        {progress}%
+                                    </span>
+                                                </div>
+
+                                                <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500"
+                                                        style={{width: `${progress}%`}}
+                                                    />
+                                                </div>
+
+                                                <div className="text-sm text-gray-500">
+                                                    {progress === 100
+                                                        ? "Курс завершён 🎉"
+                                                        : "Продолжайте обучение"}
+                                                </div>
+                                            </div>
+
+                                        </div>
                                     </div>
 
-                                    {/* 📊 Progress */}
-                                    <div className="max-w-xl space-y-2">
-
-                                        <div className="flex justify-between text-sm text-gray-500">
-                                            <span>Прогресс обучения</span>
-                                            <span className="font-semibold text-gray-700">
-                                {progress}%
-                            </span>
-                                        </div>
-
-                                        <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500"
-                                                style={{width: `${progress}%`}}
-                                            />
-                                        </div>
-
-                                        <div className="text-sm text-gray-500">
-                                            {progress === 100
-                                                ? "Курс завершён 🎉"
-                                                : "Продолжайте обучение"}
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            {/* decoration */}
-                            <div
-                                className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-100 rounded-full blur-3xl opacity-40"/>
-                        </Link>
-                    ) : (
-                        <div className="rounded-3xl bg-white border border-gray-100 shadow-md p-10 text-gray-500">
-                            У вас пока нет назначенной программы обучения.
+                                    {/* decoration */}
+                                    <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-100 rounded-full blur-3xl opacity-40"/>
+                                    </Link>
+                                );
+                            })}
                         </div>
-                    )}
+                    ) : (
+                            <div className="rounded-3xl bg-white border border-gray-100 shadow-md p-10 text-gray-500">
+                                У вас пока нет назначенной программы обучения.
+                            </div>
+                        )}
                     {/* Как учиться */}
-                    <a href="../../../assets/files/how_learn.pdf" className="rounded-3xl bg-gradient-to-br from-white via-blue-50 to-indigo-50 border border-gray-100 shadow-md p-6 w-full md:w-1/3 flex flex-col items-start gap-4">
+                    <a href={how_learn} className="h-[200px] rounded-3xl bg-gradient-to-br from-white via-blue-50 to-indigo-50 border border-gray-100 shadow-md p-6 w-full md:w-1/3 flex flex-col items-start gap-4">
                         <div className="flex items-center gap-4">
                             <div className="w-28">
                                 <img src={how} alt=""/>
@@ -343,9 +354,9 @@ const UserPage = observer(() => {
                         </div>
                     </a>
                 </div>
-
-
             </div>
+
+
 
             {
                 progress === 100 &&
