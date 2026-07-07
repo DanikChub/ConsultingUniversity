@@ -23,6 +23,8 @@ export interface MessageAttachment {
     updatedAt: string
 }
 
+
+
 export interface Message {
     id: number
     chatId: number
@@ -33,6 +35,14 @@ export interface Message {
     editedAt?: string | null
     readAt?: string | null
     message_attachments?: MessageAttachment[]
+
+    sender?: {
+        id: number;
+        name: string;
+        email: string;
+        img?: string | null;
+        role: "USER" | "ADMIN";
+    };
 }
 
 

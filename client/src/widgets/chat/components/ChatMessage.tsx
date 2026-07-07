@@ -93,36 +93,56 @@ const ChatMessage: React.FC<Props> = ({ message,
     `}
         >
             {/* AVATAR */}
-            {!isOwn && !isGrouped && (
+            {!isGrouped && (
                 avatarUrl ? (
                     <img
                         src={avatarUrl}
                         className="w-8 h-8 rounded-full object-cover shadow-sm"
                     />
                 ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-xs text-gray-600">
+                    <div
+                        className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-xs text-gray-600">
                         {name?.[0]?.toUpperCase()}
                     </div>
                 )
             )}
-            {!isOwn && isGrouped && <div className="w-8" />}
+
+            {isGrouped && <div className="w-8"/>}
 
             <div className="relative group max-w-[65%]">
-
+                {!isGrouped && (
+                    <div
+                        className={`
+                        mb-1 text-xs font-medium text-gray-500
+                        ${isOwn ? "text-right" : "text-left"}
+                    `}
+                    >
+                        {name}
+                    </div>
+                )}
                 {/* ======================= */}
                 {/* 🖼 ONLY IMAGES MODE */}
                 {/* ======================= */}
 
                 {isOnlyImages && (
                     <div className="relative max-w-[420px]">
-
+                        {!isGrouped && (
+                            <div
+                                className={`
+                                    mb-1 text-xs font-medium text-gray-500
+                                    ${isOwn ? "text-right" : "text-left"}
+                                `}
+                            >
+                                {name}
+                            </div>
+                        )}
                         <div
                             className={`
-              grid gap-1
-              ${images.length === 1 && "grid-cols-1"}
-              ${images.length === 2 && "grid-cols-2"}
-              ${images.length >= 3 && "grid-cols-2"}
-            `}
+                                      grid gap-1
+                                      ${images.length === 1 && "grid-cols-1"}
+                                      ${images.length === 2 && "grid-cols-2"}
+                                      ${images.length >= 3 && "grid-cols-2"}
+                                    `}
                         >
                             {images.slice(0, 4).map((file) => (
                                 <div
@@ -138,12 +158,13 @@ const ChatMessage: React.FC<Props> = ({ message,
                     transition duration-300 group-hover:scale-[1.03]
                   `}
                                     />
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition" />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition"/>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[11px] px-2 py-0.5 rounded-md flex items-center gap-1 backdrop-blur-sm">
+                        <div
+                            className="absolute bottom-2 right-2 bg-black/60 text-white text-[11px] px-2 py-0.5 rounded-md flex items-center gap-1 backdrop-blur-sm">
                             <span>{makeTime(message.createdAt)}</span>
 
                             {isOwn && (
@@ -275,8 +296,8 @@ const ChatMessage: React.FC<Props> = ({ message,
                             transition
                             overflow-visible
                             ${isOwn
-                                            ? "bg-[#3390ec] text-white"
-                                            : "bg-gray-50 border border-gray-200 text-gray-800"}
+                            ? "bg-[#3390ec] text-white"
+                            : "bg-gray-50 border border-gray-200 text-gray-800"}
                           `}
                     >
                         {message.text && (
@@ -300,7 +321,6 @@ const ChatMessage: React.FC<Props> = ({ message,
                                 )}
                             </>
                         )}
-
 
 
                         <div className="absolute right-3 bottom-1.5 flex items-end gap-1 text-[11px] opacity-70">

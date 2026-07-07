@@ -123,6 +123,11 @@ class ChatController {
                         include: [
                             {
                                 model: MessageAttachment
+                            },
+                            {
+                                model: User,
+                                as: "sender",
+                                attributes: ["id", "name", "email", "img", "role"]
                             }
                         ],
                         order: [["createdAt", "ASC"]]
@@ -174,6 +179,11 @@ class ChatController {
                     {
                         model: MessageAttachment,
                         required: false
+                    },
+                    {
+                        model: User,
+                        as: "sender",
+                        attributes: ["id", "name", "email", "img", "role"]
                     }
                 ],
                 order: [["createdAt", "DESC"]],
@@ -264,10 +274,18 @@ class ChatController {
 
             await chat.save()
 
-            const fullMessage = {
-                ...message.toJSON(),
-                message_attachments: attachments
-            }
+            const fullMessage = await Message.findByPk(message.id, {
+                include: [
+                    {
+                        model: MessageAttachment
+                    },
+                    {
+                        model: User,
+                        as: "sender",
+                        attributes: ["id", "name", "email", "img", "role"]
+                    }
+                ]
+            })
 
             req.io.to(`chat:${chatId}`).emit("new_message", fullMessage)
 

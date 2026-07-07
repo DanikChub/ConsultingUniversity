@@ -422,7 +422,7 @@ const Chat: React.FC<ChatProps> = ({chatId, own}) => {
                                                 own == "ADMIN" ?
                                                     chatUser?.name || "Собеседник"
                                                 :
-                                                    "Администратор"
+                                                    "Поддержка Консалтинг-Волга"
                                             }
 
                                         </Link>
@@ -496,13 +496,19 @@ const Chat: React.FC<ChatProps> = ({chatId, own}) => {
                                                     own={own}
                                                     isGrouped={isGrouped}
                                                     avatarUrl={
-                                                        !isGrouped && msg.senderType !== own
-                                                            ? msg.senderType === "ADMIN"
-                                                                ? admin_avatar
-                                                                : process.env.REACT_APP_API_URL + chatUser?.img
-                                                            : undefined
+                                                        msg.senderType === "ADMIN"
+                                                            ? msg.sender?.img
+                                                                ? API_URL + '/' + msg.sender.img
+                                                                : admin_avatar
+                                                            : chatUser?.img
+                                                                ? API_URL + '/' + chatUser.img
+                                                                : undefined
                                                     }
-                                                    name={chatUser?.name}
+                                                    name={
+                                                        msg.senderType === "ADMIN"
+                                                            ? msg.sender?.name || "Администратор"
+                                                            : chatUser?.name || "Пользователь"
+                                                    }
                                                     lastReadUserMessageId={chat.lastReadUserMessageId}
                                                     lastReadAdminMessageId={chat.lastReadAdminMessageId}
                                                     onEdit={handleEdit}

@@ -1,60 +1,83 @@
-import React, { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
+import { useSocket } from "../../hooks/useSocket";
 import {
-    ADMIN_PROGRAMS_ROUTE,
-    ADMIN_LISTENERS_ROUTE,
-    ADMIN_ROUTE,
+    ADMIN_ADMINISTRATORS_ROUTE,
     ADMIN_DOCUMENTS_ROUTE,
-    CHAT_USERS_PAGE_ROUTE, ADMIN_ADMINISTRATORS_ROUTE, ADMIN_ENROLLMENTS_ROUTE
-} from '../../shared/utils/consts';
-
+    ADMIN_LISTENERS_ROUTE,
+    ADMIN_PROGRAMS_ROUTE,
+    ADMIN_ROUTE,
+    CHAT_USERS_PAGE_ROUTE
+} from "../../shared/utils/consts";
 
 const LeftMenu: React.FC = () => {
-    const [unreadMessages, setUnreadMessages] = useState<string>('0');
+    const [unreadMessages, setUnreadMessages] = useState(0);
+    const socket = useSocket();
 
+    useEffect(() => {
+        if (!socket) return;
 
+        socket.emit("get_unread_count");
+
+        socket.on("chat_unread_count", ({ unreadCount }) => {
+            setUnreadMessages(unreadCount);
+        });
+
+        socket.on("chat_updated", () => {
+            socket.emit("get_unread_count");
+        });
+
+        socket.on("chat_read_updated", () => {
+            socket.emit("get_unread_count");
+        });
+
+        return () => {
+            socket.off("chat_unread_count");
+            socket.off("chat_updated");
+            socket.off("chat_read_updated");
+        };
+    }, [socket]);
 
     const menuItems = [
-        { name: 'Главная', path: ADMIN_ROUTE, end: true },
-        { name: 'Слушатели', path: ADMIN_LISTENERS_ROUTE },
-        { name: 'Сообщения', path: CHAT_USERS_PAGE_ROUTE, unreadCount: unreadMessages },
-        { name: 'Программы', path: ADMIN_PROGRAMS_ROUTE },
-        { name: 'Дипломы', path: ADMIN_DOCUMENTS_ROUTE },
-        { name: 'Администраторы', path: ADMIN_ADMINISTRATORS_ROUTE },
+        { name: "Главная", path: ADMIN_ROUTE, end: true },
+        { name: "Слушатели", path: ADMIN_LISTENERS_ROUTE },
+        {
+            name: "Сообщения",
+            path: CHAT_USERS_PAGE_ROUTE,
+            unreadCount: unreadMessages,
+        },
+        { name: "Программы", path: ADMIN_PROGRAMS_ROUTE },
+        { name: "Дипломы", path: ADMIN_DOCUMENTS_ROUTE },
+        { name: "Администраторы", path: ADMIN_ADMINISTRATORS_ROUTE },
     ];
 
-
-
     return (
-        <div
-            className="sticky top-0 self-start h-screen w-56 bg-white shadow-lg flex flex-col py-6 px-2 overflow-y-auto">
+        <div className="sticky top-0 self-start h-screen w-56 bg-white shadow-lg flex flex-col py-6 px-2 overflow-y-auto">
             {menuItems.map((item, index) => (
                 <NavLink
                     key={index}
                     to={item.path}
                     end={item.end || false}
-                    className={({isActive}) =>
+                    className={({ isActive }) =>
                         `flex items-center justify-between px-4 py-2 mb-2 rounded-lg transition-all duration-200
-        hover:bg-blue-100 hover:text-blue-700
-        ${isActive ? 'bg-blue-600 text-white font-semibold shadow-md' : 'text-gray-700'}`
+                        hover:bg-blue-100 hover:text-blue-700
+                        ${
+                            isActive
+                                ? "bg-blue-600 text-white font-semibold shadow-md"
+                                : "text-gray-700"
+                        }`
                     }
                 >
-                    <div className="flex items-center gap-2">
-                        {/* Если есть иконка */}
-                        {item.icon && <item.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-500'}`}/>}
-                        <span>{item.name}</span>
-                    </div>
+                    <span>{item.name}</span>
 
-                    {/* Badge для уведомлений */}
-                    {item.unreadCount && parseInt(item.unreadCount) > 0 && (
+                    {item.unreadCount !== undefined && item.unreadCount > 0 && (
                         <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-          {item.unreadCount}
-        </span>
+                            {item.unreadCount}
+                        </span>
                     )}
                 </NavLink>
             ))}
         </div>
-
     );
 };
 

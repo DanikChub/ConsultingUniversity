@@ -95,6 +95,16 @@ module.exports = (models) => {
     Chat.hasMany(Message, { foreignKey: "chatId" });
     Message.belongsTo(Chat, { foreignKey: "chatId" });
 
+    User.hasMany(Message, {
+        foreignKey: "senderId",
+        as: "sentMessages",
+    });
+
+    Message.belongsTo(User, {
+        foreignKey: "senderId",
+        as: "sender",
+    });
+
     Message.hasMany(MessageAttachment);
     MessageAttachment.belongsTo(Message);
 
