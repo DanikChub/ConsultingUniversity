@@ -4,7 +4,7 @@ const kit_buttons = document.querySelectorAll('.kit_button');
 const items = [
     {id: 1, link: "./courses/specialist.html", img: 'intro_4.png', title: "Специалист в сфере  закупок (44-ФЗ)  для заказчиков", diplom: false, description: "Повышение квалификации 144 академических часа", price: "9 700"},
     {id: 2, link: "./courses/expert.html", img: 'intro_2.png', title: "Эксперт в сфере закупок (44-ФЗ, 223-ФЗ)  для заказчиков", diplom: true, description: "Профпереподготовка 260 академических часов", price: "12 700"},
-    {id: 2, link: "./courses/contract_system.html", img: 'intro_5.png', title: "Контрактная система в сфере закупок  для руководителей (44-ФЗ)", diplom: false, description: "Повышение квалификации 40 академических часов", price: "5 700"},
+    {id: 2, link: "./courses/contract_system.html", img: 'intro_5.png', title: "Контрактная система в сфере закупок  для руководителей (44-ФЗ)", diplom: false, description: "Повышение квалификации 40 академических часов", price: "4 500"},
    
 ]
 

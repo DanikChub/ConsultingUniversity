@@ -1,4 +1,4 @@
-import { FC } from "react";
+import React, { FC } from "react";
 import { useModals } from "../../../providers/ModalProvider"; // твой провайдер
 import type { Program, Theme, File } from "../../../entities/program/model/type";
 import type { ProgramProgress, ContentProgress } from "../../../entities/progress/model/type";
@@ -36,6 +36,12 @@ const GradeBookModal: FC<Props> = ({ program, progress, onClose }) => {
         };
     }) || [];
 
+    const finalTestStatus = program.test
+        ? progress.byContent[`test-${program.test.id}`]?.status
+        : null;
+
+    const finalTestCompleted = finalTestStatus === "completed";
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fadeIn">
             <div className="w-full max-w-3xl rounded-xl bg-white p-6 shadow-xl relative">
@@ -62,6 +68,24 @@ const GradeBookModal: FC<Props> = ({ program, progress, onClose }) => {
                             )}
                         </div>
                     ))}
+
+                    {program.test && (
+                        <div className="flex justify-between items-center p-4 rounded-xl border border-blue-100 bg-blue-50">
+                        <span className="font-medium text-gray-700">
+                            {program.test.title ?? "Финальный тест"}
+                        </span>
+
+                            {finalTestCompleted ? (
+                                <div className="flex items-center gap-1 text-green-600 font-semibold">
+                                    <FiCheckCircle /> Зачёт
+                                </div>
+                            ) : (
+                                <div className="text-gray-400 font-medium">
+                                    Не пройден
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {themesWithCompletion.every(t => !t.completed) && (
                         <div className="text-center text-gray-500 py-10">

@@ -50,14 +50,7 @@ const SetInitialPasswordPage: React.FC = () => {
             user.setUser(userData);
             user.setIsAuth(true);
 
-            if (userData.programs?.length > 0) {
-                const programId = userData.programs[0].id;
-                const enrollment = await getEnrollmentByProgram(programId, userData.id);
 
-                if (enrollment) {
-                    user.setEnrollmentId(enrollment.id);
-                }
-            }
 
             if (userData.role === 'USER') {
                 navigate(USER_ROUTE);

@@ -422,7 +422,7 @@ const Chat: React.FC<ChatProps> = ({chatId, own}) => {
                                                 own == "ADMIN" ?
                                                     chatUser?.name || "Собеседник"
                                                 :
-                                                    "Поддержка Консалтинг-Волга"
+                                                    "Чат с преподавателем"
                                             }
 
                                         </Link>

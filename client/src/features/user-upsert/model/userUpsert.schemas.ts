@@ -2,21 +2,34 @@ import { z } from 'zod';
 
 const nullableStringField = z.string().trim();
 
+const nameSchema = z
+    .string()
+    .trim()
+    .min(1, 'Укажите ФИО')
+    .max(255, 'ФИО слишком длинное')
+    .refine(
+        (value) => value.split(/\s+/).filter(Boolean).length >= 2,
+        {
+            message: 'Введите минимум фамилию и имя',
+        }
+    )
+    .regex(
+        /^[А-Яа-яЁёA-Za-z'-]+(?:\s+[А-Яа-яЁёA-Za-z'-]+)+$/,
+        'ФИО содержит недопустимые символы'
+    );
+
 const baseListenerSchema = z.object({
     login: z
         .string()
         .trim()
         .min(1, 'Укажите логин')
         .max(50, 'Логин слишком длинный')
-        .regex(/^[a-z0-9._-]+$/i, 'Логин может содержать только буквы, цифры, ".", "_" и "-"'),
+        .regex(
+            /^[a-z0-9._-]+$/i,
+            'Логин может содержать только буквы, цифры, ".", "_" и "-"'
+        ),
 
-    name: z
-        .string()
-        .trim()
-        .min(1, 'Укажите ФИО')
-        .refine((value) => value.split(/\s+/).filter(Boolean).length === 3, {
-            message: 'Введите Фамилию Имя Отчество',
-        }),
+    name: nameSchema,
 
     email: z.string().trim().optional().or(z.literal('')),
     password: z.string(),
@@ -47,15 +60,12 @@ const baseAdminSchema = z.object({
         .trim()
         .min(1, 'Укажите логин')
         .max(50, 'Логин слишком длинный')
-        .regex(/^[a-z0-9._-]+$/i, 'Логин может содержать только буквы, цифры, ".", "_" и "-"'),
+        .regex(
+            /^[a-z0-9._-]+$/i,
+            'Логин может содержать только буквы, цифры, ".", "_" и "-"'
+        ),
 
-    name: z
-        .string()
-        .trim()
-        .min(1, 'Укажите ФИО')
-        .refine((value) => value.split(/\s+/).filter(Boolean).length === 3, {
-            message: 'Введите Фамилию Имя Отчество',
-        }),
+    name: nameSchema,
 
     email: z.string().trim().optional().or(z.literal('')),
     password: z.string(),

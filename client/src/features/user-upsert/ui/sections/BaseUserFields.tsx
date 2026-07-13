@@ -17,16 +17,21 @@ const normalizeLogin = (value: string) => {
 };
 
 const normalizeName = (value: string) => {
-    let next = value.replace(/[^А-Яа-яЁёA-Za-z\s]/g, "");
-    next = next.replace(/\s+/g, " ");
-    next = next.replace(/^\s/, "");
+    return value
+        // Только буквы, пробелы, дефисы и апострофы
+        .replace(/[^А-Яа-яЁёA-Za-z\s'-]/g, "")
 
-    const words = next.split(" ").filter(Boolean);
-    if (words.length > 3) {
-        return words.slice(0, 3).join(" ");
-    }
+        // Несколько пробелов подряд -> один
+        .replace(/\s+/g, " ")
 
-    return next;
+        // Несколько дефисов подряд -> один
+        .replace(/-+/g, "-")
+
+        // Несколько апострофов подряд -> один
+        .replace(/'+/g, "'")
+
+        // Убираем пробел в начале
+        .replace(/^\s+/, "");
 };
 
 const generateTemporaryPassword = () => {

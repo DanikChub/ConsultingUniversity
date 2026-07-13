@@ -169,7 +169,10 @@ interface ProgramsCellProps {
     onOpenProgram: (programId?: number | null) => void;
 }
 
-const ProgramsCell: React.FC<ProgramsCellProps> = ({ user, onOpenProgram }) => {
+const ProgramsCell: React.FC<ProgramsCellProps> = ({
+                                                       user,
+                                                       onOpenProgram,
+                                                   }) => {
     if (!user.programs || user.programs.length === 0) {
         return (
             <div className="text-gray-400">
@@ -178,35 +181,48 @@ const ProgramsCell: React.FC<ProgramsCellProps> = ({ user, onOpenProgram }) => {
         );
     }
 
-    const firstProgram = user.programs[0];
-    const extraCount = user.programs.length - 1;
-
     return (
         <div className="min-w-0 space-y-2">
-            <button
-                type="button"
-                onClick={() => onOpenProgram(firstProgram.id)}
-                className="block max-w-full truncate text-left font-medium hover:text-blue-700"
-                title={firstProgram.title}
-            >
-                {firstProgram.short_title || firstProgram.title}
-            </button>
+            {user.programs.map((program) => (
+                <div
+                    key={program.id}
+                    className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2"
+                >
+                    <button
+                        type="button"
+                        onClick={() => onOpenProgram(program.id)}
+                        className="
+                            block
+                            w-full
+                            truncate
+                            text-left
+                            text-xs
+                            font-medium
+                            text-[#2C3E50]
+                            hover:text-blue-700
+                        "
+                        title={program.title}
+                    >
+                        {program.short_title || program.title}
+                    </button>
 
-            <div className="flex items-center gap-2">
-                <EnrollmentBadge status={firstProgram.enrollment?.status} />
+                    <div className="mt-2 flex items-center gap-2">
+                        <EnrollmentBadge
+                            status={program.enrollment?.status}
+                        />
 
-                {firstProgram.progress != null ? (
-                    <ProgressBar value={firstProgram.progress} />
-                ) : (
-                    <span className="text-xs text-gray-400">—</span>
-                )}
-            </div>
-
-            {extraCount > 0 && (
-                <div className="text-xs text-gray-400">
-                    + еще {extraCount}
+                        {program.progress != null ? (
+                            <div className="min-w-0 flex-1">
+                                <ProgressBar value={program.progress} />
+                            </div>
+                        ) : (
+                            <span className="text-xs text-gray-400">
+                                —
+                            </span>
+                        )}
+                    </div>
                 </div>
-            )}
+            ))}
         </div>
     );
 };

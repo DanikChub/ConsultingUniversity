@@ -1,12 +1,21 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: "smtp.yandex.ru",
+    port: 465,
+    secure: true,
+
     auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
     },
+
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 20_000,
 });
+
+
 
 function getCompletionEmailHtml(userName, programName) {
     return `
@@ -180,15 +189,28 @@ function getWelcomeEmailHtml(userName, login, password) {
 
 async function sendWelcomeEmail(toEmail, userName, login, password) {
     try {
-        await transporter.sendMail({
-            from: process.env.MAIL_USER,
+        const info = await transporter.sendMail({
+            from: `"Consulting University" <${process.env.MAIL_USER}>`,
             to: toEmail,
             subject: "Добро пожаловать в Consulting University",
             html: getWelcomeEmailHtml(userName, login, password),
         });
+
+        console.log("Welcome email sent:", {
+            to: toEmail,
+            messageId: info.messageId,
+        });
+
+        return {
+            success: true,
+        };
     } catch (err) {
         console.error("Ошибка отправки welcome-письма:", err);
-        return null;
+
+        return {
+            success: false,
+            error: err.message,
+        };
     }
 }
 

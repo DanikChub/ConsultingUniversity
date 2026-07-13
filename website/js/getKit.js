@@ -29,7 +29,7 @@ const items = [
         diplom: false,
         description: "Повышение квалификации 40 академических часов",
 
-        price: "5 700"
+        price: "4 500"
     },
    
 ]
