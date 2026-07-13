@@ -3,6 +3,7 @@ import {
     FiArchive,
     FiBookOpen,
     FiCheckCircle,
+    FiChevronDown,
     FiExternalLink,
     FiRefreshCcw,
     FiTrendingUp,
@@ -29,7 +30,7 @@ const ListenerProgramCard: React.FC<ListenerProgramCardProps> = ({
                                                                      onChanged,
                                                                  }) => {
     const [loading, setLoading] = useState(false);
-
+    const [expanded, setExpanded] = useState(false);
 
     const status = program.status;
 
@@ -94,7 +95,7 @@ const ListenerProgramCard: React.FC<ListenerProgramCardProps> = ({
                             {program.title}
                         </h3>
 
-                        <StatusBadge status={status} />
+                        <StatusBadge status={status}/>
                     </div>
 
                     <div className="mt-2 text-left text-sm text-gray-500">
@@ -108,7 +109,7 @@ const ListenerProgramCard: React.FC<ListenerProgramCardProps> = ({
                         to={`/admin/programs/${program.programId}`}
                         className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-600 transition hover:border-blue-500 hover:text-blue-600"
                     >
-                        <FiExternalLink />
+                        <FiExternalLink/>
                         Открыть
                     </Link>
 
@@ -117,7 +118,7 @@ const ListenerProgramCard: React.FC<ListenerProgramCardProps> = ({
                         onClick={onOpenGradeBook}
                         className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-600 transition hover:border-blue-500 hover:text-blue-600"
                     >
-                        <FiBookOpen />
+                        <FiBookOpen/>
                         Зачетка
                     </button>
 
@@ -128,7 +129,7 @@ const ListenerProgramCard: React.FC<ListenerProgramCardProps> = ({
                             disabled={loading}
                             className="flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2 text-sm text-white transition hover:bg-green-700 disabled:bg-gray-300"
                         >
-                            <FiRefreshCcw />
+                            <FiRefreshCcw/>
                             Восстановить
                         </button>
                     ) : status === "completed" ? (
@@ -137,7 +138,7 @@ const ListenerProgramCard: React.FC<ListenerProgramCardProps> = ({
                             className="flex items-center gap-2 rounded-xl bg-gray-100 px-4 py-2 text-sm text-gray-500"
                             disabled
                         >
-                            <FiCheckCircle />
+                            <FiCheckCircle/>
                             Завершено
                         </button>
                     ) : (
@@ -148,7 +149,7 @@ const ListenerProgramCard: React.FC<ListenerProgramCardProps> = ({
                                 disabled={loading}
                                 className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700 disabled:bg-gray-300"
                             >
-                                <FiCheckCircle />
+                                <FiCheckCircle/>
                                 Завершить
                             </button>
 
@@ -158,7 +159,7 @@ const ListenerProgramCard: React.FC<ListenerProgramCardProps> = ({
                                 disabled={loading}
                                 className="flex items-center gap-2 rounded-xl bg-gray-100 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-200 disabled:bg-gray-200"
                             >
-                                <FiArchive />
+                                <FiArchive/>
                                 Архивировать
                             </button>
                         </>
@@ -166,75 +167,103 @@ const ListenerProgramCard: React.FC<ListenerProgramCardProps> = ({
                 </div>
             </div>
 
-            <div className="mt-6">
-                <div className="mb-2 flex items-center justify-between text-sm">
-                    <span className="text-gray-500">Завершенность</span>
-                    <span className="font-medium text-gray-700">
-                        {program.progress.percent}%
-                    </span>
-                </div>
+            <button
+                type="button"
+                onClick={() => setExpanded(prev => !prev)}
+                className="mt-5 flex w-full items-center justify-between rounded-2xl bg-gray-50 px-4 py-3 text-sm font-medium text-gray-600 transition hover:bg-gray-100"
+            >
+                <span>
+                    {expanded ? "Скрыть подробности" : "Подробнее о прогрессе"}
+                </span>
 
-                <div className="h-3 overflow-hidden rounded-full bg-gray-200">
-                    <div
-                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-700"
-                        style={{ width: `${program.progress.percent}%` }}
-                    />
-                </div>
-            </div>
-
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
-                <StatCard
-                    icon={<FiBookOpen />}
-                    label="Материалов"
-                    value={program.totalContent}
+                <FiChevronDown
+                    className={[
+                        "text-lg transition-transform duration-300",
+                        expanded ? "rotate-180" : "",
+                    ].join(" ")}
                 />
+            </button>
+            <div
+                className={[
+                    "grid transition-all duration-300 ease-in-out",
+                    expanded
+                        ? "grid-rows-[1fr] opacity-100"
+                        : "grid-rows-[0fr] opacity-0",
+                ].join(" ")}
+            >
+                <div className="overflow-hidden">
+                    <div className="mt-6">
+                        <div className="mb-2 flex items-center justify-between text-sm">
+                            <span className="text-gray-500">Завершенность</span>
 
-                <StatCard
-                    icon={<FiCheckCircle />}
-                    label="Завершено"
-                    value={completedCount}
-                />
+                            <span className="font-medium text-gray-700">
+                    {program.progress.percent}%
+                </span>
+                        </div>
 
-                <StatCard
-                    icon={<FiTrendingUp />}
-                    label="В процессе"
-                    value={inProgressCount}
-                />
-            </div>
-
-            {program.testStats.length > 0 && (
-                <div className="mt-6 rounded-2xl bg-gray-50 p-4">
-                    <div className="mb-3 text-left text-sm font-semibold text-gray-700">
-                        Тесты
-                    </div>
-
-                    <div className="space-y-2">
-                        {program.testStats.map(test => (
+                        <div className="h-3 overflow-hidden rounded-full bg-gray-200">
                             <div
-                                key={test.testId}
-                                className="flex items-center justify-between rounded-xl bg-white px-4 py-3 text-sm"
-                            >
-                                <div className="min-w-0">
-                                    <div className="truncate font-medium text-gray-700">
-                                        {test.title || `Тест #${test.testId}`}
-                                    </div>
-
-                                    <div className="mt-0.5 text-xs text-gray-400">
-                                        Попыток: {test.attemptsCount} · Успешных:{" "}
-                                        {test.passedCount}
-                                    </div>
-                                </div>
-
-                                <div className="shrink-0 font-semibold text-indigo-600">
-                                    {test.bestScore !== null
-                                        ? `${test.bestScore}%`
-                                        : "—"}
-                                </div>
-                            </div>
-                        ))}
+                                className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-700"
+                                style={{width: `${program.progress.percent}%`}}
+                            />
+                        </div>
                     </div>
+
+                    <div className="mt-6 grid gap-4 md:grid-cols-3">
+                        <StatCard
+                            icon={<FiBookOpen/>}
+                            label="Материалов"
+                            value={program.totalContent}
+                        />
+
+                        <StatCard
+                            icon={<FiCheckCircle/>}
+                            label="Завершено"
+                            value={completedCount}
+                        />
+
+                        <StatCard
+                            icon={<FiTrendingUp/>}
+                            label="В процессе"
+                            value={inProgressCount}
+                        />
+                    </div>
+
+                    {program.testStats.length > 0 && (
+                        <div className="mt-6 rounded-2xl bg-gray-50 p-4">
+                            <div className="mb-3 text-left text-sm font-semibold text-gray-700">
+                                Тесты
+                            </div>
+
+                            <div className="space-y-2">
+                                {program.testStats.map(test => (
+                                    <div
+                                        key={test.testId}
+                                        className="flex items-center justify-between rounded-xl bg-white px-4 py-3 text-sm"
+                                    >
+                                        <div className="min-w-0">
+                                            <div className="truncate font-medium text-gray-700">
+                                                {test.title || `Тест #${test.testId}`}
+                                            </div>
+
+                                            <div className="mt-0.5 text-xs text-gray-400">
+                                                Попыток: {test.attemptsCount} · Успешных:{" "}
+                                                {test.passedCount}
+                                            </div>
+                                        </div>
+
+                                        <div className="shrink-0 font-semibold text-indigo-600">
+                                            {test.bestScore !== null
+                                                ? `${test.bestScore}%`
+                                                : "—"}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
-            )}
+            </div>
         </div>
     );
 };
@@ -243,7 +272,7 @@ interface StatusBadgeProps {
     status: string;
 }
 
-const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
+const StatusBadge: React.FC<StatusBadgeProps> = ({status}) => {
     const map: Record<string, string> = {
         active: "Обучается",
         paused: "Пауза",
@@ -276,7 +305,7 @@ interface StatCardProps {
     value: string | number;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ icon, label, value }) => {
+const StatCard: React.FC<StatCardProps> = ({icon, label, value}) => {
     return (
         <div className="flex items-center gap-3 rounded-2xl bg-gray-50 p-4">
             <div className="text-lg text-indigo-500">{icon}</div>
