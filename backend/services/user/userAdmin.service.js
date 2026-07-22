@@ -310,7 +310,10 @@ class UserAdminService {
             };
         }
 
+        // Освобождаем логин
+        user.login = `${user.login}_deleted_${user.id}}`;
         user.is_delete = true;
+
         await user.save();
 
         await Event.create({
@@ -359,6 +362,99 @@ class UserAdminService {
 
         return {
             message: "Пользователь восстановлен",
+            user,
+        };
+    }
+
+    async blockUser(userId, durationMinutes, reason) {
+        const user = await User.findOne({
+            where: {
+                id: userId,
+                role: "USER",
+                is_delete: false,
+            },
+        });
+
+        if (!user) {
+            throw ApiError.notFound("Пользователь не найден");
+        }
+
+        if (!reason?.trim()) {
+            throw ApiError.badRequest("Необходимо указать причину блокировки");
+        }
+
+        let blockedUntil = null;
+
+        if (durationMinutes !== null && durationMinutes !== undefined) {
+            const minutes = Number(durationMinutes);
+
+            if (!Number.isFinite(minutes) || minutes <= 0) {
+                throw ApiError.badRequest(
+                    "Некорректная продолжительность блокировки"
+                );
+            }
+
+            blockedUntil = new Date(Date.now() + minutes * 60 * 1000);
+        }
+
+        await user.update({
+            is_blocked: true,
+            blocked_until: blockedUntil,
+            block_reason: reason.trim(),
+        });
+
+        await Event.create({
+            event_text: "Пользователь заблокирован",
+            name: user.name,
+            organization: user.organization,
+            type: "user",
+            event_id: user.id,
+        });
+
+        return {
+            message: blockedUntil
+                ? "Пользователь временно заблокирован"
+                : "Пользователь заблокирован бессрочно",
+            user,
+        };
+    }
+
+    async unblockUser(userId) {
+        const user = await User.findOne({
+            where: {
+                id: userId,
+                role: "USER",
+                is_delete: false,
+            },
+        });
+
+        if (!user) {
+            throw ApiError.notFound("Пользователь не найден");
+        }
+
+        if (!user.is_blocked) {
+            return {
+                message: "Пользователь уже разблокирован",
+                user,
+            };
+        }
+
+        await user.update({
+            is_blocked: false,
+            blocked_until: null,
+            block_reason: null,
+        });
+
+        await Event.create({
+            event_text: "Пользователь разблокирован",
+            name: user.name,
+            organization: user.organization,
+            type: "user",
+            event_id: user.id,
+        });
+
+        return {
+            message: "Пользователь разблокирован",
             user,
         };
     }

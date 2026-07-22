@@ -436,3 +436,35 @@ export const restoreUser = async (userId: number) => {
 
     return data;
 };
+
+export interface BlockUserPayload {
+    durationMinutes: number | null;
+    reason: string;
+}
+
+export interface UserBlockActionResponse {
+    message: string;
+    user: AdminUserListItem;
+}
+
+export const blockUser = async (
+    userId: number,
+    payload: BlockUserPayload
+): Promise<UserBlockActionResponse> => {
+    const { data } = await $authHost.patch<UserBlockActionResponse>(
+        `api/user/${userId}/block`,
+        payload
+    );
+
+    return data;
+};
+
+export const unblockUser = async (
+    userId: number
+): Promise<UserBlockActionResponse> => {
+    const { data } = await $authHost.patch<UserBlockActionResponse>(
+        `api/user/${userId}/unblock`
+    );
+
+    return data;
+};

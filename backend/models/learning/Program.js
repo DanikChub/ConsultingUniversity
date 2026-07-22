@@ -37,5 +37,11 @@ module.exports = (sequelize) => {
             defaultValue: "draft",
             allowNull: false,
         },
+
+        is_delete: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+        },
     });
 };

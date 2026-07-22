@@ -48,7 +48,7 @@ const ListenerProgramCard: React.FC<ListenerProgramCardProps> = ({
     }, [program.progress.byContent]);
 
     const handleArchive = async () => {
-        const ok = window.confirm("Архивировать доступ к программе?");
+        const ok = window.confirm("Удалить доступ к программе?");
         if (!ok) return;
 
         try {
@@ -100,7 +100,7 @@ const ListenerProgramCard: React.FC<ListenerProgramCardProps> = ({
 
                     <div className="mt-2 text-left text-sm text-gray-500">
                         Прогресс: {program.progress.percent}% · Материалов:{" "}
-                        {program.totalContent}
+                        {completedCount} / {program.totalContent}
                     </div>
                 </div>
 
@@ -160,7 +160,7 @@ const ListenerProgramCard: React.FC<ListenerProgramCardProps> = ({
                                 className="flex items-center gap-2 rounded-xl bg-gray-100 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-200 disabled:bg-gray-200"
                             >
                                 <FiArchive/>
-                                Архивировать
+                                Удалить
                             </button>
                         </>
                     )}
@@ -277,14 +277,14 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({status}) => {
         active: "Обучается",
         paused: "Пауза",
         completed: "Завершено",
-        archived: "Архив",
+        archived: "Удалено",
     };
 
     const classMap: Record<string, string> = {
         active: "bg-blue-50 text-blue-700",
         paused: "bg-yellow-50 text-yellow-700",
         completed: "bg-green-50 text-green-700",
-        archived: "bg-gray-100 text-gray-600",
+        archived: "bg-red-100 text-red-600",
     };
 
     return (

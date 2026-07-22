@@ -30,8 +30,11 @@ const AdminListenerPage: React.FC = () => {
         documents,
         loading,
         error,
+        blockActionLoading,
         reload,
         handleSendMessage,
+        handleBlockUser,
+        handleUnblockUser,
         handleOpenGradeBook,
         handleUserFieldUpdated,
     } = useListenerProfilePage();
@@ -81,6 +84,9 @@ const AdminListenerPage: React.FC = () => {
                     <ListenerHeader
                         user={user}
                         onSendMessage={handleSendMessage}
+                        onBlock={handleBlockUser}
+                        onUnblock={handleUnblockUser}
+                        blockActionLoading={blockActionLoading}
                     />
 
                     <ListenerTabs

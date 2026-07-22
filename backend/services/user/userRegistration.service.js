@@ -35,16 +35,15 @@ class UserRegistrationService {
                 throw ApiError.badRequest("Некорректный временный пароль");
             }
 
-            if (!number) {
-                throw ApiError.badRequest("Некорректный номер");
-            }
-
             if (!Array.isArray(programs_id) || programs_id.length === 0) {
                 throw ApiError.badRequest("Отсутствует программа у пользователя");
             }
 
             const loginExists = await User.findOne({
-                where: { login },
+                where: {
+                    login,
+                    is_delete: false,
+                },
                 transaction: t,
             });
 

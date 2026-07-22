@@ -73,6 +73,9 @@ function programFullInclude() {
 class ProgramQueryService {
     async getAllPrograms() {
         return await Program.findAll({
+            where: {
+                is_delete: false,
+            },
             attributes: {
                 include: [
                     [
@@ -84,21 +87,30 @@ class ProgramQueryService {
             include: [
                 {
                     model: User,
+                    where: {
+                        is_delete: false,
+                    },
                     attributes: [],
                     through: {
-                        where: { status: "active" },
+                        where: {
+                            status: "active",
+                        },
                         attributes: [],
                     },
                     required: false,
                 },
             ],
             group: ["program.id"],
+            order: [["id", "DESC"]],
         });
     }
 
     async getPublishedPrograms() {
         return await Program.findAll({
-            where: { status: "published" },
+            where: {
+                status: "published",
+                is_delete: false,
+            },
             order: [["id", "DESC"]],
             attributes: [
                 "id",
@@ -106,6 +118,8 @@ class ProgramQueryService {
                 "short_title",
                 "price",
                 "img",
+                "status",
+                "is_delete",
                 [
                     sequelize.fn("COUNT", sequelize.col("users.id")),
                     "users_quantity",
@@ -114,10 +128,14 @@ class ProgramQueryService {
             include: [
                 {
                     model: User,
-                    where: { is_delete: false },
+                    where: {
+                        is_delete: false,
+                    },
                     attributes: [],
                     through: {
-                        where: { status: "active" },
+                        where: {
+                            status: "active",
+                        },
                         attributes: [],
                     },
                     required: false,
@@ -129,7 +147,10 @@ class ProgramQueryService {
 
     async getDraftPrograms() {
         return await Program.findAll({
-            where: { status: "draft" },
+            where: {
+                status: "draft",
+                is_delete: false,
+            },
             order: [["id", "DESC"]],
         });
     }
@@ -137,7 +158,10 @@ class ProgramQueryService {
     async getProgramFull(programId) {
         try {
             const program = await Program.findOne({
-                where: { id: programId },
+                where: {
+                    id: programId,
+                    is_delete: false,
+                },
                 include: programFullInclude(),
             });
 
@@ -153,7 +177,9 @@ class ProgramQueryService {
                 include: [
                     {
                         model: User,
-                        where: { is_delete: false },
+                        where: {
+                            is_delete: false,
+                        },
                         required: true,
                     },
                 ],
@@ -172,7 +198,10 @@ class ProgramQueryService {
 
     async getProgramEntityFull(programId) {
         const program = await Program.findOne({
-            where: { id: programId },
+            where: {
+                id: programId,
+                is_delete: false,
+            },
             include: programFullInclude(),
         });
 

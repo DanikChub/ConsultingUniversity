@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { getUserById } from "../../../entities/user/api/user.api";
+import {blockUser, getUserById, unblockUser} from "../../../entities/user/api/user.api";
 import { getOneProgram } from "../../../entities/program/api/program.api";
 import { getEnrollmentProgress } from "../../../entities/progress/api/progress.api";
 import { getAllTestAttempts } from "../../../entities/test/api/test.api";
@@ -35,6 +35,7 @@ export const useListenerProfilePage = () => {
     const [programs, setPrograms] = useState<ProgramWithStats[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [blockActionLoading, setBlockActionLoading] = useState(false);
 
     const listenerId = Number(id);
 
@@ -166,14 +167,76 @@ export const useListenerProfilePage = () => {
         });
     };
 
+    const handleBlockUser = async () => {
+        if (!user || blockActionLoading) return;
+
+        const result = await openModal("blockUser", {
+            userName: user.name,
+        });
+
+        if (!result) return;
+
+        try {
+            setBlockActionLoading(true);
+
+            await blockUser(user.id, {
+                reason: result.reason,
+                durationMinutes: result.durationMinutes,
+            });
+
+            await load();
+        } catch (e) {
+            console.error(e);
+
+            await openModal("alert", {
+                title: "Ошибка",
+                description: "Не удалось заблокировать слушателя",
+            });
+        } finally {
+            setBlockActionLoading(false);
+        }
+    };
+
+    const handleUnblockUser = async () => {
+        if (!user || blockActionLoading) return;
+
+        const confirmed = await openModal("confirm", {
+            title: "Разблокировать слушателя?",
+            description: `Доступ пользователя «${user.name}» будет восстановлен.`,
+            confirmText: "Разблокировать",
+            cancelText: "Отмена",
+        });
+
+        if (!confirmed) return;
+
+        try {
+            setBlockActionLoading(true);
+
+            await unblockUser(user.id);
+            await load();
+        } catch (e) {
+            console.error(e);
+
+            await openModal("alert", {
+                title: "Ошибка",
+                description: "Не удалось разблокировать слушателя",
+            });
+        } finally {
+            setBlockActionLoading(false);
+        }
+    };
+
     return {
         user,
         programs,
         documents,
         loading,
         error,
+        blockActionLoading,
         reload: load,
         handleSendMessage,
+        handleBlockUser,
+        handleUnblockUser,
         handleOpenGradeBook,
         handleUserFieldUpdated,
     };

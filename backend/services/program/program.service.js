@@ -72,13 +72,16 @@ class ProgramService {
             throw ApiError.notFound("Программа не найдена");
         }
 
+
+
+        program.is_delete = true;
+        await program.save();
+
         await Event.create({
             event_text: "Программа удалена",
             name: program.title,
             type: "program",
         });
-
-        await program.destroy();
 
         return { message: "Программа успешно удалена" };
     }

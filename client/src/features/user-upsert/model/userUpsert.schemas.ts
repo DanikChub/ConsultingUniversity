@@ -17,7 +17,17 @@ const nameSchema = z
         /^[А-Яа-яЁёA-Za-z'-]+(?:\s+[А-Яа-яЁёA-Za-z'-]+)+$/,
         'ФИО содержит недопустимые символы'
     );
-
+const phoneSchema = z
+    .string()
+    .trim()
+    .refine(
+        value =>
+            value === "" ||
+            /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/.test(value),
+        {
+            message: "Введите номер полностью",
+        }
+    );
 const baseListenerSchema = z.object({
     login: z
         .string()
@@ -34,7 +44,7 @@ const baseListenerSchema = z.object({
     email: z.string().trim().optional().or(z.literal('')),
     password: z.string(),
 
-    number: nullableStringField,
+    number: phoneSchema,
     organization: nullableStringField,
     inn: nullableStringField,
     address: nullableStringField,

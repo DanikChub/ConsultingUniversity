@@ -96,11 +96,18 @@ const UserTable: React.FC<Props> = ({
                                 {user.name || "Без имени"}
                             </Link>
 
+                            {user.is_blocked && (
+                                <span className="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-medium text-red-700">
+                                    Заблокирован
+                                </span>
+                            )}
+
                             {user.is_delete && (
                                 <span className="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-medium text-red-700">
                                     Удален
                                 </span>
                             )}
+
 
                             {user.must_change_password && (
                                 <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-[11px] font-medium text-yellow-700 text-center">

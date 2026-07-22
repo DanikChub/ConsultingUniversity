@@ -92,6 +92,18 @@ router.patch(
     UserController.restoreUser
 );
 
+router.patch(
+    "/:userId/block",
+    checkRole("ADMIN"),
+    UserController.blockUser
+);
+
+router.patch(
+    "/:userId/unblock",
+    checkRole("ADMIN"),
+    UserController.unblockUser
+);
+
 // ---------- Dynamic listener route — always last ----------
 router.get("/listeners/:userId", authMiddleware, UserController.getUserById);
 

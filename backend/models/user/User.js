@@ -49,5 +49,21 @@ module.exports = (sequelize) => {
             allowNull: false,
             defaultValue: false,
         },
+
+        is_blocked: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+        },
+
+        blocked_until: {
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
+
+        block_reason: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+        },
     });
 };

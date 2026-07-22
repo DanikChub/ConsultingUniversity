@@ -46,6 +46,10 @@ export interface User {
     must_change_password?: boolean;
     admin_signature?: string | null;
 
+    is_blocked: boolean;
+    blocked_until?: string | null;
+    block_reason?: string | null;
+
     yellow_value?: string;
     createdAt?: string;
     programs?: ProgramWithProgress[];

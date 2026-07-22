@@ -18,6 +18,7 @@ export type ModalType =
     | 'confirm'
     | 'certificateDelivery'
     | "editCertificate"
+    | "blockUser"
 
 export type ModalPayloadMap = {
     uploadFile: {};
@@ -64,7 +65,15 @@ export type ModalPayloadMap = {
     editCertificate: {
         certificate: Certificate;
     }
+    blockUser: {
+        userName: string;
+    };
 };
+
+interface BlockUserModalResult {
+    reason: string;
+    durationMinutes: number | null;
+}
 
 export type ModalResultMap = {
     uploadFile:
@@ -83,5 +92,5 @@ export type ModalResultMap = {
     confirm: boolean;
     certificateDelivery: 'updated' | 'close';
     certificateEdit: 'updated' | 'close';
-
+    blockUser: BlockUserModalResult | null;
 };

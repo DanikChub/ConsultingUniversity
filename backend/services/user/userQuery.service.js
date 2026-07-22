@@ -34,12 +34,57 @@ class UserQueryService {
         };
     }
 
-    async getUserById(userId) {
+    async getUserById(userId, requesterRole) {
+        const isAdmin = requesterRole === "ADMIN";
+
+        const programInclude = {
+            model: Program,
+
+            ...(!isAdmin && {
+                where: {
+                    is_delete: false,
+                },
+            }),
+
+            attributes: [
+                "id",
+                "title",
+                "short_title",
+                "price",
+                "img",
+                "status",
+                "is_delete",
+            ],
+
+            through: {
+                as: "enrollment",
+                attributes: [
+                    "id",
+                    "status",
+                    "progress_percent",
+                    "started_at",
+                    "completed_at",
+                    "createdAt",
+                    "updatedAt",
+                ],
+                ...(!isAdmin && {
+                    where: {
+                        status: {
+                            [Op.ne]: "archived",
+                        },
+                    },
+                }),
+            },
+
+            required: false,
+        };
+
         const user = await User.findOne({
             where: {
                 id: userId,
                 is_delete: false,
             },
+
             attributes: {
                 exclude: [
                     "password",
@@ -47,31 +92,9 @@ class UserQueryService {
                     "forgot_pass_code",
                 ],
             },
+
             include: [
-                {
-                    model: Program,
-                    attributes: [
-                        "id",
-                        "title",
-                        "short_title",
-                        "price",
-                        "img",
-                        "status",
-                    ],
-                    through: {
-                        as: "enrollment",
-                        attributes: [
-                            "id",
-                            "status",
-                            "progress_percent",
-                            "started_at",
-                            "completed_at",
-                            "createdAt",
-                            "updatedAt",
-                        ],
-                    },
-                    required: false,
-                },
+                programInclude,
                 {
                     model: UserDocument,
                     as: "documents",
@@ -91,6 +114,7 @@ class UserQueryService {
                     order: [["createdAt", "DESC"]],
                 },
             ],
+
             order: [[Program, "id", "DESC"]],
         });
 
@@ -264,13 +288,20 @@ class UserQueryService {
             }
         }
 
-        const enrollmentWhere = {};
+        const enrollmentWhere = {
+            status: {
+                [Op.ne]: "archived",
+            },
+        };
 
         if (programId) {
             enrollmentWhere.programId = Number(programId);
         }
 
-        if (enrollmentStatus !== "all") {
+        if (
+            enrollmentStatus !== "all" &&
+            enrollmentStatus !== "archived"
+        ) {
             enrollmentWhere.status = enrollmentStatus;
         }
 
@@ -351,6 +382,7 @@ class UserQueryService {
                 role: json.role,
                 img: json.img,
                 is_delete: json.is_delete,
+                is_blocked: json.is_blocked,
                 must_change_password: json.must_change_password,
                 temporary_password_plain: json.temporary_password_plain,
                 createdAt: json.createdAt,

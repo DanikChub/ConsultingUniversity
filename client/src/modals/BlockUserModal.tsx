@@ -7,7 +7,7 @@ type Props = {
     onClose: () => void;
     onSubmit: (payload: {
         reason: string;
-        blockedUntil: string | null;
+        durationMinutes: number | null;
     }) => void;
 };
 
@@ -33,33 +33,41 @@ const BlockUserModal: React.FC<Props> = ({
         return reasonType === "Другое" ? customReason.trim() : reasonType;
     }, [reasonType, customReason]);
 
-    const getBlockedUntil = () => {
-        if (period === "forever") return null;
-
-        if (period === "custom") {
-            if (!customDate) return "";
-            return new Date(customDate + "T23:59:59").toISOString();
+    const getDurationMinutes = (): number | null | undefined => {
+        if (period === "forever") {
+            return null;
         }
 
-        const date = new Date();
-        date.setDate(date.getDate() + Number(period));
-        return date.toISOString();
+        if (period !== "custom") {
+            return Number(period) * 24 * 60;
+        }
+
+        if (!customDate) {
+            return undefined;
+        }
+
+        const endDate = new Date(`${customDate}T23:59:59`);
+        const differenceMs = endDate.getTime() - Date.now();
+
+        if (differenceMs <= 0) {
+            return undefined;
+        }
+
+        return Math.ceil(differenceMs / (60 * 1000));
     };
 
     const handleSubmit = () => {
-        if (!reason) {
-            return;
-        }
+        if (!reason) return;
 
-        const blockedUntil = getBlockedUntil();
+        const durationMinutes = getDurationMinutes();
 
-        if (blockedUntil === "") {
+        if (durationMinutes === undefined) {
             return;
         }
 
         onSubmit({
             reason,
-            blockedUntil,
+            durationMinutes,
         });
     };
 
@@ -145,9 +153,9 @@ const BlockUserModal: React.FC<Props> = ({
 
                             <input
                                 type="date"
+                                min={new Date().toISOString().split("T")[0]}
                                 value={customDate}
                                 onChange={e => setCustomDate(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
                             />
                         </label>
                     )}

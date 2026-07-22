@@ -109,7 +109,8 @@ class UserController {
 
     async getUserById(req, res, next) {
         try {
-            const user = await userQueryService.getUserById(req.params.userId);
+            const user = await userQueryService.getUserById(req.params.userId, req.params.role);
+            console.log(req.params)
             return res.json(user);
         } catch (e) {
             next(e);
@@ -271,6 +272,34 @@ class UserController {
             const result = await userDocumentService.updateUserDocument(
                 req.params.documentId,
                 req.body
+            );
+
+            return res.json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    async blockUser(req, res, next) {
+        try {
+            const { durationMinutes, reason } = req.body;
+
+            const result = await userAdminService.blockUser(
+                req.params.userId,
+                durationMinutes,
+                reason
+            );
+
+            return res.json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    async unblockUser(req, res, next) {
+        try {
+            const result = await userAdminService.unblockUser(
+                req.params.userId
             );
 
             return res.json(result);

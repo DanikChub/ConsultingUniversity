@@ -1,21 +1,39 @@
 {
-  // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    // File Layout
-    // "rootDir": "./src",
-    // "outDir": "./dist",
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
 
-    // Environment Settings
-    // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
-    "target": "esnext",
-    "types": [],
-    // For nodejs:
-    // "lib": ["esnext"],
-    // "types": ["node"],
-    // and npm install -D @types/node
+    "allowJs": true,
+    "checkJs": false,
 
-    // Other Outputs
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+
+    "noFallthroughCasesInSwitch": true,
+
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+
+    "jsx": "react-jsx",
+
+    "types": [
+      "react",
+      "react-dom"
+    ],
+
+
+
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
@@ -33,23 +51,22 @@
     // "noPropertyAccessFromIndexSignature": true,
 
     // Recommended Options
-    "strict": false,
-    "jsx": "react-jsx",
+
     "verbatimModuleSyntax": true,
-    "isolatedModules": true,
+
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
-    "allowJs": true,
-    "checkJs": false,
 
-    "compilerOptions": {
-      "jsx": "react-jsx",
-      "lib": ["dom", "dom.iterable", "esnext"],
-      "types": ["react", "react-dom"]
-    },
+
     "include": [
       "src/shared/types/react-icons.d.ts"
     ]
-  }
+
+  },
+
+
+
+  "include": [
+    "src"
+  ]
 }

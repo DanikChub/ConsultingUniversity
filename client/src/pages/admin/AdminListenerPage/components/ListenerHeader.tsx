@@ -1,17 +1,26 @@
 import React from "react";
-import { FiEdit, FiUser } from "react-icons/fi";
-
+import {
+    FiEdit,
+    FiLock,
+    FiUnlock,
+    FiUser,
+} from "react-icons/fi";
 import Button from "../../../../shared/ui/buttons/Button";
 import type { User } from "../../../../entities/user/model/type";
 
 interface ListenerHeaderProps {
     user: User;
     onSendMessage: () => void;
+    onBlock: () => void;
+    onUnblock: () => void;
+    blockActionLoading: boolean;
 }
-
 const ListenerHeader: React.FC<ListenerHeaderProps> = ({
                                                            user,
                                                            onSendMessage,
+                                                           onBlock,
+                                                           onUnblock,
+                                                           blockActionLoading,
                                                        }) => {
     const imgSrc = user.img ? process.env.REACT_APP_API_URL + user.img : "";
 
@@ -44,12 +53,66 @@ const ListenerHeader: React.FC<ListenerHeaderProps> = ({
                             <FiUser />
                             <span>{user.login}</span>
                         </div>
+                        {user.is_blocked && (
+                            <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                                <div className="text-sm font-semibold text-red-700">
+                                    Пользователь заблокирован
+                                </div>
+
+                                {user.block_reason && (
+                                    <div className="mt-1 text-sm text-red-600">
+                                        Причина: {user.block_reason}
+                                    </div>
+                                )}
+
+                                {user.blocked_until && (
+                                    <div className="mt-1 text-sm text-red-600">
+                                        До:{" "}
+                                        {new Date(user.blocked_until).toLocaleString("ru-RU")}
+                                    </div>
+                                )}
+
+                                {!user.blocked_until && (
+                                    <div className="mt-1 text-sm text-red-600">
+                                        Блокировка бессрочная
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
-                    <Button className="ml-4" onClick={onSendMessage}>
-                        <FiEdit />
-                        <span>Написать</span>
-                    </Button>
+                    <div className="ml-4 flex flex-wrap gap-2">
+                        <Button onClick={onSendMessage}>
+                            <FiEdit />
+                            <span>Написать</span>
+                        </Button>
+
+                        {user.is_blocked ? (
+                            <Button
+                                onClick={onUnblock}
+                                disabled={blockActionLoading}
+                            >
+                                <FiUnlock />
+                                <span>
+                                    {blockActionLoading
+                                        ? "Разблокировка..."
+                                        : "Разблокировать"}
+                                </span>
+                            </Button>
+                        ) : (
+                            <Button
+                                onClick={onBlock}
+                                disabled={blockActionLoading}
+                            >
+                                <FiLock />
+                                <span>
+                                    {blockActionLoading
+                                        ? "Блокировка..."
+                                        : "Заблокировать"}
+                                </span>
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

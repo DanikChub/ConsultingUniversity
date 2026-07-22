@@ -12,6 +12,7 @@ import AlertModal from "../modals/AlertModal";
 import ConfirmModal from "../modals/ConfirmModal";
 import CertificateDeliveryModal from "../modals/CertificateDeliveryModal";
 import {EditCertificateModal} from "../modals/EditCertificateModal";
+import BlockUserModal from "../modals/BlockUserModal";
 
 
 type ActiveModal<T extends ModalType = ModalType> = {
@@ -142,6 +143,13 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     certificate={modal.payload.certificate}
                     onClose={() => close('close')}
                     onUpdated={() => close('updated')}
+                />
+            )}
+            {modal?.type === "blockUser" && (
+                <BlockUserModal
+                    userName={modal.payload.userName}
+                    onClose={() => close(null)}
+                    onSubmit={result => close(result)}
                 />
             )}
 

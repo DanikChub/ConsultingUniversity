@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken')
+const actualizeUserBlock = require("../utils/actualizeUserBlock");
 
 
 
-module.exports = function (req, res, next) {
+module.exports = async function (req, res, next) {
     if (req.method === 'OPTIONS') {
         return next();
     }
@@ -23,6 +24,25 @@ module.exports = function (req, res, next) {
         }
 
         const decoded = jwt.verify(token, process.env.SECRET_KEY);
+
+        const blockState = await actualizeUserBlock(decoded.id);
+
+
+        if (!blockState.exists) {
+            return res.status(401).json({
+                message: "Пользователь не найден",
+            });
+        }
+
+        if (decoded.role === "USER" && blockState.blocked) {
+            return res.status(403).json({
+                code: "USER_BLOCKED",
+                message: "Ваш аккаунт заблокирован",
+                reason: blockState.reason,
+                blockedUntil: blockState.blockedUntil,
+                permanent: blockState.permanent,
+            });
+        }
 
         req.user = decoded;
         next();
