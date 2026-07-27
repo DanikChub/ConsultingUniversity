@@ -4,7 +4,7 @@ import SearchInput from "../../../../shared/ui/inputs/SearchInput";
 import Button from "../../../../shared/ui/buttons/Button";
 
 import type {
-    AdminUsersDeletedFilter,
+    AdminUsersStatusFilter,
     AdminUsersEnrollmentStatus,
     AdminUsersHasProgramFilter,
     AdminUsersSortDirection,
@@ -48,16 +48,17 @@ const SearchAndSortPanel: React.FC<Props> = ({
                 />
 
                 <select
-                    value={filters.deleted}
+                    value={filters.userStatus}
                     onChange={e =>
                         onFilterChange(
-                            "deleted",
-                            e.target.value as AdminUsersDeletedFilter
+                            "userStatus",
+                            e.target.value as AdminUsersStatusFilter
                         )
                     }
                     className="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#2980B9]"
                 >
                     <option value="active">Активные</option>
+                    <option value="blocked">Заблокированные</option>
                     <option value="deleted">Удаленные</option>
                     <option value="all">Все</option>
                 </select>

@@ -20,6 +20,19 @@ const ALLOWED_LISTENER_FIELDS = {
         required: false,
         maxLength: 50,
     },
+
+    additional_number: {
+        label: "Дополнительный телефон",
+        type: "string",
+        required: false,
+    },
+
+    note: {
+        label: "Примечание",
+        type: "string",
+        required: false,
+        maxLength: 5000,
+    },
     organization: {
         label: "Организация",
         type: "string",

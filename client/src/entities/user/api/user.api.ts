@@ -268,6 +268,8 @@ export type EditableListenerField =
     | "name"
     | "email"
     | "number"
+    | "additional_number"
+    | "note"
     | "organization"
     | "inn"
     | "address"
@@ -321,7 +323,7 @@ export const updateListenerField = async (
 
 // ---------- Admin users registry ----------
 
-export type AdminUsersDeletedFilter = "active" | "deleted" | "all";
+export type AdminUsersStatusFilter  = "active" | "deleted" | "all" | "blocked";
 export type AdminUsersHasProgramFilter = "all" | "yes" | "no";
 export type AdminUsersEnrollmentStatus =
     | "all"
@@ -345,7 +347,7 @@ export interface GetAdminUsersListParams {
     page?: number;
     limit?: number;
     search?: string;
-    deleted?: AdminUsersDeletedFilter;
+    user_status?: AdminUsersStatusFilter;
     hasProgram?: AdminUsersHasProgramFilter;
     programId?: number | string;
     enrollmentStatus?: AdminUsersEnrollmentStatus;
@@ -381,7 +383,12 @@ export interface AdminUserListItem {
     organization?: string | null;
     role: string;
     img?: string | null;
+
     is_delete: boolean;
+    is_blocked: boolean;
+    blocked_until?: string | null;
+    block_reason?: string | null;
+
     must_change_password: boolean;
     temporary_password_plain?: string | null;
     createdAt: string;
@@ -407,7 +414,9 @@ export const getAdminUsersList = async (
                 page: params.page ?? 1,
                 limit: params.limit ?? 10,
                 search: params.search ?? "",
-                deleted: params.deleted ?? "active",
+
+                user_status: params.user_status ?? "active",
+
                 hasProgram: params.hasProgram ?? "all",
                 programId: params.programId || undefined,
                 enrollmentStatus: params.enrollmentStatus ?? "all",

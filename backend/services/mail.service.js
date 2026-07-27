@@ -190,9 +190,9 @@ function getWelcomeEmailHtml(userName, login, password) {
 async function sendWelcomeEmail(toEmail, userName, login, password) {
     try {
         const info = await transporter.sendMail({
-            from: `"Consulting University" <${process.env.MAIL_USER}>`,
+            from: `Консалтинг-Университет <${process.env.MAIL_USER}>`,
             to: toEmail,
-            subject: "Добро пожаловать в Consulting University",
+            subject: "Добро пожаловать в Консалтинг-Университет",
             html: getWelcomeEmailHtml(userName, login, password),
         });
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import {
     updateListenerField,
     type EditableListenerField,
@@ -20,27 +21,67 @@ interface OpenEditFieldPayload {
 
 interface UseEditListenerFieldParams {
     userId: number;
-    onSuccess: (field: EditableListenerField, value: string | null) => void;
+    onSuccess: (
+        field: EditableListenerField,
+        value: string | null
+    ) => void;
 }
 
-const transformByField: Partial<Record<EditableListenerField, (value: string) => string>> = {
+const transformByField: Partial<
+    Record<EditableListenerField, (value: string) => string>
+> = {
     number: normalizePhone,
+    additional_number: normalizePhone,
     name: normalizeName,
 };
 
-const validateByField: Partial<Record<EditableListenerField, (value: string) => string | null>> = {
+const validatePhone = (value: string): string | null => {
+    if (!value.trim()) {
+        return null;
+    }
+
+    if (!isValidRuPhone(value)) {
+        return "Телефон должен быть в формате +7 (___) ___-__-__";
+    }
+
+    return null;
+};
+
+const validateByField: Partial<
+    Record<EditableListenerField, (value: string) => string | null>
+> = {
     name: value => {
-        if (!value.trim()) return "ФИО обязательно";
-        if (value.trim().length < 3) return "ФИО слишком короткое";
+        if (!value.trim()) {
+            return "ФИО обязательно";
+        }
+
+        if (value.trim().length < 3) {
+            return "ФИО слишком короткое";
+        }
+
         return null;
     },
+
     email: value => {
-        if (!isValidEmail(value)) return "Некорректный email";
+        if (!value.trim()) {
+            return null;
+        }
+
+        if (!isValidEmail(value)) {
+            return "Некорректный email";
+        }
+
         return null;
     },
-    number: value => {
-        if (!value.trim()) return null;
-        if (!isValidRuPhone(value)) return "Телефон должен быть в формате +7 (___) ___-__-__";
+
+    number: validatePhone,
+    additional_number: validatePhone,
+
+    note: value => {
+        if (value.length > 5000) {
+            return "Примечание не должно превышать 5000 символов";
+        }
+
         return null;
     },
 };
@@ -50,7 +91,9 @@ export const useEditListenerField = ({
                                          onSuccess,
                                      }: UseEditListenerFieldParams) => {
     const [opened, setOpened] = useState(false);
-    const [field, setField] = useState<EditableListenerField | null>(null);
+    const [field, setField] =
+        useState<EditableListenerField | null>(null);
+
     const [label, setLabel] = useState("");
     const [value, setValueRaw] = useState("");
     const [multiline, setMultiline] = useState(false);
@@ -73,7 +116,9 @@ export const useEditListenerField = ({
         const startValue = payload.value || "";
         const transform = transformByField[payload.field];
 
-        setValueRaw(transform ? transform(startValue) : startValue);
+        setValueRaw(
+            transform ? transform(startValue) : startValue
+        );
 
         setMultiline(Boolean(payload.multiline));
         setError("");
@@ -81,7 +126,9 @@ export const useEditListenerField = ({
     };
 
     const closeEditField = () => {
-        if (loading) return;
+        if (loading) {
+            return;
+        }
 
         setOpened(false);
         setField(null);
@@ -92,7 +139,9 @@ export const useEditListenerField = ({
     };
 
     const submitEditField = async () => {
-        if (!field) return;
+        if (!field) {
+            return;
+        }
 
         const validate = validateByField[field];
         const validationError = validate?.(value);
@@ -106,7 +155,10 @@ export const useEditListenerField = ({
             setLoading(true);
             setError("");
 
-            const normalizedValue = value.trim() === "" ? null : value.trim();
+            const normalizedValue =
+                value.trim() === ""
+                    ? null
+                    : value.trim();
 
             const result = await updateListenerField(userId, {
                 field,

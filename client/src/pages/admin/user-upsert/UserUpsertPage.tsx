@@ -8,7 +8,7 @@ import {
     submitUpdateAdmin,
     submitUpdateListener
 } from "../../../features/user-upsert/model/userUpsert.submit";
-import {ADMIN_ADMINISTRATORS_ROUTE, ADMIN_LISTENERS_ROUTE} from "../../../shared/utils/consts";
+import {ADMIN_ADMINISTRATORS_ROUTE, ADMIN_LISTENERS_ROUTE, ADMIN_USER_ROUTE} from "../../../shared/utils/consts";
 import ListenerUpsertForm from "../../../features/user-upsert/ui/ListenerUpsertForm";
 import AdminUpsertForm from "../../../features/user-upsert/ui/AdminUpsertForm";
 
@@ -77,23 +77,24 @@ const UserUpsertPage: React.FC = () => {
                 onSubmit={async ({ values, newDocuments, profileImg }) => {
                     try {
                         setServerError('');
+                        let res;
 
                         if (pageData.isEdit) {
-                            await submitUpdateListener({
+                            res = await submitUpdateListener({
                                 id: Number(params.id),
                                 values,
                                 newDocuments,
                                 profileImg,
                             });
                         } else {
-                            await submitCreateListener({
+                            res = await submitCreateListener({
                                 values,
                                 newDocuments,
                                 profileImg,
                             });
                         }
 
-                        navigate(ADMIN_LISTENERS_ROUTE);
+                        navigate(ADMIN_USER_ROUTE.replace(':id', res.user.id));
                     } catch (err: any) {
                         setServerError(err?.response?.data?.message || 'Ошибка сохранения');
                     }

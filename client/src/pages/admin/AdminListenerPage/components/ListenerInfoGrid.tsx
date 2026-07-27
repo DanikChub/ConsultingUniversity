@@ -6,7 +6,7 @@ import {
     FiCreditCard,
     FiEdit2,
     FiFileText,
-    FiMail,
+    FiMail, FiMessageSquare,
     FiPhone,
 } from "react-icons/fi";
 
@@ -15,6 +15,8 @@ import type { EditableListenerField } from "../../../../entities/user/api/user.a
 
 import { useEditListenerField } from "../../../../features/listener-field-edit/model/useEditListenerField";
 import EditListenerFieldModal from "../../../../features/listener-field-edit/ui/EditListenerFieldModal";
+
+
 
 interface ListenerInfoGridProps {
     user: User;
@@ -150,9 +152,10 @@ const ListenerInfoGrid: React.FC<ListenerInfoGridProps> = ({
                         }
                     />
 
+
                     <EditableLine
                         icon={<FiPhone />}
-                        label="Телефон"
+                        label="Осн. телефон"
                         value={user.number}
                         onEdit={() =>
                             edit.openEditField({
@@ -162,6 +165,7 @@ const ListenerInfoGrid: React.FC<ListenerInfoGridProps> = ({
                             })
                         }
                     />
+
 
                     <EditableLine
                         icon={<FiBookOpen />}
@@ -173,6 +177,19 @@ const ListenerInfoGrid: React.FC<ListenerInfoGridProps> = ({
                                 label: "Документ об образовании",
                                 value: user.education_document || "",
                                 multiline: true,
+                            })
+                        }
+                    />
+
+                    <EditableLine
+                        icon={<FiPhone />}
+                        label="Доп. телефон"
+                        value={user.additional_number}
+                        onEdit={() =>
+                            edit.openEditField({
+                                field: "additional_number",
+                                label: "Дополнительный телефон",
+                                value: user.additional_number || "",
                             })
                         }
                     />
@@ -211,6 +228,19 @@ const ListenerInfoGrid: React.FC<ListenerInfoGridProps> = ({
                         }
                     />
 
+                </div>
+                <div className="mt-4">
+                    <EditableNote
+                        value={user.note}
+                        onEdit={() =>
+                            edit.openEditField({
+                                field: "note",
+                                label: "Примечание",
+                                value: user.note || "",
+                                multiline: true,
+                            })
+                        }
+                    />
                 </div>
             </section>
 
@@ -287,4 +317,44 @@ const ReadOnlyLine: React.FC<LineProps> = ({icon, label, value}) => {
     );
 };
 
+interface EditableNoteProps {
+    value?: string | null;
+    onEdit: () => void;
+}
+
+const EditableNote: React.FC<EditableNoteProps> = ({
+                                                       value,
+                                                       onEdit,
+                                                   }) => {
+    return (
+        <div className="group rounded-xl border border-gray-100 bg-white p-4">
+            <div className="mb-2 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
+                    <FiMessageSquare className="text-gray-400" />
+                    <span>Примечание</span>
+                </div>
+
+                <button
+                    type="button"
+                    onClick={onEdit}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-50 hover:text-[#2980B9] md:opacity-0 md:group-hover:opacity-100"
+                    title="Изменить примечание"
+                >
+                    <FiEdit2 />
+                </button>
+            </div>
+
+            <div className="whitespace-pre-wrap break-words text-sm leading-6 text-gray-800">
+                {value || (
+                    <span className="text-gray-400">
+                        Примечание не указано
+                    </span>
+                )}
+            </div>
+        </div>
+    );
+};
+
 export default ListenerInfoGrid;
+
+

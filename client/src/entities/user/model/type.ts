@@ -21,7 +21,11 @@ export interface User {
     id: number;
     login: string;
     email?: string | null;
+
     number?: string | null;
+    additional_number?: string | null;
+    note?: string | null;
+
     name: string;
     password?: string | null;
     role?: string;

@@ -5,7 +5,7 @@ import {
     restoreUser,
     softDeleteUser,
     type AdminUserListItem,
-    type AdminUsersDeletedFilter,
+    type AdminUsersStatusFilter,
     type AdminUsersEnrollmentStatus,
     type AdminUsersHasProgramFilter,
     type AdminUsersSortDirection,
@@ -16,7 +16,7 @@ import type { PaginationItem } from "../entities/user/model/type";
 
 export interface AdminListenersFilters {
     search: string;
-    deleted: AdminUsersDeletedFilter;
+    userStatus: AdminUsersStatusFilter;
     hasProgram: AdminUsersHasProgramFilter;
     programId: string;
     enrollmentStatus: AdminUsersEnrollmentStatus;
@@ -28,7 +28,7 @@ export interface AdminListenersFilters {
 
 const DEFAULT_FILTERS: AdminListenersFilters = {
     search: "",
-    deleted: "active",
+    userStatus: "active",
     hasProgram: "all",
     programId: "",
     enrollmentStatus: "all",
@@ -99,7 +99,7 @@ export const useAdminListeners = () => {
                     page,
                     limit: DEFAULT_LIMIT,
                     search: nextFilters.search,
-                    deleted: nextFilters.deleted,
+                    user_status: nextFilters.userStatus,
                     hasProgram: nextFilters.hasProgram,
                     programId: nextFilters.programId || undefined,
                     enrollmentStatus: nextFilters.enrollmentStatus,

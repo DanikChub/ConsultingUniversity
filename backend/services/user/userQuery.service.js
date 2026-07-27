@@ -225,7 +225,7 @@ class UserQueryService {
             page = 1,
             limit = 10,
             search = "",
-            deleted = "active", // active | deleted | all
+            user_status = "active", // active | deleted | all | blocked
             hasProgram = "all", // all | yes | no
             programId,
             enrollmentStatus = "all", // all | active | completed | archived | paused
@@ -244,12 +244,18 @@ class UserQueryService {
             role: "USER",
         };
 
-        if (deleted === "active") {
+        if (user_status === "active") {
             userWhere.is_delete = false;
+            userWhere.is_blocked = false;
         }
 
-        if (deleted === "deleted") {
+        if (user_status === "deleted") {
             userWhere.is_delete = true;
+        }
+
+        if (user_status === "blocked") {
+            userWhere.is_delete = false;
+            userWhere.is_blocked = true;
         }
 
         if (search) {

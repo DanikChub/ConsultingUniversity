@@ -9,16 +9,17 @@ import { Context } from '../../../index';
 import { getOneProgram } from '../../../entities/program/api/program.api';
 import { setUserProfileImg } from '../../../entities/user/api/user.api';
 
-import statement from '../../../assets/imgs/statement.png';
-import learn from '../../../assets/imgs/learn.png';
-import how from '../../../assets/imgs/how.png';
-import check from '../../../assets/imgs/check.png';
+
+import learning from '../../../assets/imgs/learning.jfif';
+import message from '../../../assets/imgs/message.jfif';
+import statement from '../../../assets/imgs/statement.jfif';
 import how_learn from '../../../assets/files/how_learn.pdf';
 import user_img from '../../../assets/imgs/user.png';
 import {COURSE_ROUTE, STATEMENT_ROUTE, USER_CHAT_ROUTE, USER_PROFILE_ROUTE} from '../../../shared/utils/consts';
 import {FiArchive, FiCheckCircle, FiClock} from "react-icons/fi";
 import UserPageSkeleton from "./components/UserPageSkeleton";
 import {useSocket} from "../../../hooks/useSocket";
+import {useModals} from "../../../hooks/useModals";
 
 const UserPage = observer(() => {
     const userContext = useContext(Context);
@@ -28,7 +29,7 @@ const UserPage = observer(() => {
     const [progress, setProgress] = useState<number>(0);
     const [unreadMessages, setUnreadMessages] = useState<number | null>(null);
     const [alertLoading, setAlertLoading] = useState(false);
-
+    const { openModal } = useModals();
     const socket = useSocket()
 
 
@@ -124,6 +125,27 @@ const UserPage = observer(() => {
 
     const status = statusStyles['published']
 
+    const handleProgramClick = async (
+        event: React.MouseEvent<HTMLAnchorElement>,
+        program: any
+    ) => {
+        const enrollmentStatus = program?.enrollment?.status;
+
+        if (enrollmentStatus !== "paused") {
+            localStorage.removeItem("arr_open");
+            return;
+        }
+
+        event.preventDefault();
+
+        await openModal("confirm", {
+            title: "Обучение приостановлено",
+            description:
+                "Доступ к этой программе временно приостановлен. Для возобновления обучения обратитесь к администратору или преподавателю.",
+            confirmText: "Понятно",
+        });
+    };
+
     return (
         <UserContainer loading={loading} skeleton={<UserPageSkeleton/>}>
             <LoadingAlert show={alertLoading} text="Загружаем картинку профиля..." />
@@ -175,7 +197,7 @@ const UserPage = observer(() => {
                         className="
                             relative
                             w-[130px]
-                            h-[110px]
+                            h-[130px]
                             flex
                             flex-col
                             items-center
@@ -183,51 +205,15 @@ const UserPage = observer(() => {
                             rounded-lg
                             border
                             border-gray-300
-                            bg-gray-50
+
                             hover:bg-gray-100
                             transition
                         "
                     >
                         <div className="relative">
-                            <svg
-                                width="65"
-                                height="48"
-                                viewBox="0 0 100 69"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <g filter="url(#filter0_d_0_1)">
-                                    <rect
-                                        x="5"
-                                        y="1"
-                                        width="90"
-                                        height="59"
-                                        rx="10"
-                                        stroke="#2980B9"
-                                        strokeWidth="2"
-                                    />
-                                </g>
-
-                                <line x1="5.5" y1="8.134" x2="50.5" y2="34.134" stroke="#2980B9" strokeWidth="2"/>
-                                <line x1="49.5" y1="34.134" x2="94.5" y2="8.134" stroke="#2980B9" strokeWidth="2"/>
-                                <line x1="38.707" y1="27.707" x2="8.707" y2="57.707" stroke="#2980B9" strokeWidth="2"/>
-                                <line x1="62.719" y1="27.305" x2="91.719" y2="57.305" stroke="#2980B9" strokeWidth="2"/>
-
-                                <defs>
-                                    <filter
-                                        id="filter0_d_0_1"
-                                        x="0"
-                                        y="0"
-                                        width="100"
-                                        height="69"
-                                        filterUnits="userSpaceOnUse"
-                                    >
-                                        <feFlood floodOpacity="0"/>
-                                        <feOffset dy="4"/>
-                                        <feGaussianBlur stdDeviation="2"/>
-                                    </filter>
-                                </defs>
-                            </svg>
+                            <img src={message}
+                                 alt=""
+                                 className="w-[65px] h-[55px] object-contain"/>
 
                             {unreadMessages > 0 && (
                                 <div
@@ -273,7 +259,7 @@ const UserPage = observer(() => {
                         to={STATEMENT_ROUTE}
                         className="
                             w-[130px]
-                            h-[110px]
+                            h-[130px]
                             flex
                             flex-col
                             items-center
@@ -281,7 +267,7 @@ const UserPage = observer(() => {
                             rounded-lg
                             border
                             border-gray-300
-                            bg-gray-50
+
                             hover:bg-gray-100
                             transition
                         "
@@ -298,10 +284,12 @@ const UserPage = observer(() => {
                             ведомость
                         </div>
                     </Link>
-                    <a href={how_learn}
+                    <a
+                        target="_blank"
+                        href={how_learn}
                        className="relative
                             w-[130px]
-                            h-[110px]
+                            h-[130px]
                             flex
                             flex-col
                             items-center
@@ -309,15 +297,19 @@ const UserPage = observer(() => {
                             rounded-lg
                             border
                             border-gray-300
-                            bg-gray-50
+
                             hover:bg-gray-100
                             transition">
-                        <div className="flex items-center gap-4">
 
+                            <img
+                                src={learning}
+                                alt=""
+                                className="w-[65px] h-[55px] object-contain"
+                            />
                             <div className="mt-1 text-center font-medium text-sm text-gray-800 leading-tight">
                                 Как учиться с Консалтинг-Университет
                             </div>
-                        </div>
+
 
                     </a>
                 </div>
@@ -335,25 +327,40 @@ const UserPage = observer(() => {
                         <div className="flex flex-col gap-4 w-full">
                             {programs.map((program) => {
                                 const progress = program?.enrollment?.progress_percent ?? 0;
+                                const enrollmentStatus = program?.enrollment?.status;
+                                const isPaused = enrollmentStatus === "paused";
 
                                 return (
                                     <Link
                                         key={program.id}
                                         to={COURSE_ROUTE.replace(":id", String(program.id))}
-                                        onClick={() => localStorage.removeItem("arr_open")}
-                                        className="block relative rounded-3xl bg-gradient-to-br from-white via-blue-50 to-indigo-50 border border-gray-100 shadow-md overflow-hidden"
+                                        onClick={event => handleProgramClick(event, program)}
+                                        className={[
+                                            "block relative rounded-3xl bg-gradient-to-br from-white via-blue-50 to-indigo-50",
+                                            "border border-gray-100 shadow-md overflow-hidden transition",
+                                            isPaused
+                                                ? "cursor-pointer opacity-90 hover:shadow-lg"
+                                                : "hover:shadow-lg",
+                                        ].join(" ")}
                                     >
                                         <div className="flex flex-col lg:flex-row items-center lg:items-stretch">
 
                                             {/* 🖼 Cover */}
-                                            <div className="relative lg:w-[320px] w-full max-h-[200px] flex-shrink-0">
+                                            <div className="
+                                                relative w-full lg:w-[390px] flex-shrink-0 overflow-hidden rounded-t-3xl lg:rounded-l-3xl lg:rounded-tr-none
+                                            ">
 
                                                 {program.img ? (
-                                                    <img
-                                                        src={process.env.REACT_APP_API_URL + program.img}
-                                                        alt={program.title ?? "Course cover"}
-                                                        className="w-full h-full object-cover lg:rounded-l-3xl"
-                                                    />
+                                                    <>
+                                                        <div
+                                                            className="absolute inset-0 bg-center bg-cover"
+                                                            style={{
+                                                                backgroundImage: `url(${process.env.REACT_APP_API_URL + program.img})`,
+                                                            }}
+                                                        />
+
+                                                        <div className="pb-[62.5%]" />
+                                                    </>
                                                 ) : (
                                                     <div
                                                         className="w-full h-full min-h-[170px] flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100 lg:rounded-l-3xl">
@@ -378,7 +385,12 @@ const UserPage = observer(() => {
                                                             {program.title}
                                                         </h1>
 
-
+                                                        {isPaused && (
+                                                            <div className="inline-flex items-center gap-2 rounded-full bg-amber-100 px-4 py-2 text-sm font-semibold text-amber-700">
+                                                                <FiClock className="text-base" />
+                                                                Обучение приостановлено
+                                                            </div>
+                                                        )}
                                                     </div>
 
 
@@ -414,6 +426,15 @@ const UserPage = observer(() => {
                                         {/* decoration */}
                                         <div
                                             className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-100 rounded-full blur-3xl opacity-40"/>
+
+                                        {isPaused && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-slate-900/40 lg:rounded-l-3xl">
+                                                <div className="flex items-center gap-2 rounded-xl bg-white/95 px-4 py-3 font-semibold text-amber-700 shadow">
+                                                    <FiClock />
+                                                    Доступ приостановлен
+                                                </div>
+                                            </div>
+                                        )}
                                     </Link>
                                 );
                             })}

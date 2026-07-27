@@ -86,6 +86,21 @@ const ListenerProgramCard: React.FC<ListenerProgramCardProps> = ({
         }
     };
 
+    const handlePause = async () => {
+        try {
+            setLoading(true);
+
+            await updateEnrollmentStatus(
+                program.enrollmentId,
+                status === "paused" ? "active" : "paused"
+            );
+
+            onChanged();
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
@@ -149,8 +164,21 @@ const ListenerProgramCard: React.FC<ListenerProgramCardProps> = ({
                                 disabled={loading}
                                 className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700 disabled:bg-gray-300"
                             >
-                                <FiCheckCircle/>
+                                <FiCheckCircle />
                                 Завершить
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={handlePause}
+                                disabled={loading}
+                                className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm text-white transition disabled:bg-gray-300 ${
+                                    status === "paused"
+                                        ? "bg-green-600 hover:bg-green-700"
+                                        : "bg-yellow-500 hover:bg-yellow-600"
+                                }`}
+                            >
+                                {status === "paused" ? "Возобновить" : "Поставить на паузу"}
                             </button>
 
                             <button
@@ -159,7 +187,7 @@ const ListenerProgramCard: React.FC<ListenerProgramCardProps> = ({
                                 disabled={loading}
                                 className="flex items-center gap-2 rounded-xl bg-gray-100 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-200 disabled:bg-gray-200"
                             >
-                                <FiArchive/>
+                                <FiArchive />
                                 Удалить
                             </button>
                         </>

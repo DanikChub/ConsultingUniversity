@@ -157,11 +157,13 @@ export const useListenerProfilePage = () => {
         field: EditableListenerField,
         value: string | null
     ) => {
-        setUser(prev => {
-            if (!prev) return prev;
+        setUser(currentUser => {
+            if (!currentUser) {
+                return currentUser;
+            }
 
             return {
-                ...prev,
+                ...currentUser,
                 [field]: value,
             };
         });
