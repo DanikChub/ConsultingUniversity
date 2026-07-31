@@ -15,21 +15,24 @@ const {
 } = require("../models/models");
 const { sendCompletionEmail } = require("./mail.service");
 
-async function generateCertificateNumber(transaction) {
+async function generateCertificateNumber(programType) {
     const year = new Date().getFullYear();
+
+    const prefix = programType === "professional_retraining"
+        ? `КС/ПП-${year}`
+        : `КС/ПК-${year}`;
 
     const countThisYear = await Certificate.count({
         where: {
-            createdAt: {
-                [Op.gte]: new Date(`${year}-01-01`),
-                [Op.lt]: new Date(`${year + 1}-01-01`),
-            },
-        },
-        transaction,
+            certificate_number: {
+                [Op.like]: `${prefix}-%`
+            }
+        }
     });
 
-    const sequence = String(countThisYear + 1).padStart(6, "0");
-    return `DP-${year}-${sequence}`;
+    const sequence = String(countThisYear + 1).padStart(4, "0");
+
+    return `${prefix}-${sequence}`;
 }
 
 function collectRequiredContent(program) {
@@ -146,13 +149,35 @@ async function recalculateEnrollmentProgress(enrollmentId, options = {}) {
             transaction,
         });
 
+
+
         if (!existingCertificate) {
-            const number = await generateCertificateNumber(transaction);
+            const fullEnrollment = await Enrollment.findByPk(enrollmentId, {
+                include: [Program]
+            });
+
+            if (!fullEnrollment) {
+                const error = new Error("Enrollment not found");
+                error.status = 404;
+                throw error;
+            }
+
+            if (!fullEnrollment.program) {
+                const error = new Error("Program not found for enrollment");
+                error.status = 404;
+                throw error;
+            }
+
+            const program = fullEnrollment.program;
+
+            const certificateNumber = await this.generateCertificateNumber(
+                program.program_type
+            );
 
             await Certificate.create(
                 {
                     enrollmentId: enrollment.id,
-                    certificate_number: number,
+                    certificate_number: certificateNumber,
                     issued_at: new Date(),
                 },
                 { transaction }

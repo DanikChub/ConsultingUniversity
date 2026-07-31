@@ -99,7 +99,7 @@ export default function CoursePage() {
                 // Обновляем прогресс
                 userContext.user.setEnrollmentProgress(enrollment.id, freshProgress);
                 setProgress(freshProgress);
-
+                console.log(freshProgress)
 
 
 

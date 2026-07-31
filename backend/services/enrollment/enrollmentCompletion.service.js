@@ -17,22 +17,24 @@ const {
 const { sendCompletionEmail } = require("../mail.service");
 
 class EnrollmentCompletionService {
-    async generateCertificateNumber(transaction) {
+    async generateCertificateNumber(programType) {
         const year = new Date().getFullYear();
+
+        const prefix = programType === "professional_retraining"
+            ? `КС/ПП-${year}`
+            : `КС/ПК-${year}`;
 
         const countThisYear = await Certificate.count({
             where: {
-                createdAt: {
-                    [Op.gte]: new Date(`${year}-01-01`),
-                    [Op.lt]: new Date(`${year + 1}-01-01`),
-                },
-            },
-            transaction,
+                certificate_number: {
+                    [Op.like]: `${prefix}-%`
+                }
+            }
         });
 
-        const sequence = String(countThisYear + 1).padStart(6, "0");
+        const sequence = String(countThisYear + 1).padStart(4, "0");
 
-        return `DP-${year}-${sequence}`;
+        return `${prefix}-${sequence}`;
     }
 
     calculateProgramProgress(program, userProgressMap, enrollmentId) {
@@ -221,8 +223,27 @@ class EnrollmentCompletionService {
             return [existing, false];
         }
 
-        const certificateNumber = await this.generateCertificateNumber(transaction);
+        const fullEnrollment = await Enrollment.findByPk(enrollment.id, {
+            include: [Program]
+        });
 
+        if (!fullEnrollment) {
+            const error = new Error("Enrollment not found");
+            error.status = 404;
+            throw error;
+        }
+
+        if (!fullEnrollment.program) {
+            const error = new Error("Program not found for enrollment");
+            error.status = 404;
+            throw error;
+        }
+
+        const program = fullEnrollment.program;
+
+        const certificateNumber = await this.generateCertificateNumber(
+            program.program_type
+        );
         const certificate = await Certificate.create(
             {
                 enrollmentId: enrollment.id,
@@ -263,10 +284,15 @@ class EnrollmentCompletionService {
 
                 const wasCompleted = enrollment.status === "completed";
 
+                user.graduation_date = new Date();
+
+
                 enrollment.status = "completed";
                 enrollment.progress_percent = 100;
                 enrollment.completed_at = enrollment.completed_at || new Date();
 
+
+                await user.save({ transaction });
                 await enrollment.save({ transaction });
 
                 const [certificate, created] = await this.findOrCreateCertificate({

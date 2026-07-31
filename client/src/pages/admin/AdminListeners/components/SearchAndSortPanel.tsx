@@ -90,8 +90,7 @@ const SearchAndSortPanel: React.FC<Props> = ({
                 >
                     <option value="all">Любой статус</option>
                     <option value="active">Обучается</option>
-                    <option value="completed">Завершил</option>
-                    <option value="archived">Архив</option>
+                    <option value="completed">Завершил</option>df
                     <option value="paused">Пауза</option>
                 </select>
 

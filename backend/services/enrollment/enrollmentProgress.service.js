@@ -15,20 +15,24 @@ module.exports = (models) => {
         User,
     } = models;
 
-    async function generateCertificateNumber() {
+    async function generateCertificateNumber(programType) {
         const year = new Date().getFullYear();
+
+        const prefix = programType === "professional_retraining"
+            ? `КС/ПП-${year}`
+            : `КС/ПК-${year}`;
 
         const countThisYear = await Certificate.count({
             where: {
-                createdAt: {
-                    [Op.gte]: new Date(`${year}-01-01`),
-                    [Op.lt]: new Date(`${year + 1}-01-01`),
-                },
-            },
+                certificate_number: {
+                    [Op.like]: `${prefix}-%`
+                }
+            }
         });
 
-        const sequence = String(countThisYear + 1).padStart(6, "0");
-        return `DP-${year}-${sequence}`;
+        const sequence = String(countThisYear + 1).padStart(4, "0");
+
+        return `${prefix}-${sequence}`;
     }
 
     async function ensureCertificate(enrollmentId) {
@@ -38,39 +42,71 @@ module.exports = (models) => {
 
         if (existing) return existing;
 
-        const number = await generateCertificateNumber();
+        const fullEnrollment = await Enrollment.findByPk(enrollmentId, {
+            include: [Program]
+        });
+
+        if (!fullEnrollment) {
+            const error = new Error("Enrollment not found");
+            error.status = 404;
+            throw error;
+        }
+
+        if (!fullEnrollment.program) {
+            const error = new Error("Program not found for enrollment");
+            error.status = 404;
+            throw error;
+        }
+
+        const program = fullEnrollment.program;
+
+        const certificateNumber = await generateCertificateNumber(
+            program.program_type
+        );
+
 
         return Certificate.create({
             enrollmentId,
-            certificate_number: number,
+            certificate_number: certificateNumber,
             status: "waiting_issue_date",
         });
     }
 
-    function calculateProgramProgress(program, userProgressMap, enrollmentId) {
+    function calculateProgramProgress(
+        program,
+        userProgressMap,
+        enrollmentId
+    ) {
         let totalCount = 0;
         let completedCount = 0;
 
+        function countTest(test) {
+            if (!test) return;
+
+            const key = `test-${test.id}`;
+
+            const progress = userProgressMap[key] || {
+                enrollmentId,
+                contentType: "test",
+                contentId: test.id,
+                status: "not_started",
+            };
+
+            totalCount++;
+
+            if (progress.status === "completed") {
+                completedCount++;
+            }
+        }
+
         program.themes.forEach(theme => {
             theme.puncts.forEach(punct => {
-                punct.tests.forEach(test => {
-                    const key = `test-${test.id}`;
-
-                    const progress = userProgressMap[key] || {
-                        enrollmentId,
-                        contentType: "test",
-                        contentId: test.id,
-                        status: "not_started",
-                    };
-
-                    totalCount++;
-
-                    if (progress.status === "completed") {
-                        completedCount++;
-                    }
-                });
+                punct.tests.forEach(countTest);
             });
         });
+
+        // Финальный тест, который принадлежит непосредственно программе
+        countTest(program.test);
 
         return totalCount
             ? Math.round((completedCount / totalCount) * 100)
@@ -96,14 +132,23 @@ module.exports = (models) => {
                         { model: File },
                         {
                             model: Punct,
-                            include: [{ model: File }, { model: Test }],
+                            include: [
+                                { model: File },
+                                { model: Test },
+                            ],
                         },
                     ],
+                },
+                {
+                    model: Test,
+                    required: false,
                 },
             ],
         });
 
         if (!program) return null;
+
+        console.log(userProgressItems);
 
         const userProgressMap = {};
 
@@ -138,6 +183,10 @@ module.exports = (models) => {
             });
 
             const user = await User.findByPk(enrollment.userId);
+
+            user.graduation_date = new Date();
+
+            await user.save();
 
             if (user?.email) {
                 try {

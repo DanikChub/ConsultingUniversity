@@ -17,60 +17,116 @@ const transporter = nodemailer.createTransport({
 
 
 
-function getCompletionEmailHtml(userName, programName) {
+function getCompletionEmailHtml(
+    userName,
+    programName,
+    trackNumber = "Будет указан после отправки"
+) {
     return `
-    <!DOCTYPE html>
-    <html lang="ru">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Поздравляем с окончанием программы</title>
-    </head>
-    <body style="margin:0; padding:0; font-family: 'Helvetica', Arial, sans-serif; background-color:#f4f4f7;">
-        <table width="100%" bgcolor="#f4f4f7" cellpadding="0" cellspacing="0" style="padding: 40px 0;">
-            <tr>
-                <td align="center">
-                    <table width="600" bgcolor="#ffffff" cellpadding="0" cellspacing="0" style="border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
-                        <tr>
-                            <td align="center" style="padding: 40px 20px; background: linear-gradient(90deg, #4f46e5, #6366f1); color: #ffffff;">
-                                <h1 style="margin:0; font-size: 28px;">Поздравляем, ${userName}!</h1>
-                                <p style="margin:5px 0 0; font-size:16px;">Вы успешно завершили программу <strong>${programName}</strong></p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 30px 40px; text-align: center;">
-                                <p style="font-size: 16px; color: #4a5568; line-height: 1.5;">
-                                    Мы гордимся вашим достижением и рады видеть ваши успехи. Теперь вы можете получить доступ к сертификату или пересмотреть материалы программы.
-                                </p>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+</head>
 
-                               
-                                <a href="#" style="
-                                    display:inline-block;
-                                    margin-top:20px;
-                                    padding:12px 24px;
-                                    background-color:#4f46e5;
-                                    color:#ffffff;
-                                    text-decoration:none;
-                                    border-radius:8px;
-                                    font-weight:bold;
-                                ">Перейти к сертификату</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="padding:20px 40px; background-color:#f4f4f7; text-align:center; font-size:12px; color:#9ca3af;">
-                                Это автоматическое сообщение, пожалуйста, не отвечайте на него.<br/>
-                                © ${new Date().getFullYear()} Онлайн-школа
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </body>
-    </html>
-    `;
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f6f8">
+<tr>
+<td align="center" style="padding:40px 15px;">
+
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:10px;overflow:hidden;">
+
+<tr>
+<td style="padding:40px 35px;">
+
+<h2 style="margin:0 0 20px;color:#253858;">
+Поздравляем, ${userName}!
+</h2>
+
+<p style="font-size:16px;line-height:26px;color:#555;">
+Искренне поздравляем вас с успешным окончанием обучения по программе дополнительного профессионального образования.
+</p>
+
+<p style="font-size:16px;line-height:26px;color:#555;">
+<strong>${programName}</strong>
+</p>
+
+<p style="font-size:16px;line-height:26px;color:#555;">
+Ваш диплом уже отправлен Почтой России по адресу, который вы указали при регистрации.
+</p>
+
+<table width="100%" cellpadding="12" cellspacing="0"
+style="background:#f6f8fb;border:1px solid #dfe5ec;border-radius:8px;margin:25px 0;">
+<tr>
+<td>
+
+<b style="font-size:15px;">
+Трек-номер для отслеживания
+</b>
+
+<br><br>
+
+<span style="font-size:18px;color:#2f8fd3;font-weight:bold;">
+${trackNumber}
+</span>
+
+</td>
+</tr>
+</table>
+
+<h3 style="color:#253858;margin-top:35px;">
+Как проверить подлинность диплома?
+</h3>
+
+<p style="font-size:16px;line-height:26px;color:#555;">
+Все сведения о выданных документах переданы в государственный реестр.
+</p>
+
+<p style="font-size:16px;line-height:26px;color:#555;">
+Проверить подлинность диплома можно на официальном сайте ФИС ФРДО.
+</p>
+
+<table cellpadding="0" cellspacing="0" style="margin-top:30px;">
+<tr>
+<td bgcolor="#2f8fd3" style="border-radius:6px;">
+<a href="https://obrnadzor.gov.ru/activity/main_directions/reestr_of_issued_documents/"
+style="
+display:inline-block;
+padding:14px 28px;
+font-size:15px;
+font-weight:bold;
+color:#ffffff;
+text-decoration:none;
+">
+Проверить диплом
+</a>
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+
+<tr>
+<td>
+<img
+src="cid:footer-banner"
+width="600"
+style="display:block;width:100%;border:0;">
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+`;
 }
-
 
 async function sendCompletionEmail(toEmail, userName, programName) {
     try {
@@ -79,6 +135,13 @@ async function sendCompletionEmail(toEmail, userName, programName) {
             to: toEmail,
             subject: 'Поздравляем с окончанием программы!',
             html: getCompletionEmailHtml(userName, programName),
+            attachments: [
+                {
+                    filename: "banner.webp",
+                    path: "./assets/banner.webp",
+                    cid: "footer-banner",
+                },
+            ]
         });
     } catch (err) {
         console.error('Ошибка отправки письма:', err);
@@ -89,102 +152,143 @@ async function sendCompletionEmail(toEmail, userName, programName) {
 
 function getWelcomeEmailHtml(userName, login, password) {
     return `
-    <!DOCTYPE html>
-    <html lang="ru">
-    <head>
-        <meta charset="UTF-8">
-    </head>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+</head>
 
-    <body style="margin:0;padding:0;background:#f4f4f7;font-family:Arial,sans-serif;">
-        <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f4f7">
-            <tr>
-                <td align="center" style="padding:40px 0;">
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;">
 
-                    <table width="600" cellpadding="0" cellspacing="0"
-                           style="background:#fff;border-radius:12px;overflow:hidden;">
+<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f6f8">
+<tr>
+<td align="center" style="padding:40px 15px;">
 
-                        <tr>
-                            <td align="center"
-                                style="background:#4f46e5;color:#fff;padding:35px;">
-                                <h1 style="margin:0;">
-                                    Добро пожаловать!
-                                </h1>
+<table width="600" cellpadding="0" cellspacing="0"
+style="background:#ffffff;border-radius:10px;overflow:hidden;">
 
-                                <p style="margin-top:10px;">
-                                    Ваш личный кабинет успешно создан.
-                                </p>
-                            </td>
-                        </tr>
+<tr>
+<td style="padding:40px 35px;">
 
-                        <tr>
-                            <td style="padding:35px;">
+<h2 style="margin:0 0 20px;color:#253858;">
+Здравствуйте, ${userName}!
+</h2>
 
-                                <p>
-                                    Здравствуйте,
-                                    <strong>${userName}</strong>!
-                                </p>
+<p style="font-size:16px;line-height:26px;color:#555;">
+Для активации вашего аккаунта и получения возможности использовать все преимущества нашей системы необходимо войти в личный кабинет, используя следующие данные:
+</p>
 
-                                <p>
-                                    Для вас был создан личный кабинет.
-                                </p>
+<table
+width="100%"
+cellpadding="12"
+cellspacing="0"
+style="
+margin:25px 0;
+background:#f6f8fb;
+border:1px solid #dfe5ec;
+border-radius:8px;
+">
 
-                                <table
-                                    width="100%"
-                                    cellpadding="10"
-                                    cellspacing="0"
-                                    style="margin:25px 0;background:#f7f7f7;border-radius:8px;">
+<tr>
+<td width="150">
+<b>Логин</b>
+</td>
+<td>${login}</td>
+</tr>
 
-                                    <tr>
-                                        <td><b>Логин</b></td>
-                                        <td>${login}</td>
-                                    </tr>
+<tr>
+<td>
+<b>Пароль</b>
+</td>
+<td>${password}</td>
+</tr>
 
-                                    <tr>
-                                        <td><b>Временный пароль</b></td>
-                                        <td>${password}</td>
-                                    </tr>
+</table>
 
-                                </table>
+<table cellpadding="0" cellspacing="0" style="margin-top:10px;">
+<tr>
+<td bgcolor="#2f8fd3" style="border-radius:6px;">
+<a
+href="https://консалтинг-университет.рф/signin"
+style="
+display:inline-block;
+padding:14px 28px;
+font-size:15px;
+font-weight:bold;
+color:#ffffff;
+text-decoration:none;
+">
+Войти в личный кабинет
+</a>
+</td>
+</tr>
+</table>
 
-                                <p>
-                                    При первом входе рекомендуем сменить пароль.
-                                </p>
+<h3 style="margin-top:35px;color:#253858;">
+С чего начать?
+</h3>
 
-                            </td>
-                        </tr>
+<ol style="font-size:16px;color:#555;line-height:28px;padding-left:20px;">
 
-                        <tr>
-                            <td
-                                align="center"
-                                style="padding:20px;background:#f4f4f7;font-size:12px;color:#888;">
-                                Это автоматическое письмо. Пожалуйста, не отвечайте на него.
-                            </td>
-                        </tr>
+<li>
+При первом входе система предложит изменить пароль.
+</li>
 
-                    </table>
+<li>
+Заполните профиль и добавьте свою фотографию.
+</li>
 
-                </td>
-            </tr>
-        </table>
-        
-        <a
-            href="https://consulting-university.ru/login"
-            style="
-                display:inline-block;
-                background:#4f46e5;
-                color:white;
-                padding:14px 28px;
-                border-radius:8px;
-                text-decoration:none;
-                margin-top:20px;
-                font-weight:bold;
-            "
-        >
-            Войти в личный кабинет
-        </a>
-    </body>
-    </html>
-    `;
+<li>
+Откройте программу и начните обучение.
+</li>
+
+</ol>
+
+<hr style="margin:30px 0;border:none;border-top:1px solid #e3e8ee;">
+
+<p style="font-size:15px;color:#555;line-height:24px;">
+
+Все вопросы можно задать на электронную почту
+
+<br><br>
+
+<b>school@kv34.ru</b>
+
+<br><br>
+
+или уточнить по телефону
+
+<br><br>
+
+<b>8 800 550 56 90</b>
+
+</p>
+
+<p style="margin-top:25px;font-size:16px;color:#253858;">
+Желаем продуктивного и интересного обучения!
+</p>
+
+</td>
+</tr>
+
+<tr>
+<td>
+<img
+src="cid:footer-banner"
+width="600"
+style="display:block;width:100%;border:0;">
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+`;
 }
 
 async function sendWelcomeEmail(toEmail, userName, login, password) {
@@ -194,6 +298,13 @@ async function sendWelcomeEmail(toEmail, userName, login, password) {
             to: toEmail,
             subject: "Добро пожаловать в Консалтинг-Университет",
             html: getWelcomeEmailHtml(userName, login, password),
+            attachments: [
+                {
+                    filename: "banner.webp",
+                    path: "../assets/banner.webp",
+                    cid: "footer-banner",
+                },
+            ]
         });
 
         console.log("Welcome email sent:", {
