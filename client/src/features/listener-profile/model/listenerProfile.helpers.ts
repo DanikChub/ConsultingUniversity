@@ -20,7 +20,7 @@ export const extractAllTests = (program: Program) => {
 export function getTotalContent(program: Program): number {
     if (!program.themes) return 0;
 
-    return program.themes.reduce((themeAcc, theme) => {
+    const total = program.themes.reduce((themeAcc, theme) => {
         const themeFilesCount = theme.files?.length ?? 0;
 
         const punctsTotal =
@@ -33,6 +33,8 @@ export function getTotalContent(program: Program): number {
 
         return themeAcc + themeFilesCount + punctsTotal;
     }, 0);
+
+    return total + (program.test ? 1 : 0);
 }
 
 export const isImageFile = (name?: string, mime?: string | null) => {
