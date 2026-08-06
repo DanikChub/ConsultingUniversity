@@ -36,7 +36,9 @@ class UserRegistrationService {
             }
 
             if (!Array.isArray(programs_id) || programs_id.length === 0) {
-                throw ApiError.badRequest("Отсутствует программа у пользователя");
+                throw ApiError.badRequest(
+                    "Отсутствует программа у пользователя"
+                );
             }
 
             const loginExists = await User.findOne({
@@ -81,13 +83,23 @@ class UserRegistrationService {
                 { transaction: t }
             );
 
+            await Chat.create(
+                {
+                    userId: user.id,
+                    status: "open",
+                },
+                { transaction: t }
+            );
+
             const enrollments = programs_id.map(programId => ({
                 userId: user.id,
                 programId,
                 status: "active",
             }));
 
-            await Enrollment.bulkCreate(enrollments, { transaction: t });
+            await Enrollment.bulkCreate(enrollments, {
+                transaction: t,
+            });
 
             await Event.create(
                 {
@@ -121,11 +133,15 @@ class UserRegistrationService {
                     number: user.number,
                     role: user.role,
                     must_change_password: user.must_change_password,
-                    temporary_password_plain: user.temporary_password_plain,
+                    temporary_password_plain:
+                    user.temporary_password_plain,
                 },
             };
         } catch (e) {
-            await t.rollback();
+            if (!t.finished) {
+                await t.rollback();
+            }
+
             throw e;
         }
     }

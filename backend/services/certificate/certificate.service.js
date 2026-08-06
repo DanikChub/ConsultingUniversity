@@ -1,5 +1,6 @@
 const { Certificate, Enrollment, User, Program } = require('../../models/models.old');
 const { Op } = require('sequelize');
+const { sendDiplomaTrackingEmail } = require("../mail.service");
 
 class CertificateService {
     async generateCertificateNumber(programType) {
@@ -144,10 +145,65 @@ class CertificateService {
     async markShipped(id, tracking_number) {
         const certificate = await this.getCertificateOrFail(id);
 
-        certificate.status = 'shipped';
+        certificate.status = "shipped";
         certificate.tracking_number = tracking_number;
 
         await certificate.save();
+
+
+        try {
+            const certificateWithUser = await Certificate.findByPk(id, {
+                include: [
+                    {
+                        model: Enrollment,
+                        include: [
+                            {
+                                model: User,
+                                attributes: [
+                                    "id",
+                                    "email",
+                                    "name", // подставь реальные поля
+
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            });
+
+            console.log(certificateWithUser);
+
+            const user = certificateWithUser?.enrollment?.user;
+
+            if (!user) {
+                throw new Error(
+                    `Не найден пользователь для сертификата ${id}`,
+                );
+            }
+
+            if (!user.email) {
+                throw new Error(
+                    `У пользователя ${user.id} не указан email`,
+                );
+            }
+
+
+            const emailResult = await sendDiplomaTrackingEmail(
+                user.email,
+                user.name,
+                tracking_number,
+            );
+
+            if (!emailResult.success) {
+                console.error(
+                    `Сертификат ${id} отмечен отправленным, но письмо не отправлено:`,
+                    emailResult.error,
+                );
+            }
+        } catch (error) {
+            console.log(error)
+        }
+
 
         return certificate;
     }
@@ -195,7 +251,8 @@ class CertificateService {
             delivery_type,
             address,
             tracking_number,
-            issued_at
+            issued_at,
+            certificate_number
         } = data;
 
         if (status !== undefined) certificate.status = status;
@@ -203,6 +260,8 @@ class CertificateService {
         if (address !== undefined) certificate.address = address;
         if (tracking_number !== undefined) certificate.tracking_number = tracking_number;
         if (issued_at !== undefined) certificate.issued_at = issued_at;
+        if (certificate_number !== undefined) certificate.certificate_number = certificate_number;
+
 
         await certificate.save();
 

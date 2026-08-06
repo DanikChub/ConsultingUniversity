@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import Chat from "../../../../../widgets/chat/Chat";
 import type {User} from "../../../../../entities/user/model/type";
-import {getChatByUserId} from "../../../../../entities/chat/api/chat.api";
+import {createChat, getChatByUserId} from "../../../../../entities/chat/api/chat.api";
 
 interface ListenerMessagesTabProps {
     userId: number;
@@ -17,6 +17,8 @@ const ListenerMessagesTab: React.FC<ListenerMessagesTabProps> = ({
         const fetchChat = async () => {
             try {
                 setLoading(true);
+
+                await createChat(userId);
 
                 const chat = await getChatByUserId(userId);
                 setChatId(chat.id);

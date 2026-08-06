@@ -49,6 +49,8 @@ export const EditCertificateModal: React.FC<Props> = ({
             editableCert
         );
 
+        console.log(editableCert)
+
         onUpdated();
         onClose();
     };
@@ -112,6 +114,25 @@ export const EditCertificateModal: React.FC<Props> = ({
                                 </option>
                             ))}
                         </select>
+                    </div>
+
+                    {/* Номер сертификата */}
+                    <div className="space-y-1">
+                        <label className="text-sm text-gray-600">
+                            Номер сертификата
+                        </label>
+
+                        <input
+                            value={editableCert?.certificate_number || ""}
+                            onChange={(e) =>
+                                setEditableCert({
+                                    ...editableCert,
+                                    certificate_number: e.target.value,
+                                })
+                            }
+                            className="w-full border px-3 py-2 rounded-lg"
+                            placeholder="Введите номер сертификата"
+                        />
                     </div>
 
                     {/* Адрес */}
