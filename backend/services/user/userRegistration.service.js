@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const { sendWelcomeEmail } = require("../mail.service");
 const ApiError = require("../../error/ApiError");
 const sequelize = require("../../db");
-const { User, Enrollment, Event } = require("../../models/models");
+const { User, Enrollment, Event, Chat } = require("../../models/models");
 const { generateJwt } = require("../../utils/jwt");
 
 class UserRegistrationService {

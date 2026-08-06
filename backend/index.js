@@ -35,7 +35,7 @@ app.use((req, res, next) => {
 })
 
 app.use('/api', router)
-app.use(errorHandler)
+
 
 const start = async () => {
     try {
