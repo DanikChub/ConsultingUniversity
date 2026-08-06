@@ -1,4 +1,6 @@
 const nodemailer = require('nodemailer');
+const path = require("path");
+
 
 const transporter = nodemailer.createTransport({
     host: "smtp.yandex.ru",
@@ -123,7 +125,7 @@ async function sendCompletionEmail(toEmail, userName, programName) {
             attachments: [
                 {
                     filename: "banner.webp",
-                    path: "./assets/banner.webp",
+                    path: path.resolve(__dirname, "../assets/banner.webp"),
                     cid: "footer-banner",
                 },
             ]
@@ -286,7 +288,7 @@ async function sendWelcomeEmail(toEmail, userName, login, password) {
             attachments: [
                 {
                     filename: "banner.webp",
-                    path: "../assets/banner.webp",
+                    path: path.resolve(__dirname, "../assets/banner.webp"),
                     cid: "footer-banner",
                 },
             ]
@@ -447,7 +449,7 @@ async function sendDiplomaTrackingEmail(
             attachments: [
                 {
                     filename: "banner.webp",
-                    path: "../assets/banner.webp",
+                    path: path.resolve(__dirname, "../assets/banner.webp"),
                     cid: "footer-banner",
                 },
             ],
