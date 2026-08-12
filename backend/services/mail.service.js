@@ -239,15 +239,11 @@ text-decoration:none;
 
 <br><br>
 
-<b>school@kv34.ru</b>
-
-<br><br>
+<b>school@kv34.ru </b>
 
 или уточнить по телефону
 
-<br><br>
-
-<b>8 800 550 56 90</b>
+<b> 8 800 550 56 90</b>
 
 </p>
 

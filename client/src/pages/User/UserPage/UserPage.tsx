@@ -15,7 +15,13 @@ import message from '../../../assets/imgs/message.jfif';
 import statement from '../../../assets/imgs/statement.jfif';
 import how_learn from '../../../assets/files/how_learn.pdf';
 import user_img from '../../../assets/imgs/user.png';
-import {COURSE_ROUTE, STATEMENT_ROUTE, USER_CHAT_ROUTE, USER_PROFILE_ROUTE} from '../../../shared/utils/consts';
+import {
+    COURSE_ROUTE,
+    STATEMENT_ROUTE,
+    USER_CHAT_ROUTE,
+    USER_PROFILE_ROUTE,
+    USER_ROUTE_HOW_LEARN
+} from '../../../shared/utils/consts';
 import {FiArchive, FiCheckCircle, FiClock} from "react-icons/fi";
 import UserPageSkeleton from "./components/UserPageSkeleton";
 import {useSocket} from "../../../hooks/useSocket";
@@ -284,9 +290,8 @@ const UserPage = observer(() => {
                             ведомость
                         </div>
                     </Link>
-                    <a
-                        target="_blank"
-                        href={how_learn}
+                    <Link
+                        to={USER_ROUTE_HOW_LEARN}
                        className="relative
                             w-[130px]
                             h-[130px]
@@ -311,7 +316,7 @@ const UserPage = observer(() => {
                             </div>
 
 
-                    </a>
+                    </Link>
                 </div>
 
             </div>
