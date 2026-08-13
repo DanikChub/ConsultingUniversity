@@ -78,8 +78,23 @@ class CertificateService {
 
         return Certificate.findAll({
             where,
-            include: this.getInclude(),
-            order: [['createdAt', 'DESC']]
+            include: [
+                {
+                    model: Enrollment,
+                    required: true,
+                    include: [
+                        {
+                            model: User,
+                            where: {
+                                is_delete: false
+                            },
+                            required: true
+                        },
+                        Program
+                    ]
+                }
+            ],
+            order: [["createdAt", "DESC"]]
         });
     }
 

@@ -323,25 +323,29 @@ class ChatController {
                 order: [["lastMessageAt", "DESC"]],
                 limit: Number(limit),
                 offset: Number(offset),
+
                 include: [
                     {
-                        model: User
+                        model: User,
+                        where: {
+                            is_delete: false
+                        },
+                        required: true
                     },
                     {
                         model: Message,
                         limit: 1,
                         order: [["createdAt", "DESC"]],
-                        separate: true, // ВАЖНО
+                        separate: true,
                         include: [
                             {
                                 model: MessageAttachment
                             }
-
                         ]
                     }
                 ]
             })
-            console.log(chats)
+
 
             for (const chat of chats.rows) {
 
