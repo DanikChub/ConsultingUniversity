@@ -42,7 +42,7 @@ import {
     TEST_ATTEMPT_ROUTE,
     PDF_ROUTE,
     ADMIN_CHANGE_ADMIN,
-    SET_INITIAL_PASSWORD_ROUTE, USER_PROFILE_ROUTE, ADMIN_ENROLLMENTS_ROUTE
+    SET_INITIAL_PASSWORD_ROUTE, USER_PROFILE_ROUTE, ADMIN_ENROLLMENTS_ROUTE, USER_ROUTE_HOW_LEARN
 } from './shared/utils/consts'
 import LoginPage from './pages/LoginPage/LoginPage'
 import AdminPage from './pages/admin/AdminPage/AdminPage'
@@ -75,6 +75,7 @@ import PdfPage from "./pages/User/PdfPage/PdfPage";
 import SetInitialPasswordPage from "./pages/SetInitialPasswordPage/SetInitialPasswordPage";
 import ProfilePage from "./pages/User/ProfilePage/ProfilePage";
 import EnrollmentManagePage from "./pages/admin/EnrollmentManagePage/EnrollmentManagePage";
+import {HowToStudyPage} from "./pages/User/HowToStudyPage/HowToStudyPage";
 
 
 export const authRoutes = [
@@ -130,6 +131,10 @@ export const authRoutes = [
     {
         path: USER_PROFILE_ROUTE,
         Component: <ProfilePage/>
+    },
+    {
+        path: USER_ROUTE_HOW_LEARN,
+        Component: <HowToStudyPage/>
     }
 ]
 

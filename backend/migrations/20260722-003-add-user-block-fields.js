@@ -2,26 +2,44 @@
 
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.addColumn("users", "is_blocked", {
-            type: Sequelize.BOOLEAN,
-            allowNull: false,
-            defaultValue: false,
-        });
+        const columns = await queryInterface.describeTable("users");
 
-        await queryInterface.addColumn("users", "blocked_until", {
-            type: Sequelize.DATE,
-            allowNull: true,
-        });
+        if (!columns.is_blocked) {
+            await queryInterface.addColumn("users", "is_blocked", {
+                type: Sequelize.BOOLEAN,
+                allowNull: false,
+                defaultValue: false,
+            });
+        }
 
-        await queryInterface.addColumn("users", "block_reason", {
-            type: Sequelize.TEXT,
-            allowNull: true,
-        });
+        if (!columns.blocked_until) {
+            await queryInterface.addColumn("users", "blocked_until", {
+                type: Sequelize.DATE,
+                allowNull: true,
+            });
+        }
+
+        if (!columns.block_reason) {
+            await queryInterface.addColumn("users", "block_reason", {
+                type: Sequelize.TEXT,
+                allowNull: true,
+            });
+        }
     },
 
     async down(queryInterface) {
-        await queryInterface.removeColumn("users", "block_reason");
-        await queryInterface.removeColumn("users", "blocked_until");
-        await queryInterface.removeColumn("users", "is_blocked");
+        const columns = await queryInterface.describeTable("users");
+
+        if (columns.block_reason) {
+            await queryInterface.removeColumn("users", "block_reason");
+        }
+
+        if (columns.blocked_until) {
+            await queryInterface.removeColumn("users", "blocked_until");
+        }
+
+        if (columns.is_blocked) {
+            await queryInterface.removeColumn("users", "is_blocked");
+        }
     },
 };

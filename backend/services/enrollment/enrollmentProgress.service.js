@@ -18,7 +18,7 @@ module.exports = (models) => {
     async function generateCertificateNumber(programType) {
         const year = new Date().getFullYear();
 
-        const prefix = programType === "professional_retraining"
+        const prefix = programType === "ПП"
             ? `КС/ПП-${year}`
             : `КС/ПК-${year}`;
 
@@ -175,18 +175,20 @@ module.exports = (models) => {
 
             await ensureCertificate(enrollment.id);
 
-            await Event.create({
-                event_text: "Пользователь завершил обучение",
-                name: program.title,
-                event_id: program.id,
-                type: "program",
-            });
+
 
             const user = await User.findByPk(enrollment.userId);
 
             user.graduation_date = new Date();
 
             await user.save();
+
+            await Event.create({
+                event_text: "Пользователь завершил обучение",
+                name: user.name,
+                event_id: user.id,
+                type: "user",
+            });
 
             if (user?.email) {
                 try {

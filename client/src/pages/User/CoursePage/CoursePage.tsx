@@ -230,30 +230,23 @@ export default function CoursePage() {
                     <div className="flex flex-col lg:flex-row items-center lg:items-stretch">
 
                         {/* 🖼 Cover */}
-                        <div className="relative lg:w-[390px] w-full max-h-[350px] flex-shrink-0">
-
+                        <div className="relative lg:w-[390px] w-full flex-shrink-0 overflow-hidden lg:rounded-l-3xl">
                             {program.img ? (
-                                <>
-                                    <div
-                                        className="absolute inset-0 bg-center bg-cover"
-                                        style={{
-                                            backgroundImage: `url(${process.env.REACT_APP_API_URL + program.img})`,
-                                        }}
-                                    />
-
-                                    <div className="pb-[62.5%]" />
-                                </>
+                                <img
+                                    src={process.env.REACT_APP_API_URL + program.img}
+                                    alt={program.title}
+                                    className="w-full h-full object-cover object-left"
+                                />
                             ) : (
                                 <div
-                                    className="w-full h-full min-h-[220px] flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100 lg:rounded-l-3xl">
+                                    className="w-full h-full min-h-[220px] flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100">
                                     <span className="text-4xl font-bold text-indigo-300">
                                         {program.title?.charAt(0)}
                                     </span>
                                 </div>
                             )}
 
-                            {/* subtle overlay */}
-                            <div className="absolute inset-0 bg-black/5 lg:rounded-l-3xl"/>
+                            <div className="absolute inset-0 bg-black/5 pointer-events-none"/>
                         </div>
 
                         {/* 📝 Content */}
