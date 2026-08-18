@@ -179,7 +179,7 @@ const ChatUsersPage: React.FC = () => {
                 ) : (
                     <div className="grid grid-cols-2">
 
-                        <div className="bg-white rounded-l-2xl shadow-sm border divide-y max-h-[700px] overflow-y-auto">
+                        <div className="bg-white rounded-l-2xl shadow-sm border divide-y max-h-[90vh] overflow-y-auto">
                             {filteredChats.map(chat => {
                                 const hasUnread = chat.unreadCount > 0
                                 const lastMessage = chat.messages?.[0]
