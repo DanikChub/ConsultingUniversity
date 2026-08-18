@@ -374,31 +374,17 @@ class UserQueryService {
             order: [
                 [
                     Sequelize.literal(`
-            CASE
-                WHEN EXISTS (
-                    SELECT 1
-                    FROM enrollments AS e
-                    WHERE e."userId" = "user"."id"
-                      AND e.status = 'active'
-                ) THEN 0
-
-                WHEN EXISTS (
-                    SELECT 1
-                    FROM enrollments AS e
-                    WHERE e."userId" = "user"."id"
-                      AND e.status = 'paused'
-                ) THEN 1
-
-                WHEN EXISTS (
-                    SELECT 1
-                    FROM enrollments AS e
-                    WHERE e."userId" = "user"."id"
-                      AND e.status = 'completed'
-                ) THEN 2
-
-                ELSE 3
-            END
-        `),
+                CASE
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM enrollments AS e
+                        WHERE e."userId" = "user"."id"
+                          AND e.status = 'active'
+                    )
+                    THEN 0
+                    ELSE 1
+                END
+            `),
                     "ASC",
                 ],
 
