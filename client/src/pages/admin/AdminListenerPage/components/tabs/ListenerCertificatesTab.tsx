@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import type {Certificate, CertificateStatus} from "../../../../../entities/certificate/model/type";
 import {useModals} from "../../../../../hooks/useModals";
 import {getCertificatesByUserId} from "../../../../../entities/certificate/api/certificate.api";
-
+import { HiOutlineCog } from "react-icons/hi";
 
 
 function dateToString(date?: string | null) {
@@ -119,21 +119,40 @@ const ListenerCertificatesTab: React.FC = () => {
                                             {statusLabels[cert.status]}
                                         </span>
 
-                                        <button
-                                            onClick={async () => {
-                                                const result = await openModal(
-                                                    "certificateDelivery",
-                                                    { certificate: cert }
-                                                );
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={async () => {
+                                                    const result = await openModal(
+                                                        "certificateDelivery",
+                                                        { certificate: cert }
+                                                    );
 
-                                                if (result === "updated") {
-                                                    loadCertificates();
-                                                }
-                                            }}
-                                            className="text-xs px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-                                        >
-                                            Управление
-                                        </button>
+                                                    if (result === "updated") {
+                                                        loadCertificates();
+                                                    }
+                                                }}
+                                                className="text-xs px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                                            >
+                                                Управление
+                                            </button>
+
+                                            <button
+                                                onClick={async () => {
+                                                    const result = await openModal(
+                                                        "editCertificate",
+                                                        { certificate: cert }
+                                                    );
+
+                                                    if (result === "updated") {
+                                                        loadCertificates();
+                                                    }
+                                                }}
+                                                className="text-xs px-3 py-1 bg-blue-400 text-white rounded-lg hover:bg-blue-600 transition-all"
+                                                title="Редактировать диплом"
+                                            >
+                                                <HiOutlineCog size={18} />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             );
